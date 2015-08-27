@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `attribute_type_visibility` (
 CREATE TABLE IF NOT EXISTS `attribute_type_visibility_i18n` (
   `attribute_type_id` bigint(20) unsigned NOT NULL,
   `branch_id` bigint(20) unsigned NOT NULL,
-  `i18n_id` bigint(20) unsigned NOT NULL,
+  `i18n_id` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'id of the language',
   `label` varchar(200) DEFAULT NULL COMMENT 'label of the attribute type'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='contains specific label of an attribute type for a given branch';
 
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS `branch` (
   `id` bigint(20) unsigned NOT NULL,
   `branch_type_id` bigint(20) unsigned NOT NULL,
   `tree_id` bigint(20) unsigned NOT NULL,
-  `parent` bigint(20) NULL COMMENT 'sets the parent of this branch',
+  `parent` bigint(20) unsigned NULL COMMENT 'sets the parent of this branch',
   `order` int(11) DEFAULT NULL COMMENT 'sets the order for branches of the same level',
   `media_id` bigint(20) unsigned NULL,
   `visible` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'sets the visibility of the branch',
@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS `branch` (
 
 CREATE TABLE IF NOT EXISTS `branch_i18n` (
   `branch_id` bigint(20) unsigned NOT NULL,
-  `i18n_id` bigint(20) unsigned NOT NULL,
+  `i18n_id` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'id of the language',
   `label` varchar(100) COLLATE utf8_bin DEFAULT NULL COMMENT 'name of the branch',
   `description` varchar(500) COLLATE utf8_bin DEFAULT NULL COMMENT 'description of the branch',
   `url` varchar(250) COLLATE utf8_bin DEFAULT NULL COMMENT 'url for the branch',
@@ -124,7 +124,7 @@ CREATE TABLE IF NOT EXISTS `branch_type` (
 
 CREATE TABLE IF NOT EXISTS `branch_type_i18n` (
   `branch_type_id` bigint(20) unsigned NOT NULL,
-  `i18n_id` bigint(20) unsigned NOT NULL,
+  `i18n_id` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'id of the language',
   `label` varchar(50) DEFAULT NULL COMMENT 'name of the branch'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='translation for branch type';
 
@@ -177,7 +177,7 @@ CREATE TABLE IF NOT EXISTS `sheet_type` (
 
 CREATE TABLE IF NOT EXISTS `sheet_type_i18n` (
   `sheet_type_id` bigint(20) unsigned NOT NULL,
-  `i18n_id` bigint(20) unsigned NOT NULL,
+  `i18n_id` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'id of the language',
   `label` varchar(50) COLLATE utf8_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='translations for sheet types';
 
@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS `tree` (
 
 CREATE TABLE IF NOT EXISTS `tree_i18n` (
   `tree_id` bigint(20) unsigned NOT NULL,
-  `i18n_id` bigint(20) unsigned NOT NULL,
+  `i18n_id` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'id of the language',
   `label` varchar(200) COLLATE utf8_bin DEFAULT NULL COMMENT 'name of the tree',
   `description` varchar(500) COLLATE utf8_bin DEFAULT NULL COMMENT 'description for the tree'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='translation table for trees';
@@ -228,7 +228,7 @@ CREATE TABLE IF NOT EXISTS `tree_type` (
 
 CREATE TABLE IF NOT EXISTS `tree_type_i18n` (
   `tree_type_id` bigint(20) unsigned NOT NULL,
-  `i18n_id` bigint(20) unsigned NOT NULL,
+  `i18n_id` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'id of the language',
   `label` varchar(50) COLLATE utf8_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin COMMENT='translations for tree type';
 

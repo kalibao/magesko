@@ -1,0 +1,46 @@
+.blockUI.blockMsg {
+  width: 60px !important;
+  height: 60px !important;
+  border: 1px solid #505052;
+  background: white url(../images/ajax-loader.gif) no-repeat center center;
+}
+.label-language .flag {
+  display: inline-block;
+  height: 11px;
+  width: 16px;
+  margin-right: 5px;
+}
+.label-language .flag.flag-fr {
+  background-image: url(../images/languages/fr.png);
+}
+.label-language .flag.flag-en,
+.label-language .flag.flag-en-UK {
+  background-image: url(../images/languages/en-UK.png);
+}
+.label-language .flag.flag-es {
+  background-image: url(../images/languages/es.png);
+}
+.label-language .flag.flag-de {
+  background-image: url(../images/languages/de.png);
+}
+.uploader-viewer {
+  margin: 10px 0;
+  text-align: center;
+  display: inline-block;
+}
+.uploader-viewer img {
+  border: 1px solid #C7C7C7;
+  padding: 5px;
+  background-color: white;
+  width: auto;
+  height: auto;
+}
+.uploader-viewer .name {
+  border: 1px solid #C7C7C7;
+  padding: 5px;
+  margin-top: 5px;
+  background-color: white;
+}
+.uploader-viewer .action {
+  margin-top: 5px;
+}

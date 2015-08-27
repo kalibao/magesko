@@ -1,0 +1,20 @@
+.sortable {
+  background-color: #CCCCCC;
+}
+.sortable tr {
+  background-color: #fff;
+  cursor: ns-resize;
+}
+.sortable tr.sortable-placeholder {
+  height: 50px;
+  background-color: #CCCCCC;
+}
+.top-border-bold {
+  border-top: 2px solid #b4b4b4;
+}
+.table td[rowspan="2"] {
+  vertical-align: middle;
+}
+.mouse-pointer {
+  cursor: pointer;
+}

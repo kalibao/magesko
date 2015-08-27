@@ -1,0 +1,43 @@
+.crud-list {
+  .actions {
+    float: none;
+  }
+}
+
+select {
+  &.input-sm {
+    line-height: 20px;
+  }
+}
+
+.required {
+  border-color: #357CA5;
+}
+
+label {
+  font-weight: normal;
+  &.required {
+    font-weight: bold;
+    &::before {
+      display: inline-block;
+      font-family: "FontAwesome";
+      font-weight: normal;
+      content: "\f069";
+      position: relative;
+      top: -2px;
+      color: #dd4B39;
+      font-size: 66%;
+      margin-right: 5px;
+    }
+  }
+}
+
+.cke {
+  text-align: initial;
+}
+
+table {
+  .form-group {
+    margin-bottom: 0;
+  }
+}

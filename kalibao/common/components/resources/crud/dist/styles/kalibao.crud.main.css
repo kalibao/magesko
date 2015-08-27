@@ -1,0 +1,127 @@
+.select2-add {
+  margin: 5px 0 5px 10px;
+}
+.select2-add a {
+  font-weight: bold;
+  display: block;
+}
+.select2-add a:hover {
+  text-decoration: none;
+}
+.select2-result-label {
+  display: inline-block;
+}
+.select2-update {
+  display: inline-block;
+  margin-left: 5px;
+}
+.select2-update a {
+  color: white;
+  font-style: italic;
+}
+.select2-update a:hover {
+  text-decoration: underline;
+}
+.select2-container {
+  width: 100%;
+}
+.btn-danger {
+  text-transform: uppercase;
+}
+.modal-footer {
+  padding: 7px 15px;
+  margin-top: -1px;
+}
+.modal-header {
+  padding: 5px 15px;
+}
+.modal-header h5 {
+  font-weight: bold;
+}
+.modal-body .header-title h1 {
+  border: none;
+  float: none;
+}
+.crud-translate table .select2-container,
+.crud-translate table input[type=text],
+.crud-translate table textarea {
+  width: 100%;
+}
+.crud-list .actions {
+  float: right;
+  margin: 10px 0;
+}
+.crud-list .advanced-filters {
+  display: none;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E5E5;
+  padding: 10px 20px 5px;
+  margin: 15px 0;
+}
+.crud-list .advanced-filters h4 {
+  margin-bottom: 15px;
+}
+.crud-list .advanced-filters .form-control.input-ajax-select {
+  min-width: 170px;
+}
+.crud-list table.list-grid .form-group {
+  width: 100%;
+}
+.crud-list table.list-grid .form-group .select2-container,
+.crud-list table.list-grid .form-group input[type=text],
+.crud-list table.list-grid .form-group textarea {
+  width: 100%;
+}
+.crud-list table.list-grid thead .head-titles {
+  background-color: #f1f1f1;
+}
+.crud-list table.list-grid thead .head-titles th.th-quick-action {
+  text-align: center;
+}
+.crud-list table.list-grid thead .head-titles a {
+  color: #333333;
+}
+.crud-list table.list-grid thead .head-titles a.current-sort {
+  color: #c12f2b;
+  text-decoration: underline;
+}
+.crud-list table.list-grid thead .head-filters .td-search {
+  text-align: center;
+}
+.crud-list table.list-grid thead .head-filters input.date-range {
+  width: 90px !important;
+}
+.crud-list table.list-grid tbody tr.row-selected td {
+  background-color: #c4ddf6 !important;
+  border-top: 1px solid #97bee6;
+}
+.crud-list table.list-grid tbody tr td {
+  vertical-align: middle !important;
+}
+.crud-list table.list-grid tbody tr td.control-label {
+  margin-top: 5px;
+}
+.crud-list table.list-grid tbody tr td.td-inline-actions {
+  width: 70px;
+  text-align: center;
+}
+.crud-list table.list-grid tbody tr td.td-inline-actions .form-group {
+  width: auto;
+}
+.crud-list table.list-grid tbody tr td.td-inline-actions a {
+  margin-left: 2px;
+  padding-top: 2pt;
+  vertical-align: middle;
+}
+.crud-list table.list-grid tbody tr td.td-action {
+  width: 86px;
+  text-align: center;
+}
+.crud-list table.list-grid tbody tr td.form-inline .form-group {
+  width: 100%;
+}
+.crud-list table.list-grid tbody tr td img.overview {
+  border: 1px solid #C7C7C7;
+  padding: 5px;
+  background-color: white;
+}

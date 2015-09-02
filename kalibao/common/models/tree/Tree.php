@@ -171,11 +171,12 @@ class Tree extends \yii\db\ActiveRecord
                 JOIN    branch hi
                 ON      hi.id = ho.id
                 WHERE hi.tree_id = :id
-                ORDER BY hi.`order`",
+                ORDER BY ho.`level`, hi.`order`",
             [
                 "id"    => $this->id,
             ]
         )->queryAll();
+
         $tree = [];
         foreach ($data as $v) {
             $v['path'] = str_replace('.', '.children.', $v['path']);
@@ -183,13 +184,14 @@ class Tree extends \yii\db\ActiveRecord
                 "id"       => 'branch-' . $v['item'],
                 "text"     =>
                     $v['label'] .
-                    " &nbsp; <i class=\"fa fa-search\" id=\"view-{$v['item']}\"></i>" .
+                    " &nbsp; <i class=\"fa fa-eye\" id=\"view-{$v['item']}\"></i>" .
                     " &nbsp; <i class=\"fa fa-edit\" id=\"edit-{$v['item']}\"></i>"
                 ,
                 "order"    => $v['order'],
                 "children" => []
             ]);
         }
+
         return $tree;
     }
 
@@ -211,7 +213,7 @@ class Tree extends \yii\db\ActiveRecord
     }
 
     /*  this method seems to be slower than the other one for big trees
-    public function treeToJson2()
+    public function treeToJson()
     {
         $data = Branch::findAll(['tree_id' => 1]);
         $tree = '';

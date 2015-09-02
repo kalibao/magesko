@@ -59,20 +59,28 @@
   /**
    * Init components
    */
-  $.kalibao.crud.Edit.prototype.initComponents = function () {
+  $.kalibao.backend.tree.View.prototype.initComponents = function () {
     this.initValidators(this.validators, this.activeValidators);
     this.initAdvancedDropDownList(this.$main);
     this.initDatePicker(this.$main);
     this.initWysiwig(this.$main);
     this.initUploader(this.$main);
-    /*this.$tree.jstree({
+    this.initTree();
+
+  };
+
+  /**
+   * Init tree events
+   */
+  $.kalibao.backend.tree.View.prototype.initTree = function () {
+    this.$tree.jstree({
       'core': {
-        'data'     : this.treeData,
-        'multiple' : false,
-        'check_callback' : true
+        'data': this.treeData,
+        'multiple': false,
+        'check_callback': true
       },
-      'plugins' : ['contextmenu', 'dnd', 'unique', 'changed', '']
-    });*/
+      'plugins': ['contextmenu', 'dnd', 'unique', 'changed', '']
+    });
   };
 
   /**
@@ -80,14 +88,45 @@
    */
   $.kalibao.backend.tree.View.prototype.initTreeEvents = function () {
     var self = this;
-    this.$tree.on('click', '.fa', function(e, data){
+    this.$tree.on('click', '.fa', function(e){
       e.stopPropagation();
-      console.log(e.target.id)
-    });
-    this.$tree.on('set_text.jstree', function(e, data){
-      console.log(data.obj);
+      var data = e.target.id.split('-');
+      var event = {
+        action: data[0],
+        id: data[1]
+      };
       self.$tree.jstree().deselect_all();
-      self.$tree.jstree().select_node(data.obj)
+      self.$tree.jstree().select_node($(this).parent());
+      switch (event.action) {
+        case 'edit':
+          $.get('../branch/update?id=' + event.id, function(response){
+            self.$branchContainer.html(response.html);
+          });
+          break;
+
+        case 'view':
+          $.get('../branch/view?id=' + event.id, function(response){
+            self.$branchContainer.html(response.html);
+          });
+          break;
+      }
+    });
+    this.$tree.on('move_node.jstree', function(e, data){
+      var parent = (data.parent == "#")?"#":data.parent.split('-')[1];
+      if (data.parent === data.old_parent) {
+        $.post('order-branch', {
+          id: data.node.id.split('-')[1],
+          order: data.position+1,
+          old: data.old_position+1,
+          parent: parent
+        })
+      } else {
+        $.post('change-parent', {
+          id: data.node.id.split('-')[1],
+          order: data.position+1,
+          parent: parent
+        })
+      }
     });
   };
 

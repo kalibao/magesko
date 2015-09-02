@@ -6,11 +6,14 @@
 
 namespace kalibao\backend\modules\tree\controllers;
 
+use kalibao\common\models\branch\Branch;
 use Yii;
 use yii\base\ErrorException;
 use yii\db\ActiveRecord;
 use kalibao\common\components\helpers\Html;
 use kalibao\backend\components\crud\Controller;
+use yii\web\HttpException;
+use yii\web\Response;
 
 /**
  * Class BranchController
@@ -56,6 +59,47 @@ class BranchController extends Controller
             $this->crudModelsClass['main'] => [
             ],
         ];
+    }
+
+    public function behaviors(){
+        $b = parent::behaviors();
+        $b['access']['rules'][] = [
+            'actions' => ['view', 'advanced-drop-down-list', 'settings', 'export'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+        ];
+        return $b;
+    }
+
+    /**
+     * View action
+     * @return array|string
+     * @throws HttpException
+     */
+    public function actionView()
+    {
+        $request = Yii::$app->request;
+        if ($request->get('id') === null) {
+            throw new HttpException(404, Yii::t('kalibao.backend', 'tree_not_found'));
+        }
+
+        $branch = Branch::findOne($request->get('id'));
+        $title = ($branch->branchI18ns[0]->label == "")?Yii::t("kalibao.backend", "branch-view"):$branch->branchI18ns[0]->label;
+
+        $vars = ['branch', 'title', 'vars'];
+
+        $create = false;
+        if ($request->isAjax) {
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            return [
+                'html' => $this->renderAjax('view/_contentBlock.php', compact($vars)),
+                'scripts' => $this->registerClientSideAjaxScript(),
+                'title' => $title
+            ];
+        } else {
+            return $this->render('view/view', compact($vars));
+        }
     }
 
     /**

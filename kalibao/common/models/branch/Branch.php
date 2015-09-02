@@ -19,6 +19,7 @@ use kalibao\common\models\sheet\Sheet;
 use kalibao\common\models\branchType\BranchTypeI18n;
 use kalibao\common\models\media\MediaI18n;
 use kalibao\common\models\tree\TreeI18n;
+use yii\helpers\Html;
 
 /**
  * This is the model class for table "branch".
@@ -243,5 +244,37 @@ class Branch extends \yii\db\ActiveRecord
     public function getTreeI18ns()
     {
         return $this->hasMany(TreeI18n::className(), ['tree_id' => 'tree_id']);
+    }
+
+    /**
+     * creates a correct html rendering depending on the file type :
+     * if the file is a picture, it will be displayed
+     * if the file is anything else, a link to the resource will be displayed.
+     *
+     * @param $file string file to put in the row
+     * @return string the file field
+     */
+    public function getFileTag() {
+        if (!isset($this->mediaI18ns[0])) return Yii::t('kalibao.backend', 'no-image');
+        $filepath = Yii::$app->cdnManager->getBaseUrl() . '/common/data/' . $this->media->file;
+        $text = isset($this->mediaI18ns[0]) ? $this->mediaI18ns[0]->title : $this->media->file;
+        if (in_array(
+            strtolower(pathinfo($filepath)['extension']),
+            ['jpg', 'png', 'gif', '']))
+            $text =  Html::img(
+                $filepath,
+                [
+                    'alt' => isset($this->mediaI18ns[0]) ? $this->mediaI18ns[0]->title : $this->media->file,
+                    'height' => '100px',
+                    'class' => 'thumbnail center-block'
+                ]
+            );
+        return Html::a(
+            $text,
+            $filepath,
+            [
+                'target' => '_blank'
+            ]
+        );
     }
 }

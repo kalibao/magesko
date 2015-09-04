@@ -79,7 +79,7 @@
         'multiple': false,
         'check_callback': true
       },
-      'plugins': ['contextmenu', 'dnd', 'unique', 'changed', '']
+      'plugins': ['contextmenu', 'dnd', 'unique', 'changed']
     });
   };
 
@@ -89,14 +89,15 @@
   $.kalibao.backend.tree.View.prototype.initTreeEvents = function () {
     var self = this;
     this.$tree.on('click', '.fa', function(e){
+      console.log("clic");
       e.stopPropagation();
       var data = e.target.id.split('-');
       var event = {
         action: data[0],
         id: data[1]
       };
-      self.$tree.jstree().deselect_all();
-      self.$tree.jstree().select_node($(this).parent());
+      self.$tree.jstree().deselect_all(true);
+      self.$tree.jstree().select_node($(this).parent(), true);
       switch (event.action) {
         case 'edit':
           $.get('../branch/update?id=' + event.id, function(response){
@@ -111,6 +112,19 @@
           break;
       }
     });
+
+    this.$tree.on('changed.jstree', function(e, f){
+      console.log("changed");
+      var data = f.node.id.split('-');
+      var event = {
+        action: data[0],
+        id: data[1]
+      };
+      $.get('../branch/view?id=' + event.id, function(response){
+        self.$branchContainer.html(response.html);
+      });
+    });
+
     this.$tree.on('move_node.jstree', function(e, data){
       var parent = (data.parent == "#")?"#":data.parent.split('-')[1];
       if (data.parent === data.old_parent) {

@@ -7,6 +7,7 @@
 namespace kalibao\backend\modules\tree\controllers;
 
 use Yii;
+use yii\caching\TagDependency;
 use yii\web\Response;
 use yii\db\ActiveRecord;
 use yii\web\HttpException;
@@ -213,6 +214,8 @@ class TreeController extends Controller
         $branch = Branch::findOne($request->post('id'));
         $branch->order = $order;
         $branch->scenario = 'update';
+
+        TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic($branch->tree_id));
         return $branch->save();
     }
 
@@ -243,6 +246,8 @@ class TreeController extends Controller
         $branch->order    = $order;
         $branch->parent   = $parent;
         $branch->scenario = 'update';
+
+        TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic($branch->tree_id));
         return $branch->save();
     }
 

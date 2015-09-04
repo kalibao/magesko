@@ -15,6 +15,7 @@ use kalibao\common\models\treeType\TreeType;
 use kalibao\common\models\tree\TreeI18n;
 use kalibao\common\models\media\MediaI18n;
 use kalibao\common\models\treeType\TreeTypeI18n;
+use yii\caching\TagDependency;
 
 /**
  * This is the model class for table "tree".
@@ -153,11 +154,18 @@ class Tree extends \yii\db\ActiveRecord
      */
     public function buildTree()
     {
-        $data = Yii::$app->db->createCommand(
-            "SELECT  hi.id AS item,
+        $dependency = new TagDependency(['tags' => [
+            $this->generateTag(),
+            $this->generateTag($this->id),
+            $this->generateTag($this->id, 'rawTree'),
+        ]]);
+        $db = Yii::$app->db;
+        $data = $db->cache(function($db){
+            return $db->createCommand(
+                "SELECT  hi.id AS item,
                 build_tree_path('.', hi.id) AS path,
                 hi.order,
-                concat('branch-', hi.id) as `label`
+                bi18n.label as `label`
                 FROM    (
                     SELECT  build_tree(id) AS id,
                             @level AS level, tree_id
@@ -166,16 +174,19 @@ class Tree extends \yii\db\ActiveRecord
                             @id := @start_with,
                             @level := 0
                         ) vars, branch
-
                     ) ho
                 JOIN    branch hi
                 ON      hi.id = ho.id
-                WHERE hi.tree_id = :id
+                JOIN    branch_i18n bi18n
+                ON      bi18n.branch_id = hi.id
+                WHERE hi.tree_id = :id AND bi18n.i18n_id = :lang
                 ORDER BY ho.`level`, hi.`order`",
-            [
-                "id"    => $this->id,
-            ]
-        )->queryAll();
+                [
+                    "id"    => $this->id,
+                    "lang"  => Yii::$app->language
+                ]
+            )->queryAll();
+        }, 0, $dependency);
 
         $tree = [];
         foreach ($data as $v) {
@@ -184,7 +195,7 @@ class Tree extends \yii\db\ActiveRecord
                 "id"       => 'branch-' . $v['item'],
                 "text"     =>
                     $v['label'] .
-                    " &nbsp; <i class=\"fa fa-eye\" id=\"view-{$v['item']}\"></i>" .
+                    //" &nbsp; <i class=\"fa fa-eye\" id=\"view-{$v['item']}\"></i>" .
                     " &nbsp; <i class=\"fa fa-edit\" id=\"edit-{$v['item']}\"></i>"
                 ,
                 "order"    => $v['order'],
@@ -197,9 +208,21 @@ class Tree extends \yii\db\ActiveRecord
 
     public function treeToJson()
     {
-        $data = $this->buildTree();
-        $data = $this->formatChildren($data['1']['children']);
-        return json_encode($data);
+        $tag = $this->generateTag($this->id, 'jsonTree');
+        if ($data = Yii::$app->commonCache->get($tag)) {
+            return $data;
+        } else {
+            $dependency = new TagDependency(['tags' => [
+                $this->generateTag(),
+                $this->generateTag($this->id),
+                $this->generateTag($this->id, 'jsonTree'),
+            ]]);
+            $data = $this->buildTree();
+            $data = $this->formatChildren($data['1']['children']);
+            $tree = json_encode($data);
+            Yii::$app->commonCache->set($tag, $tree, 0, $dependency);
+            return $tree;
+        }
     }
 
     private function formatChildren($data)
@@ -227,4 +250,26 @@ class Tree extends \yii\db\ActiveRecord
         return json_encode($tree);
     }
     */
+
+    /**
+     * function to generate a tag for caching data (alias to static method)
+     * @param string $id id of the product
+     * @param string $context identifier describing the cached data
+     * @return string the tag
+     */
+    public function generateTag($id = '', $context = '')
+    {
+        return self::generateTagStatic($id, $context);
+    }
+
+    /**
+     * static function to generate a tag for caching data
+     * @param string $id id of the product
+     * @param string $context identifier describing the cached data
+     * @return string the tag
+     */
+    public static function generateTagStatic($id = '', $context = '')
+    {
+        return (md5('TreeTag' . $id . $context));
+    }
 }

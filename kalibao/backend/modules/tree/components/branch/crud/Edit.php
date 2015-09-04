@@ -49,6 +49,8 @@ class Edit extends \kalibao\common\components\crud\Edit
         // upload config
         $uploadConfig['main'] = $this->uploadConfig[(new \ReflectionClass($models['main']))->getName()];
 
+        $this->setCloseAction('/tree/tree/view?id=' . $models['main']->tree_id);
+
         // set items
         $items = [];
 

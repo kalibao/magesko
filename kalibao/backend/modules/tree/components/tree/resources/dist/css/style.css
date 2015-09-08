@@ -1071,3 +1071,12 @@
   background-color: #eeeeee;
   padding: 6px 12px;
 }
+
+#add-branch {
+  margin-top: 5px;
+  margin-left: 10px;
+}
+
+#branch-container {
+  margin-top: -15px;
+}

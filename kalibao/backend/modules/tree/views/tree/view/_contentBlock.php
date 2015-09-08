@@ -21,14 +21,10 @@ $this->registerJs("
                     <fieldset>
                         <legend><?= $title ?></legend>
                         <div id="tree"></div>
+                        <a class="btn btn-primary btn-xs" id="add-branch">Ajouter <i class="fa fa-plus"></i></a>
                     </fieldset>
                 </div>
-                <div class="col-md-9">
-                    <fieldset>
-                        <legend id="branch-title">Sélectionner une branche</legend>
-                        <div id="branch-container"></div>
-                    </fieldset>
-                </div>
+                <div class="col-md-9" id="branch-container"></div>
             </div>
         </section>
     </div>

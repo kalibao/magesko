@@ -37,13 +37,13 @@
    * Init object
    */
   $.kalibao.backend.tree.View.prototype.init = function () {
-    var self = this;
     this.$container = $('#' + this.id);
     this.$wrapper = this.$container.closest('.content-dynamic');
     this.$main = this.$container.find('.content-main');
     this.$dynamic = this.$container.find('.content-dynamic');
     this.$tree = this.$container.find('#tree');
     this.$branchContainer = this.$container.find('#branch-container');
+    this.$addButton = this.$container.find('#add-branch');
     this.initComponents();
     this.initEvents();
   };
@@ -79,7 +79,7 @@
         'multiple': false,
         'check_callback': true
       },
-      'plugins': ['contextmenu', 'dnd', 'unique', 'changed']
+      'plugins': ['dnd', 'unique']
     });
   };
 
@@ -88,16 +88,18 @@
    */
   $.kalibao.backend.tree.View.prototype.initTreeEvents = function () {
     var self = this;
+    this.$tree.on('click', '#add-branch', function(e){e.stopPropagation();});
+
     this.$tree.on('click', '.fa', function(e){
-      console.log("clic");
       e.stopPropagation();
       var data = e.target.id.split('-');
+      var $node = $(this).parent();
       var event = {
         action: data[0],
         id: data[1]
       };
       self.$tree.jstree().deselect_all(true);
-      self.$tree.jstree().select_node($(this).parent(), true);
+      self.$tree.jstree().select_node($node, true);
       switch (event.action) {
         case 'edit':
           $.get('../branch/update?id=' + event.id, function(response){
@@ -105,16 +107,20 @@
           });
           break;
 
-        case 'view':
-          $.get('../branch/view?id=' + event.id, function(response){
-            self.$branchContainer.html(response.html);
-          });
+        case 'delete':
+          if (confirm('confirmer la suppression ? la branche et ses enfants seront supprimés')) {
+            $.post('../branch/delete-rows?id=' + event.id, {
+              rows: ['id=' + event.id]
+            }, function(){
+              self.$tree.jstree().delete_node($node);
+            });
+          }
           break;
       }
     });
 
     this.$tree.on('changed.jstree', function(e, f){
-      console.log("changed");
+      if (f.action != 'select_node') return;
       var data = f.node.id.split('-');
       var event = {
         action: data[0],
@@ -142,6 +148,12 @@
         })
       }
     });
+
+    this.$addButton.on('click', function(){
+      $.get('../branch/create?tree=' + self.urlParam('id'), function(response){
+        self.$branchContainer.html(response.html);
+      });
+    })
   };
 
   /**

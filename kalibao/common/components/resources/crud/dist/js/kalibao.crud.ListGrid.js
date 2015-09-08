@@ -568,7 +568,7 @@
       return false;
     });
 
-    $container.find('.btn-update, .btn-translate').on('click', function() {
+    $container.find('.btn-update, .btn-translate, .btn-view').on('click', function() {
       var action = $(this).attr('href');
       var params = '';
 

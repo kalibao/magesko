@@ -230,8 +230,11 @@ class TreeController extends Controller
         if ($request->post('id') === null || $request->post('order') === null || $request->post('parent') === null) {
             throw new HttpException(400, Yii::t('kalibao.backend', 'invalid_parameter'));
         }
-        $order  = $request->post('order');
-        $parent = ($request->post('parent') == '#')?1:$request->post('parent');
+        $branch    = Branch::findOne($request->post('id'));
+        $order     = $request->post('order');
+        $parent    = ($request->post('parent') == '#')?1:$request->post('parent');
+        $oldParent = $branch->parent;
+        $oldOrder  = $branch->order;
 
         $query = "UPDATE branch b
                   SET b.order = b.order + 1
@@ -242,7 +245,15 @@ class TreeController extends Controller
             'order'  => $order
         ])->execute();
 
-        $branch = Branch::findOne($request->post('id'));
+        $query = "UPDATE branch b
+                  SET b.order = b.order - 1
+                  WHERE b.parent = :parent
+                    AND b.order >= :order";
+        Yii::$app->db->createCommand($query, [
+            'parent' => $oldParent,
+            'order'  => $oldOrder
+        ])->execute();
+
         $branch->order    = $order;
         $branch->parent   = $parent;
         $branch->scenario = 'update';

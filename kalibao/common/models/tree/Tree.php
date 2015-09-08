@@ -195,14 +195,13 @@ class Tree extends \yii\db\ActiveRecord
                 "id"       => 'branch-' . $v['item'],
                 "text"     =>
                     $v['label'] .
-                    //" &nbsp; <i class=\"fa fa-eye\" id=\"view-{$v['item']}\"></i>" .
-                    " &nbsp; <i class=\"fa fa-edit\" id=\"edit-{$v['item']}\"></i>"
+                    " &nbsp; <i class=\"fa fa-edit\" id=\"edit-{$v['item']}\"></i>" .
+                    " &nbsp; <i class=\"fa fa-trash text-red\" id=\"delete-{$v['item']}\"></i>"
                 ,
                 "order"    => $v['order'],
                 "children" => []
             ]);
         }
-
         return $tree;
     }
 
@@ -218,7 +217,7 @@ class Tree extends \yii\db\ActiveRecord
                 $this->generateTag($this->id, 'jsonTree'),
             ]]);
             $data = $this->buildTree();
-            $data = $this->formatChildren($data['1']['children']);
+            if (!empty($data)) $data = $this->formatChildren($data['1']['children']);
             $tree = json_encode($data);
             Yii::$app->commonCache->set($tag, $tree, 0, $dependency);
             return $tree;
@@ -270,6 +269,6 @@ class Tree extends \yii\db\ActiveRecord
      */
     public static function generateTagStatic($id = '', $context = '')
     {
-        return (md5('TreeTag' . $id . $context));
+        return (md5('TreeTag' . $id . $context . Yii::$app->language));
     }
 }

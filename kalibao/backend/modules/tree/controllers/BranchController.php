@@ -7,8 +7,10 @@
 namespace kalibao\backend\modules\tree\controllers;
 
 use kalibao\common\models\branch\Branch;
+use kalibao\common\models\tree\Tree;
 use Yii;
 use yii\base\ErrorException;
+use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 use kalibao\common\components\helpers\Html;
 use kalibao\backend\components\crud\Controller;
@@ -59,6 +61,34 @@ class BranchController extends Controller
             $this->crudModelsClass['main'] => [
             ],
         ];
+
+        $this->on(self::EVENT_SAVE_EDIT, function($d){
+            if($d->extraData['create']) {
+                Yii::$app->getDb()->createCommand('
+                    UPDATE `branch`
+                    SET `order` = `order`+1
+                    WHERE parent = :p AND id <> :id',
+                    [
+                        'p'  => $d->extraData['models']['main']->parent,
+                        'id' => $d->extraData['models']['main']->id
+                    ]
+                )->execute();
+            }
+            TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic($d->extraData['models']['main']->tree_id));
+        });
+
+        $this->on(self::EVENT_DELETE, function($d){
+            Yii::$app->getDb()->createCommand('
+                    UPDATE `branch`
+                    SET `order` = `order`-1
+                    WHERE parent = :p AND `order` > :o',
+                [
+                    'p' => $d->extraData['models'][0]->parent,
+                    'o' => $d->extraData['models'][0]->order
+                ]
+            )->execute();
+            TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic($d->extraData['models'][0]->tree_id));
+        });
     }
 
     public function behaviors(){

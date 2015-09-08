@@ -50,6 +50,7 @@ class Edit extends \kalibao\common\components\crud\Edit
         $uploadConfig['main'] = $this->uploadConfig[(new \ReflectionClass($models['main']))->getName()];
 
         $this->setCloseAction('/tree/tree/view?id=' . $models['main']->tree_id);
+        $this->addAgain = false;
 
         // set items
         $items = [];
@@ -85,19 +86,10 @@ class Edit extends \kalibao\common\components\crud\Edit
         $items['tree_id'] = new InputField([
             'model' => $models['main'],
             'attribute' => 'tree_id',
-            'type' => 'activeHiddenInput',
+            'type' => 'activeTextInput',
             'options' => [
-                'class' => 'form-control input-sm input-ajax-select',
-                'data-action' => Url::to([
-                    'advanced-drop-down-list',
-                    'id' => 'tree_i18n.label',
-                ]),
-                'data-allow-clear' => 1,
-                'data-placeholder' => Yii::t('kalibao', 'input_select'),
-                'data-text' => !empty($models['main']->tree_id) ? TreeI18n::findOne([
-                    'tree_id' => $models['main']->tree_id,
-                    'i18n_id' => $language
-                ])->label : '',
+                'class' => 'form-control input-sm',
+                'placeholder' => $models['main']->getAttributeLabel('tree_id'),
             ]
         ]);
 

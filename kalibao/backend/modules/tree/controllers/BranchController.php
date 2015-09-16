@@ -6,7 +6,9 @@
 
 namespace kalibao\backend\modules\tree\controllers;
 
+use kalibao\common\models\attributeTypeVisibility\AttributeTypeVisibilityI18n;
 use kalibao\common\models\branch\Branch;
+use kalibao\common\models\attributeTypeVisibility\AttributeTypeVisibility;
 use kalibao\common\models\tree\Tree;
 use Yii;
 use yii\base\ErrorException;
@@ -31,7 +33,7 @@ class BranchController extends Controller
     protected $crudModelsClass = [
         'main' => 'kalibao\common\models\branch\Branch',
         'i18n' => 'kalibao\common\models\branch\BranchI18n',
-        'filter' => 'kalibao\backend\modules\tree\models\branch\crud\ModelFilter',
+        'newFilter' => 'kalibao\backend\modules\tree\models\branch\crud\ModelFilter',
     ];
 
     /**
@@ -98,6 +100,16 @@ class BranchController extends Controller
             'allow' => true,
             'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
         ];
+        $b['access']['rules'][] = [
+            'actions' => ['delete-newFilter', 'advanced-drop-down-list', 'settings', 'export'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+        ];
+        $b['access']['rules'][] = [
+            'actions' => ['add-filter', 'advanced-drop-down-list', 'settings', 'export'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+        ];
         return $b;
     }
 
@@ -130,6 +142,70 @@ class BranchController extends Controller
         } else {
             return $this->render('view/view', compact($vars));
         }
+    }
+
+    /**
+     * View action
+     * @return array|string
+     * @throws HttpException
+     */
+    public function actionDeleteFilter()
+    {
+        $request = Yii::$app->request;
+        if (! $request->isPost) {
+            throw new HttpException(405, Yii::t('kalibao.backend', 'not_allowed'));
+        }
+        $attributeType = $request->post('attribute_type_id');
+        $branch        = $request->post('branch_id');
+        AttributeTypeVisibility::findOne([
+            'attribute_type_id' => $attributeType,
+            'branch_id'         => $branch
+        ])->delete();
+    }
+
+    /**
+     * View action
+     * @return array|string
+     * @throws HttpException
+     */
+    public function actionAddFilter()
+    {
+        $request = Yii::$app->request;
+        if (! $request->isPost) {
+            throw new HttpException(405, Yii::t('kalibao.backend', 'not_allowed'));
+        }
+        $newFilters = $request->post('insert', []);
+        $oldFilters = $request->post('update', []);
+        $transaction = Yii::$app->getDb()->beginTransaction();
+        $err = false;
+        foreach($newFilters as $newFilter) {
+            $model = new AttributeTypeVisibility();
+            $model->scenario = 'insert';
+            $model->attribute_type_id = $newFilter['id'];
+            $model->branch_id = $newFilter['branch'];
+
+            $i18n = new AttributeTypeVisibilityI18n();
+            $i18n->scenario = 'insert';
+            $i18n->attribute_type_id = $newFilter['id'];
+            $i18n->branch_id = $newFilter['branch'];
+            $i18n->i18n_id = Yii::$app->language;
+            $i18n->label = $newFilter['i18n'];
+
+            if (!($model->save() && $i18n->save())) $err = true;
+        }
+        foreach($oldFilters as $oldFilter) {
+            $i18n = AttributeTypeVisibilityI18n::findOne([
+                'attribute_type_id' => $oldFilter['id'],
+                'branch_id' => $oldFilter['branch'],
+                'i18n_id' => Yii::$app->language
+            ]);
+            $i18n->scenario = 'update';
+            $i18n->label = $oldFilter['i18n'];
+
+            if (!$i18n->save()) $err = true;
+        }
+        if ($err) $transaction->rollBack();
+        else $transaction->commit();
     }
 
     /**

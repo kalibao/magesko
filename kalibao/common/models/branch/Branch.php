@@ -19,6 +19,7 @@ use kalibao\common\models\sheet\Sheet;
 use kalibao\common\models\branchType\BranchTypeI18n;
 use kalibao\common\models\media\MediaI18n;
 use kalibao\common\models\tree\TreeI18n;
+use yii\caching\TagDependency;
 use yii\helpers\Html;
 
 /**
@@ -276,5 +277,49 @@ class Branch extends \yii\db\ActiveRecord
                 'target' => '_blank'
             ]
         );
+    }
+
+    public function getAttributeList()
+    {
+        TagDependency::invalidate(Yii::$app->commonCache, $this->generateTag());
+        $dependency = new TagDependency(['tags' => [
+            $this->generateTag(),
+            $this->generateTag($this->id),
+            $this->generateTag($this->id, 'attributeTypeList'),
+        ]]);
+        return $this->getDb()->cache(function(){
+            $attributeTypes = $this->attributeTypeVisibilities;
+            $list = [];
+            foreach ($attributeTypes as $attributeType) {
+                $list[] = [
+                    'id'    => $attributeType->attribute_type_id,
+                    'i18n'  => $attributeType->attributeTypeI18ns[0]->value,
+                    'label' => $attributeType->attributeTypeVisibilityI18ns[0]->label
+                ];
+            }
+            return $list;
+        }, 0, $dependency);
+    }
+
+    /**
+     * function to generate a tag for caching data (alias to static method)
+     * @param string $id id of the product
+     * @param string $context identifier describing the cached data
+     * @return string the tag
+     */
+    public function generateTag($id = '', $context = '')
+    {
+        return self::generateTagStatic($id, $context);
+    }
+
+    /**
+     * static function to generate a tag for caching data
+     * @param string $id id of the product
+     * @param string $context identifier describing the cached data
+     * @return string the tag
+     */
+    public static function generateTagStatic($id = '', $context = '')
+    {
+        return (md5('BranchTag' . $id . $context . Yii::$app->language));
     }
 }

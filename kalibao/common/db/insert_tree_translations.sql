@@ -37,8 +37,8 @@ INSERT INTO `message` (`id`, `message_group_id`, `source`, `created_at`, `update
 (765, 2, 'branch_i18n:url', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
 (764, 2, 'branch_i18n:description', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
 (763, 2, 'branch_i18n:label', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(762, 2, 'branch_i18n:i18n_id', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
-(761, 2, 'branch_i18n:branch_id', '0000-00-00 00:00:00', '0000-00-00 00:00:00');
+(787, 2, 'branch_i18n:i18n_id', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(788, 2, 'branch_i18n:branch_id', '0000-00-00 00:00:00', '0000-00-00 00:00:00');
 
 
 --
@@ -94,8 +94,8 @@ INSERT INTO `message_i18n` (`message_id`, `i18n_id`, `translation`) VALUES
 (764, 'en', 'Description'),
 (763, 'fr', 'Nom de la branche'),
 (763, 'en', 'Branch name'),
-(762, 'fr', 'Langage'),
-(762, 'en', 'Language'),
-(761, 'fr', 'Branche'),
-(761, 'en', 'Branch');
+(788, 'fr', 'Langage'),
+(788, 'en', 'Language'),
+(787, 'fr', 'Branche'),
+(787, 'en', 'Branch');
 

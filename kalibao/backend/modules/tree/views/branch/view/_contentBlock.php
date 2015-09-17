@@ -13,7 +13,7 @@
                 <legend><?= $title ?></legend>
                 <div class="row form-inline">
                     <div class="col-sm-2">
-                        <b><?= Yii::t('kalibao.backend', 'branch_visible')?> : </b><input type="checkbox" disabled <?= ($branch->visible)?'selected':'' ?>/>
+                        <b><?= Yii::t('kalibao.backend', 'branch_visible')?> : </b><input type="checkbox" disabled <?= ($branch->visible)?'checked':'' ?>/>
                     </div>
                     <div class="col-sm-5">
                         <b><?= Yii::t('kalibao.backend', 'branch_label')?> : </b><input type="text" class="form-control" disabled value="<?= $branch->branchI18ns[0]->label ?>" />

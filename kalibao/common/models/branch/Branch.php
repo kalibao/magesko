@@ -19,6 +19,7 @@ use kalibao\common\models\sheet\Sheet;
 use kalibao\common\models\branchType\BranchTypeI18n;
 use kalibao\common\models\media\MediaI18n;
 use kalibao\common\models\tree\TreeI18n;
+use yii\caching\TagDependency;
 use yii\helpers\Html;
 
 /**
@@ -120,23 +121,23 @@ class Branch extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('kalibao.backend','ID'),
-            'branch_type_id' => Yii::t('kalibao.backend','Branch Type ID'),
-            'tree_id' => Yii::t('kalibao.backend','Tree ID'),
-            'parent' => Yii::t('kalibao.backend','sets the parent of this branch'),
-            'order' => Yii::t('kalibao.backend','sets the order for branches of the same level'),
-            'media_id' => Yii::t('kalibao.backend','Media ID'),
-            'visible' => Yii::t('kalibao.backend','sets the visibility of the branch'),
-            'background' => Yii::t('kalibao.backend','background color of the branch (used in back office only)'),
-            'presentation_type' => Yii::t('kalibao.backend','sets the display mode for the sheets of this branch (table, list...)'),
-            'offset' => Yii::t('kalibao.backend','sets the permission level required to access this branch'),
-            'display_brands_types' => Yii::t('kalibao.backend','Display Brands Types'),
-            'big_menu_only_first_level' => Yii::t('kalibao.backend','sets if all children branches must be shown in big menu'),
-            'unfold' => Yii::t('kalibao.backend','Unfold'),
-            'google_shopping_category_id' => Yii::t('kalibao.backend','Google Shopping Category ID'),
-            'google_shopping' => Yii::t('kalibao.backend','sets if google shopping is used for this branch'),
-            'affiliation_category_id' => Yii::t('kalibao.backend','Affiliation Category ID'),
-            'affiliation' => Yii::t('kalibao.backend','sets if affiliation categories are used for this branch'),
+            'id' => Yii::t('kalibao.backend','branch:id'),
+            'branch_type_id' => Yii::t('kalibao.backend','branch:branch_type_id'),
+            'tree_id' => Yii::t('kalibao.backend','branch:tree_id'),
+            'parent' => Yii::t('kalibao.backend','branch:parent'),
+            'order' => Yii::t('kalibao.backend','branch:order'),
+            'media_id' => Yii::t('kalibao.backend','branch:media_id'),
+            'visible' => Yii::t('kalibao.backend','branch:visible'),
+            'background' => Yii::t('kalibao.backend','branch:background'),
+            'presentation_type' => Yii::t('kalibao.backend','branch:presentation_type'),
+            'offset' => Yii::t('kalibao.backend','branch:offset'),
+            'display_brands_types' => Yii::t('kalibao.backend','branch:display_brands_types'),
+            'big_menu_only_first_level' => Yii::t('kalibao.backend','branch:big_menu_only_first_level'),
+            'unfold' => Yii::t('kalibao.backend','branch:unfold'),
+            'google_shopping_category_id' => Yii::t('kalibao.backend','branch:google_shopping_category_id'),
+            'google_shopping' => Yii::t('kalibao.backend','branch:google_shopping'),
+            'affiliation_category_id' => Yii::t('kalibao.backend','branch:affiliation_category_id'),
+            'affiliation' => Yii::t('kalibao.backend','branch:affiliation'),
             'created_at' => Yii::t('kalibao','model:created_at'),
             'updated_at' => Yii::t('kalibao','model:updated_at'),
         ];
@@ -276,5 +277,49 @@ class Branch extends \yii\db\ActiveRecord
                 'target' => '_blank'
             ]
         );
+    }
+
+    public function getAttributeList()
+    {
+        TagDependency::invalidate(Yii::$app->commonCache, $this->generateTag());
+        $dependency = new TagDependency(['tags' => [
+            $this->generateTag(),
+            $this->generateTag($this->id),
+            $this->generateTag($this->id, 'attributeTypeList'),
+        ]]);
+        return $this->getDb()->cache(function(){
+            $attributeTypes = $this->attributeTypeVisibilities;
+            $list = [];
+            foreach ($attributeTypes as $attributeType) {
+                $list[] = [
+                    'id'    => $attributeType->attribute_type_id,
+                    'i18n'  => $attributeType->attributeTypeI18ns[0]->value,
+                    'label' => $attributeType->attributeTypeVisibilityI18ns[0]->label
+                ];
+            }
+            return $list;
+        }, 0, $dependency);
+    }
+
+    /**
+     * function to generate a tag for caching data (alias to static method)
+     * @param string $id id of the product
+     * @param string $context identifier describing the cached data
+     * @return string the tag
+     */
+    public function generateTag($id = '', $context = '')
+    {
+        return self::generateTagStatic($id, $context);
+    }
+
+    /**
+     * static function to generate a tag for caching data
+     * @param string $id id of the product
+     * @param string $context identifier describing the cached data
+     * @return string the tag
+     */
+    public static function generateTagStatic($id = '', $context = '')
+    {
+        return (md5('BranchTag' . $id . $context . Yii::$app->language));
     }
 }

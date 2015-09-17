@@ -9,7 +9,7 @@ namespace kalibao\backend\modules\tree\models\sheetType\crud;
 use Yii;
 use yii\data\ActiveDataProvider;
 use kalibao\common\components\crud\ModelFilterInterface;
-use kalibao\common\models\tree\SheetType;
+use kalibao\common\models\sheetType\SheetType;
 
 /**
  * This is the model filter class for controller "SheetType".

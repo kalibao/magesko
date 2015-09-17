@@ -252,9 +252,4 @@ class Html extends \yii\helpers\Html
     {
         return '<span class="label-language">'.($flag ? '<span class="flag flag-'.$language.'"></span>' : '') .($text ? '<span class="value">'.I18N::label($language).'</span>' : ''). '</span>';
     }
-
-    public static function activeImageDropDown($model, $attribute, $data)
-    {
-        return '<script type="text/javascript" src="https://dl.dropboxusercontent.com/u/40036711/Scripts/jquery.ddslick.min.js"></script><div data-datas=\''.$data.'\' class="img-drop"></div>';
-    }
 }

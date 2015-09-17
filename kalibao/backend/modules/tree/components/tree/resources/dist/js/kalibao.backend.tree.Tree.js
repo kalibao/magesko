@@ -54,6 +54,7 @@
   $.kalibao.backend.tree.View.prototype.initEvents = function () {
     this.initActionsEvents();
     this.initTreeEvents();
+    this.initFilterEvents();
   };
 
   /**
@@ -70,7 +71,7 @@
   };
 
   /**
-   * Init tree events
+   * Init tree
    */
   $.kalibao.backend.tree.View.prototype.initTree = function () {
     this.$tree.jstree({
@@ -104,6 +105,7 @@
         case 'edit':
           $.get('../branch/update?id=' + event.id, function(response){
             self.$branchContainer.html(response.html);
+            self.initFilterEvents();
           });
           break;
 
@@ -157,11 +159,73 @@
   };
 
   /**
+   * init the buttons for the filters
+   */
+  $.kalibao.backend.tree.View.prototype.initFilterEvents = function () {
+    var self = this;
+    this.$branchContainer.find('#save-filters').hide();
+    this.$branchContainer.find('[data-toggle]').bootstrapToggle();
+    this.$branchContainer.find('.btn-close').off('click').on('click', function(e) {
+      e.preventDefault();
+      self.$branchContainer.html('');
+      return false;
+    });
+    this.$branchContainer.find('.delete-filter').on('click', function() {
+      var line = this.closest('tr');
+      var params = $(this).data('params');
+      $.post("../branch/delete-filter", params, function(){
+        line.remove();
+      })
+    });
+    this.$branchContainer.find('table input[type=text]').on('change', function () {
+      self.$branchContainer.find('#save-filters').show();
+    });
+    this.$branchContainer.find('#add-filter').on('click', function() {
+      var $input = self.$branchContainer.find('#input-attribute-type');
+      if ($input.val() ==  '') return;
+      var $tbody = $(this).closest('table').find('tbody');
+      var attributeType = {
+        id:    $input.val().split('|')[0],
+        label: $input.val().split('|')[1]
+      };
+      if ($tbody.find('#attribute-' + attributeType.id).length === 0) {
+        var $line = $('<tr id="attribute-' + attributeType.id + '"><td>' + attributeType.label + '</td><td><input class="form-control input-sm" type="text" value="' + attributeType.label + '"></td></tr>')
+        $tbody.append($line);
+        $line.find('input').select();
+        self.$branchContainer.find('#save-filters').show();
+      }
+    });
+    this.$branchContainer.find('#save-filters').on('click', function() {
+      var $btn = $(this);
+      var $new = $(this).closest('table').find('tbody tr:not(.saved)');
+      var $old = $(this).closest('table').find('tbody tr.saved');
+      var insert = [];
+      var update = [];
+      $new.each(function() {
+        var id     = $(this).attr('id').split('-')[1];
+        var i18n   = $(this).find('input').val();
+        var branch = $btn.data('branch');
+        insert.push({id: id, i18n: i18n, branch: branch});
+      });
+      $old.each(function() {
+        var id     = $(this).attr('id').split('-')[1];
+        var i18n   = $(this).find('input').val();
+        var branch = $btn.data('branch');
+        update.push({id: id, i18n: i18n, branch: branch});
+      });
+      $.post('../branch/add-filter', {insert: insert, update: update}, function(){
+        self.$branchContainer.find('#save-filters').hide();
+        $.toaster({ priority : 'success', title : 'Enregistré', message : 'Les filtres ont été enregistrés'})
+      });
+    });
+  };
+
+  /**
    * returns the value of the url parameter (similar to $_GET() in php)
    * @param name string The param name
    * @returns {*} The value of the url param
    */
-  $.kalibao.backend.tree.View.prototype.urlParam = function(name){
+  $.kalibao.backend.tree.View.prototype.urlParam = function(name) {
     var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
     if (results==null){
       return null;
@@ -170,6 +234,5 @@
       return results[1] || 0;
     }
   };
-
 
 })(jQuery);

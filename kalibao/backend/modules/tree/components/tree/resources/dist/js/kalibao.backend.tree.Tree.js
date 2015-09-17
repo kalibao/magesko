@@ -105,7 +105,7 @@
         case 'edit':
           $.get('../branch/update?id=' + event.id, function(response){
             self.$branchContainer.html(response.html);
-            self.initBranchEvents();
+            self.initFilterEvents();
           });
           break;
 

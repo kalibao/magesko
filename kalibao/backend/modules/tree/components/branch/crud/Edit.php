@@ -197,6 +197,12 @@ class Edit extends \kalibao\common\components\crud\Edit
             'options' => [
                 'class' => '',
                 'label' => '',
+                'data-toggle' => 'toggle',
+                'data-on' => 'Type',
+                'data-off' => 'Marque',
+                'data-size' => 'mini',
+                'data-onstyle' => "default",
+                'data-offstyle' => "default",
             ]
         ]);
 

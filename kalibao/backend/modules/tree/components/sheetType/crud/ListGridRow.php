@@ -6,6 +6,7 @@
 
 namespace kalibao\backend\modules\tree\components\sheetType\crud;
 
+use kalibao\common\models\sheetType\SheetType;
 use Yii;
 use kalibao\common\components\helpers\Html;
 use kalibao\common\components\i18n\I18N;

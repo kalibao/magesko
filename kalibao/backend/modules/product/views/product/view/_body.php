@@ -21,6 +21,7 @@
             <?= $this->render('tabs/_variantPrice', compact('component')); ?>
             <?= $this->render('tabs/_description', compact('component')); ?>
             <?= $this->render('tabs/_prices', compact('component')); ?>
+            <?= $this->render('tabs/_catalog', compact('component')); ?>
             <?= $this->render('tabs/_logistic', compact('component')); ?>
             <?= $this->render('tabs/_crossSelling', compact('component')); ?>
             <?= $this->render('tabs/_discount', compact('component')); ?>

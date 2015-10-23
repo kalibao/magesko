@@ -149,10 +149,8 @@ class Tree extends \yii\db\ActiveRecord
         return $this->hasMany(TreeTypeI18n::className(), ['tree_type_id' => 'tree_type_id']);
     }
 
-    /**
-     * @return Array
-     */
-    public function buildTree()
+
+    private function getTree()
     {
         $dependency = new TagDependency(['tags' => [
             $this->generateTag(),
@@ -160,7 +158,7 @@ class Tree extends \yii\db\ActiveRecord
             $this->generateTag($this->id, 'rawTree'),
         ]]);
         $db = Yii::$app->db;
-        $data = $db->cache(function($db){
+        return $db->cache(function($db){
             return $db->createCommand(
                 "SELECT  hi.id AS item,
                 build_tree_path('.', hi.id) AS path,
@@ -187,17 +185,27 @@ class Tree extends \yii\db\ActiveRecord
                 ]
             )->queryAll();
         }, 0, $dependency);
+    }
 
+    /**
+     * @return Array
+     */
+    private function buildTree($actionBtns)
+    {
+        $data = $this->getTree();
         $tree = [];
         foreach ($data as $v) {
             $v['path'] = str_replace('.', '.children.', $v['path']);
+
+            $text = $v['label'];
+            if($actionBtns) {
+                $text .= " &nbsp; <i class=\"fa fa-edit\" id=\"edit-{$v['item']}\"></i>" .
+                         " &nbsp; <i class=\"fa fa-trash text-red\" id=\"delete-{$v['item']}\"></i>";
+            }
+
             Arr::set($tree, $v['path'], [
                 "id"       => 'branch-' . $v['item'],
-                "text"     =>
-                    $v['label'] .
-                    " &nbsp; <i class=\"fa fa-edit\" id=\"edit-{$v['item']}\"></i>" .
-                    " &nbsp; <i class=\"fa fa-trash text-red\" id=\"delete-{$v['item']}\"></i>"
-                ,
+                "text"     => $text,
                 "order"    => $v['order'],
                 "children" => []
             ]);
@@ -205,20 +213,55 @@ class Tree extends \yii\db\ActiveRecord
         return $tree;
     }
 
-    public function treeToJson()
+    public function treeToJson($actionBtns = true)
     {
-        $tag = $this->generateTag($this->id, 'jsonTree');
+        $tag = ($actionBtns)?$this->generateTag($this->id, 'jsonTreeBtns'):$this->generateTag($this->id, 'jsonTree');
         if ($data = Yii::$app->commonCache->get($tag)) {
             return $data;
         } else {
             $dependency = new TagDependency(['tags' => [
                 $this->generateTag(),
                 $this->generateTag($this->id),
-                $this->generateTag($this->id, 'jsonTree'),
+                $tag,
             ]]);
-            $data = $this->buildTree();
+            $data = $this->buildTree($actionBtns);
             if (!empty($data)) $data = $this->formatChildren($data['1']['children']);
             $tree = json_encode($data);
+            Yii::$app->commonCache->set($tag, $tree, 0, $dependency);
+            return $tree;
+        }
+    }
+
+    public function treeToList()
+    {
+        $tag = $this->generateTag($this->id, 'listTree');
+        if ($data = Yii::$app->commonCache->get($tag)) {
+            return $data;
+        } else {
+            $dependency = new TagDependency(['tags' => [
+                $this->generateTag(),
+                $this->generateTag($this->id),
+                $this->generateTag($this->id, 'listTree'),
+            ]]);
+            $rawData = $this->getTree();
+            $data = [];
+            foreach ($rawData as $rd) {
+                $data[$rd['item']] = $rd;
+            }
+            $tree = [];
+            foreach ($data as $d) {
+                $parents = explode('.', substr($d['path'], 2));
+                $path = '';
+                foreach($parents as $parent) {
+                    if ($parent != end($parents)) {
+                        $path .= $data[$parent]['label'] .  '&nbsp;&nbsp;>>&nbsp;&nbsp;';
+                    } else {
+                        $path .= $data[$parent]['label'];
+                    }
+                }
+                $tree[] = $path;
+            }
+            sort($tree);
             Yii::$app->commonCache->set($tag, $tree, 0, $dependency);
             return $tree;
         }

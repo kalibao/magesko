@@ -7,6 +7,8 @@
 $this->registerJs("
     new $.kalibao.backend.product.View({
         id: '".$component->id."',
+        treeData: ". $component->tree['json'].",
+        categories: ". $component->models['main']->getCategories(true) .",
         messages: $.extend($.kalibao.core.app.messages, { /* your messages */ })".
     (
     $component->hasClientValidationEnabled()

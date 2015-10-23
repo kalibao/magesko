@@ -23,6 +23,8 @@
         this[i] = args[i];
       }
     }
+    this.treeData = args['treeData'];
+    this.categories = args['categories'];
     this.init();
   };
 
@@ -45,7 +47,10 @@
     this.$discountTab = this.$container.find('#discount');
     this.$variantListTab = this.$container.find('#variant-list');
     this.$logisticTab = this.$container.find('#logistic');
+    this.$catalogTab = this.$container.find('#catalog');
+    this.$tree = this.$container.find('#tree');
     this.initComponents();
+    this.initTree();
     this.initEvents();
   };
 
@@ -63,6 +68,54 @@
     this.$variantListTab.find('input[type=radio]').change(function() {
       $('input[type=radio]:checked').not(this).prop('checked', false);
     });
+    this.initTreeEvents();
+  };
+
+  /**
+   * Init tree
+   */
+  $.kalibao.backend.product.View.prototype.initTree = function () {
+    var self = this;
+    this.$tree.jstree({
+      'core': {
+        'data': this.treeData,
+        'check_callback': true
+      },
+      'plugins': ['checkbox'],
+      'checkbox': {
+        'cascade': 'undetermined',
+        'three_state': false,
+        'keep_selected_style': false
+      }
+    });
+    this.$tree.on('ready.jstree', function(){
+      for (var i = 0; i < self.categories.length; i++) {
+        self.$tree.jstree().check_node('branch-' + self.categories[i].branch_id);
+      }
+      self.initialData = self.$tree.jstree().get_checked();
+    });
+  };
+
+  /**
+   * Init tree events
+   */
+  $.kalibao.backend.product.View.prototype.initTreeEvents = function () {
+    var self = this;
+    var $jstree = this.$tree.jstree();
+    this.$catalogTab.find('.btn-submit').off('click').on('click', function(e) {
+      e.preventDefault();
+      var newData = $jstree.get_checked();
+      var ad = $(newData).not(self.initialData).get();
+      var rm = $(self.initialData).not(newData).get();
+      var productId = self.urlParam('id');
+      $.post('/product/product/update-catalog', {ad: ad, rm: rm, productId: productId})
+    });
+    this.$catalogTab.find('.reset-form').on('click', function() {
+      $jstree.uncheck_all();
+      for (var i = 0; i < self.categories.length; i++) {
+        self.$tree.jstree().check_node('branch-' + self.categories[i].branch_id);
+      }
+    })
   };
 
   /**

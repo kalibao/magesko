@@ -19,7 +19,11 @@ $this->registerJs("
             <div class="row">
                 <div class="col-md-3">
                     <fieldset>
-                        <legend><?= $title ?></legend>
+                        <legend>
+                            <?= ucfirst($title) ?>&nbsp;
+                            <a class="btn btn-primary btn-xs" id="open-all"><i class="fa fa-expand"></i></a>
+                            <a class="btn btn-primary btn-xs" id="close-all"><i class="fa fa-compress"></i></a>
+                        </legend>
                         <div id="tree"></div>
                         <a class="btn btn-primary btn-xs" id="add-branch">Ajouter <i class="fa fa-plus"></i></a>
                     </fieldset>

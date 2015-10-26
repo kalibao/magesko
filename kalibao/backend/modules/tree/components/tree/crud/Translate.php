@@ -48,7 +48,7 @@ class Translate extends \kalibao\common\components\crud\Translate
             'attribute' => 'description',
             'type' => 'activeTextarea',
             'options' => [
-                'class' => 'form-control input-sm wysiwyg-textarea',
+                'class' => 'form-control input-sm',
                 'data-ckeditor-language' => $language
             ]
         ]);

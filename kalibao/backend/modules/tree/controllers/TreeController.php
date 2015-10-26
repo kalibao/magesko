@@ -156,7 +156,7 @@ class TreeController extends Controller
         }
 
         $tree = Tree::findOne($request->get('id'));
-        $json = $tree->treeToJson();
+        $json = $tree->treeToJson(true);
         $title = ($tree->treeI18ns[0]->label == "")?Yii::t("kalibao.backend", "tree-home"):$tree->treeI18ns[0]->label;
 
         $vars = ['json', 'vars', 'title'];
@@ -289,4 +289,6 @@ class TreeController extends Controller
                 break;
         }
     }
+
+
 }

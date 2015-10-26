@@ -44,6 +44,8 @@
     this.$tree = this.$container.find('#tree');
     this.$branchContainer = this.$container.find('#branch-container');
     this.$addButton = this.$container.find('#add-branch');
+    this.$openAll = this.$container.find('#open-all');
+    this.$closeAll = this.$container.find('#close-all');
     this.initComponents();
     this.initEvents();
   };
@@ -78,7 +80,10 @@
       'core': {
         'data': this.treeData,
         'multiple': false,
-        'check_callback': true
+        'check_callback': true,
+        'themes': {
+          'variant': 'large'
+        }
       },
       'plugins': ['dnd', 'unique']
     });
@@ -91,7 +96,7 @@
     var self = this;
     this.$tree.on('click', '#add-branch', function(e){e.stopPropagation();});
 
-    this.$tree.on('click', '.fa', function(e){
+    this.$tree.on('click', '.fa', function(e){ // fired when an action button is clicked in a node
       e.stopPropagation();
       var data = e.target.id.split('-');
       var $node = $(this).parent();
@@ -121,11 +126,11 @@
       }
     });
 
-    this.$tree.on('changed.jstree', function(e, f){
+    this.$tree.on('changed.jstree', function(e, f){ // fired when a node is selected
       if (f.action != 'select_node') return;
       var data = f.node.id.split('-');
       var event = {
-        action: data[0],
+        branch: f.node.id,
         id: data[1]
       };
       $.get('../branch/view?id=' + event.id, function(response){
@@ -133,20 +138,21 @@
       });
     });
 
-    this.$tree.on('move_node.jstree', function(e, data){
+    this.$tree.on('move_node.jstree', function(e, data){ // fired when a node is moved
       var parent = (data.parent == "#")?"#":data.parent.split('-')[1];
       if (data.parent === data.old_parent) {
-        $.post('order-branch', {
-          id: data.node.id.split('-')[1],
-          order: data.position+1,
-          old: data.old_position+1,
-          parent: parent
+        $.post('order-branch', { // change order without changing the parent branch
+          id: data.node.id.split('-')[1],  // id of the moved branch
+          order: data.position+1,          // new order
+          old: data.old_position+1,        // old order
+          parent: parent                   // parent of the moved branch
         })
       } else {
-        $.post('change-parent', {
-          id: data.node.id.split('-')[1],
-          order: data.position+1,
-          parent: parent
+        self.$tree.jstree().open_node(data.parent);
+        $.post('change-parent', { // change the parent branch
+          id: data.node.id.split('-')[1], // id of the moved branch
+          order: data.position+1,         // new order
+          parent: parent                  // parent of the moved branch
         })
       }
     });
@@ -155,6 +161,14 @@
       $.get('../branch/create?tree=' + self.urlParam('id'), function(response){
         self.$branchContainer.html(response.html);
       });
+    });
+
+    this.$openAll.on('click', function() {
+      self.$tree.jstree().open_all();
+    });
+
+    this.$closeAll.on('click', function() {
+      self.$tree.jstree().close_all();
     })
   };
 

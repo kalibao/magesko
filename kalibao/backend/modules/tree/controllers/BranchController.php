@@ -145,7 +145,55 @@ class BranchController extends Controller
     }
 
     /**
-     * View action
+     * Create action
+     * @return array|string
+     * @throws ErrorException
+     */
+    public function actionCreate()
+    {
+        // request component
+        $request = Yii::$app->request;
+        // load models
+        $models = $this->loadEditModels();
+
+        // save models
+        $saved = false;
+        if ($request->isPost) {
+            $saved = $this->saveEditModels($models, $request->post());
+        }
+
+        // create a component to display data
+        $crudEdit = new $this->crudComponentsClass['edit']([
+            'models' => $models,
+            'language' => Yii::$app->language,
+            'addAgain' => $request->get('add-again', true),
+            'saved' => $saved,
+            'uploadConfig' => $this->uploadConfig,
+            'dropDownList' => function ($id) {
+                return $this->getDropDownList($id);
+            },
+        ]);
+
+        if($saved) {
+            $this->redirect('/tree/tree/view?id=' . Yii::$app->request->get('tree'));
+        }
+
+        if ($request->isAjax) {
+            // set response format
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            return [
+                'html' => $this->renderAjax('crud/edit/_contentBlock', ['crudEdit' => $crudEdit]),
+                'scripts' => $this->registerClientSideAjaxScript(),
+                'title' => $crudEdit->title,
+            ];
+        } else {
+            return $this->render('crud/edit/edit', ['crudEdit' => $crudEdit]);
+        }
+    }
+
+    /**
+     * Delete filter action
      * @return array|string
      * @throws HttpException
      */

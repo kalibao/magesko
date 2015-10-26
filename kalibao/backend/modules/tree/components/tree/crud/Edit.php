@@ -48,14 +48,6 @@ class Edit extends \kalibao\common\components\crud\Edit
         // set items
         $items = [];
 
-        if (!$models['main']->isNewRecord) {
-            $items[] = new SimpleValueField([
-                'model' => $models['main'],
-                'attribute' => 'id',
-                'value' => $models['main']->id,
-            ]);
-        }
-
         $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'tree_type_id',
@@ -110,26 +102,9 @@ class Edit extends \kalibao\common\components\crud\Edit
             'attribute' => 'description',
             'type' => 'activeTextarea',
             'options' => [
-                'class' => 'form-control input-sm wysiwyg-textarea',
-                'data-ckeditor-language' => $language
+                'class' => 'form-control input-sm'
             ]
         ]);
-
-        if (!$models['main']->isNewRecord) {
-            $items[] = new SimpleValueField([
-                'model' => $models['main'],
-                'attribute' => 'created_at',
-                'value' => Yii::$app->formatter->asDatetime($models['main']->created_at, I18N::getDateFormat())
-            ]);
-        }
-
-        if (!$models['main']->isNewRecord) {
-            $items[] = new SimpleValueField([
-                'model' => $models['main'],
-                'attribute' => 'updated_at',
-                'value' => Yii::$app->formatter->asDatetime($models['main']->updated_at, I18N::getDateFormat())
-            ]);
-        }
 
         $this->setItems($items);
     }

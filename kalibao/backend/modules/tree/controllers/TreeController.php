@@ -6,16 +6,16 @@
 
 namespace kalibao\backend\modules\tree\controllers;
 
-use kalibao\backend\modules\tree\components\branch\crud\Edit;
-use kalibao\common\models\tree\Tree;
 use Yii;
-use yii\base\ErrorException;
 use yii\caching\TagDependency;
+use yii\web\Response;
 use yii\db\ActiveRecord;
+use yii\web\HttpException;
+use kalibao\common\models\tree\Tree;
+use kalibao\common\models\branch\Branch;
 use kalibao\common\components\helpers\Html;
 use kalibao\backend\components\crud\Controller;
-use yii\web\HttpException;
-use yii\web\Response;
+use kalibao\backend\modules\tree\components\branch\crud\Edit;
 
 /**
  * Class treeController
@@ -75,6 +75,16 @@ class TreeController extends Controller
         $b = parent::behaviors();
         $b['access']['rules'][] = [
             'actions' => ['view', 'advanced-drop-down-list', 'settings', 'export'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+        ];
+        $b['access']['rules'][] = [
+            'actions' => ['order-branch', 'advanced-drop-down-list', 'settings', 'export'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+        ];
+        $b['access']['rules'][] = [
+            'actions' => ['change-parent', 'advanced-drop-down-list', 'settings', 'export'],
             'allow' => true,
             'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
         ];
@@ -146,7 +156,7 @@ class TreeController extends Controller
         }
 
         $tree = Tree::findOne($request->get('id'));
-        $json = $tree->treeToJson();
+        $json = $tree->treeToJson(true);
         $title = ($tree->treeI18ns[0]->label == "")?Yii::t("kalibao.backend", "tree-home"):$tree->treeI18ns[0]->label;
 
         $vars = ['json', 'vars', 'title'];
@@ -163,6 +173,93 @@ class TreeController extends Controller
         } else {
             return $this->render('view/view', compact($vars));
         }
+    }
+
+    /**
+     * order branch action
+     * @return array|string
+     * @throws HttpException
+     */
+    public function actionOrderBranch()
+    {
+        $request = Yii::$app->request;
+        if ($request->post('id') === null || $request->post('order') === null) {
+            throw new HttpException(400, Yii::t('kalibao.backend', 'invalid_parameter'));
+        }
+        $order  = $request->post('order');
+        $old    = $request->post('old');
+        $parent = ($request->post('parent') == '#')?1:$request->post('parent');
+        if ($order < $old)
+        {
+            $query = "UPDATE branch b
+                      SET b.order = b.order + 1
+                      WHERE b.parent = :parent
+                        AND b.order BETWEEN :l AND :h";
+            $low   = $order;
+            $high  = $old;
+        } else {
+            $query = "UPDATE branch b
+                      SET b.order = b.order - 1
+                      WHERE b.parent = :parent
+                        AND b.order BETWEEN :l AND :h";
+            $low   = $old;
+            $high  = $order;
+        }
+        Yii::$app->db->createCommand($query, [
+            'parent' => $parent,
+            'l' => $low,
+            'h' => $high,
+        ])->execute();
+
+        $branch = Branch::findOne($request->post('id'));
+        $branch->order = $order;
+        $branch->scenario = 'update';
+
+        TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic($branch->tree_id));
+        return $branch->save();
+    }
+
+    /**
+     * change branch parent action
+     * @return array|string
+     * @throws HttpException
+     */
+    public function actionChangeParent()
+    {
+        $request = Yii::$app->request;
+        if ($request->post('id') === null || $request->post('order') === null || $request->post('parent') === null) {
+            throw new HttpException(400, Yii::t('kalibao.backend', 'invalid_parameter'));
+        }
+        $branch    = Branch::findOne($request->post('id'));
+        $order     = $request->post('order');
+        $parent    = ($request->post('parent') == '#')?1:$request->post('parent');
+        $oldParent = $branch->parent;
+        $oldOrder  = $branch->order;
+
+        $query = "UPDATE branch b
+                  SET b.order = b.order + 1
+                  WHERE b.parent = :parent
+                    AND b.order >= :order";
+        Yii::$app->db->createCommand($query, [
+            'parent' => $parent,
+            'order'  => $order
+        ])->execute();
+
+        $query = "UPDATE branch b
+                  SET b.order = b.order - 1
+                  WHERE b.parent = :parent
+                    AND b.order >= :order";
+        Yii::$app->db->createCommand($query, [
+            'parent' => $oldParent,
+            'order'  => $oldOrder
+        ])->execute();
+
+        $branch->order    = $order;
+        $branch->parent   = $parent;
+        $branch->scenario = 'update';
+
+        TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic($branch->tree_id));
+        return $branch->save();
     }
 
     /**
@@ -192,4 +289,6 @@ class TreeController extends Controller
                 break;
         }
     }
+
+
 }

@@ -83,15 +83,15 @@ class BranchI18n extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'branch_id' => Yii::t('kalibao.backend','Branch ID'),
-            'i18n_id' => Yii::t('kalibao.backend','I18n ID'),
-            'label' => Yii::t('kalibao.backend','name of the branch'),
-            'description' => Yii::t('kalibao.backend','description of the branch'),
-            'url' => Yii::t('kalibao.backend','url for the branch'),
-            'meta_title' => Yii::t('kalibao.backend','content of the meta title tag'),
-            'meta_description' => Yii::t('kalibao.backend','content of the meta description tag'),
-            'meta_keywords' => Yii::t('kalibao.backend','content of the meta keywords tag'),
-            'h1_tag' => Yii::t('kalibao.backend','content of the H1 tag'),
+            'branch_id' => Yii::t('kalibao.backend','branch_i18n:branch_id'),
+            'i18n_id' => Yii::t('kalibao.backend','branch_i18n:i18n_id'),
+            'label' => Yii::t('kalibao.backend','branch_i18n:label'),
+            'description' => Yii::t('kalibao.backend','branch_i18n:description'),
+            'url' => Yii::t('kalibao.backend','branch_i18n:url'),
+            'meta_title' => Yii::t('kalibao.backend','branch_i18n:meta_title'),
+            'meta_description' => Yii::t('kalibao.backend','branch_i18n:meta_description'),
+            'meta_keywords' => Yii::t('kalibao.backend','branch_i18n:meta_keywords'),
+            'h1_tag' => Yii::t('kalibao.backend','branch_i18n:h1_tag'),
         ];
     }
 

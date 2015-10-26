@@ -16,9 +16,7 @@ use kalibao\common\models\tree\AttributeTypeVisibility;
  *
  * @property integer $attribute_type_id
  * @property integer $branch_id
- * @property integer $attribute_type_id
  * @property integer $attribute_type_visibility_i18n_attribute_type_id
- * @property integer $branch_id
  * @property integer $attribute_type_visibility_i18n_branch_id
  * @property string $attribute_type_visibility_i18n_label
  *
@@ -27,11 +25,11 @@ use kalibao\common\models\tree\AttributeTypeVisibility;
  */
 class ModelFilter extends AttributeTypeVisibility implements ModelFilterInterface
 {
-    public $attribute_type_id;
-    public $attribute_type_visibility_i18n_attribute_type_id;
     public $branch_id;
-    public $attribute_type_visibility_i18n_branch_id;
+    public $attribute_type_id;
     public $attribute_type_visibility_i18n_label;
+    public $attribute_type_visibility_i18n_branch_id;
+    public $attribute_type_visibility_i18n_attribute_type_id;
 
     /**
      * @inheritdoc

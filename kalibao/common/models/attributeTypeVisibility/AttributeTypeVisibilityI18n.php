@@ -4,7 +4,7 @@
 * @license https://github.com/kalibao/magesko/blob/master/LICENSE
 */
 
-namespace kalibao\common\models\tree;
+namespace kalibao\common\models\attributeTypeVisibility;
 
 use Yii;
 use kalibao\common\models\attributeTypeVisibility\AttributeTypeVisibility;

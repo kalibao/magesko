@@ -8,11 +8,11 @@ use kalibao\common\components\crud\InputField;
 use kalibao\common\components\crud\SimpleValueField;
 ?>
 <tbody>
-    <?php foreach ($crudTranslate->languages as $language): ?>
+    <?php foreach ($crudTranslate->items as $itemField): ?>
         <tr>
-            <th><?= \kalibao\common\components\helpers\Html::labelI18n($language); ?></th>
-            <?php foreach ($crudTranslate->items as $itemField): ?>
-                <?php $options = $itemField->options; ?>
+            <th><?= $itemField->label !== null ? $itemField->label : $itemField->model->getAttributeLabel($itemField->attribute); ?></th>
+            <?php $options = $itemField->options; ?>
+            <?php foreach ($crudTranslate->languages as $language): ?>
                 <td>
                     <?php if ($itemField instanceof InputField): ?>
                         <?php

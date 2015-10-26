@@ -116,13 +116,6 @@ class SheetTypeController extends Controller
     protected function getAdvancedDropDownList($id, $search)
     {
         switch ($id) {
-            case 'tables':
-                $tableNames = [];
-                foreach (Yii::$app->db->schema->getTableNames() as $table) {
-                    if ($search != '' && strpos($table, $search) === false) continue;
-                    $tableNames[] = ['id' => $table, 'text' => $table];
-                }
-                return $tableNames;
             default:
                 return [];
                 break;

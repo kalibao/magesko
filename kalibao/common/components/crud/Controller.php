@@ -189,10 +189,6 @@ class Controller extends \kalibao\common\components\web\Controller
                 return $this->getDropDownList($id);
             },
         ]);
-        
-        if($saved) {
-            $this->redirect(array('list'));
-        }
 
         if ($request->isAjax) {
             // set response format
@@ -249,10 +245,6 @@ class Controller extends \kalibao\common\components\web\Controller
                 return $this->getDropDownList($id);
             },
         ]);
-
-        if($saved) {
-            $this->redirect(array('list'));
-        }
 
         if ($request->isAjax) {
             // set response format
@@ -798,9 +790,8 @@ class Controller extends \kalibao\common\components\web\Controller
         // trigger an event
         $this->trigger(self::EVENT_SAVE_EDIT, new ExtraDataEvent([
             'extraData' => [
-                'models'  => $models,
-                'success' => $success,
-                'create'  => (Yii::$app->controller->action->id == 'create'),
+                'models' => $models,
+                'success' => $success
             ]
         ]));
 

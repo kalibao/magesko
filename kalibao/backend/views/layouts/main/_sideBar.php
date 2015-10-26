@@ -116,20 +116,6 @@ use yii\helpers\Url;
                 </li>
             <?php endif; ?>
 
-            <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:tree'])): ?>
-                <li class="treeview">
-                    <a href="#">
-                        <i class="fa fa-sitemap"></i> <span><?= Yii::t('kalibao.backend', 'navbar_tree'); ?></span>
-                        <i class="fa fa-angle-left pull-right"></i>
-                    </a>
-                    <ul class="treeview-menu">
-                        <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:kalibao\backend\modules\tree\controllers\TreeController'])): ?>
-                            <li><a href="<?= Url::to(['/tree/tree/list']); ?>"><i class="fa fa-circle-o"></i> <?= Yii::t('kalibao.backend', 'navbar_tree_list'); ?></a></li>
-                        <?php endif; ?>
-                    </ul>
-                </li>
-            <?php endif; ?>
-
             <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:rights'])): ?>
             <li class="treeview">
                 <a href="#">

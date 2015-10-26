@@ -75,9 +75,7 @@ class SheetType extends \yii\db\ActiveRecord
     {
         return [
             [['url_pick', 'url_zoom_front', 'url_zoom_back'], 'string', 'max' => 250],
-            [['table'], 'required'],
-            [['table'], 'string', 'max' => 64],
-            [['table'], 'in', 'range' => Yii::$app->db->schema->getTableNames()],
+            [['table'], 'string', 'max' => 64]
         ];
     }
 

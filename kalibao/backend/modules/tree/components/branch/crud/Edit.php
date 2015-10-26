@@ -49,27 +49,23 @@ class Edit extends \kalibao\common\components\crud\Edit
         // upload config
         $uploadConfig['main'] = $this->uploadConfig[(new \ReflectionClass($models['main']))->getName()];
 
-        $this->setCloseAction('/tree/tree/view?id=' . $models['main']->tree_id);
-        $this->addAgain = false;
-
         // set items
         $items = [];
 
         if (!$models['main']->isNewRecord) {
-            $items['id'] = new SimpleValueField([
+            $items[] = new SimpleValueField([
                 'model' => $models['main'],
                 'attribute' => 'id',
                 'value' => $models['main']->id,
             ]);
         }
 
-        $items['branch_type_id'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'branch_type_id',
             'type' => 'activeHiddenInput',
-            'required' => true,
             'options' => [
-                'class' => 'form-control input-sm input-ajax-select required',
+                'class' => 'form-control input-sm input-ajax-select',
                 'data-action' => Url::to([
                     'advanced-drop-down-list',
                     'id' => 'branch_type_i18n.label',
@@ -83,17 +79,26 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['tree_id'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'tree_id',
-            'type' => 'activeTextInput',
+            'type' => 'activeHiddenInput',
             'options' => [
-                'class' => 'form-control input-sm',
-                'placeholder' => $models['main']->getAttributeLabel('tree_id'),
+                'class' => 'form-control input-sm input-ajax-select',
+                'data-action' => Url::to([
+                    'advanced-drop-down-list',
+                    'id' => 'tree_i18n.label',
+                ]),
+                'data-allow-clear' => 1,
+                'data-placeholder' => Yii::t('kalibao', 'input_select'),
+                'data-text' => !empty($models['main']->tree_id) ? TreeI18n::findOne([
+                    'tree_id' => $models['main']->tree_id,
+                    'i18n_id' => $language
+                ])->label : '',
             ]
         ]);
 
-        $items['parent'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'parent',
             'type' => 'activeHiddenInput',
@@ -105,14 +110,14 @@ class Edit extends \kalibao\common\components\crud\Edit
                 ]),
                 'data-allow-clear' => 1,
                 'data-placeholder' => Yii::t('kalibao', 'input_select'),
-                'data-text' => !empty($models['main']->parent && $models['main']->parent != 1) ? BranchI18n::findOne([
+                'data-text' => !empty($models['main']->parent) ? BranchI18n::findOne([
                     'branch_id' => $models['main']->parent,
                     'i18n_id' => $language
                 ])->label : '',
             ]
         ]);
 
-        $items['order'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'order',
             'type' => 'activeTextInput',
@@ -123,7 +128,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['media_id'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'media_id',
             'type' => 'activeHiddenInput',
@@ -142,7 +147,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['visible'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'visible',
             'type' => 'activeCheckbox',
@@ -152,7 +157,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['background'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'background',
             'type' => 'activeTextInput',
@@ -163,23 +168,17 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['presentation_type'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'presentation_type',
             'type' => 'activeCheckbox',
             'options' => [
                 'class' => '',
                 'label' => '',
-                'data-toggle' => 'toggle',
-                'data-on' => 'Liste',
-                'data-off' => 'Tableau',
-                'data-size' => 'mini',
-                'data-onstyle' => "default",
-                'data-offstyle' => "default",
             ]
         ]);
 
-        $items['offset'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'offset',
             'type' => 'activeTextInput',
@@ -190,23 +189,17 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['display_brands_types'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'display_brands_types',
             'type' => 'activeCheckbox',
             'options' => [
                 'class' => '',
                 'label' => '',
-                'data-toggle' => 'toggle',
-                'data-on' => 'Type',
-                'data-off' => 'Marque',
-                'data-size' => 'mini',
-                'data-onstyle' => "default",
-                'data-offstyle' => "default",
             ]
         ]);
 
-        $items['big_menu_only_first_level'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'big_menu_only_first_level',
             'type' => 'activeCheckbox',
@@ -216,7 +209,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['unfold'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'unfold',
             'type' => 'activeCheckbox',
@@ -226,7 +219,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['google_shopping_category_id'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'google_shopping_category_id',
             'type' => 'activeDropDownList',
@@ -238,7 +231,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['google_shopping'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'google_shopping',
             'type' => 'activeCheckbox',
@@ -248,7 +241,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['affiliation_category_id'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'affiliation_category_id',
             'type' => 'activeDropDownList',
@@ -260,7 +253,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['affiliation'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'affiliation',
             'type' => 'activeCheckbox',
@@ -270,19 +263,18 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['label'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['i18n'],
             'attribute' => 'label',
             'type' => 'activeTextInput',
-            'required' => true,
             'options' => [
-                'class' => 'form-control input-sm required',
+                'class' => 'form-control input-sm',
                 'maxlength' => true,
                 'placeholder' => $models['i18n']->getAttributeLabel('label'),
             ]
         ]);
 
-        $items['description'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['i18n'],
             'attribute' => 'description',
             'type' => 'activeTextarea',
@@ -292,7 +284,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['url'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['i18n'],
             'attribute' => 'url',
             'type' => 'activeTextInput',
@@ -303,7 +295,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['meta_title'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['i18n'],
             'attribute' => 'meta_title',
             'type' => 'activeTextInput',
@@ -314,7 +306,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['meta_description'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['i18n'],
             'attribute' => 'meta_description',
             'type' => 'activeTextarea',
@@ -324,7 +316,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['meta_keywords'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['i18n'],
             'attribute' => 'meta_keywords',
             'type' => 'activeTextInput',
@@ -335,7 +327,7 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]
         ]);
 
-        $items['h1_tag'] = new InputField([
+        $items[] = new InputField([
             'model' => $models['i18n'],
             'attribute' => 'h1_tag',
             'type' => 'activeTextInput',
@@ -347,7 +339,7 @@ class Edit extends \kalibao\common\components\crud\Edit
         ]);
 
         if (!$models['main']->isNewRecord) {
-            $items['created_at'] = new SimpleValueField([
+            $items[] = new SimpleValueField([
                 'model' => $models['main'],
                 'attribute' => 'created_at',
                 'value' => Yii::$app->formatter->asDatetime($models['main']->created_at, I18N::getDateFormat())
@@ -355,7 +347,7 @@ class Edit extends \kalibao\common\components\crud\Edit
         }
 
         if (!$models['main']->isNewRecord) {
-            $items['updated_at'] = new SimpleValueField([
+            $items[] = new SimpleValueField([
                 'model' => $models['main'],
                 'attribute' => 'updated_at',
                 'value' => Yii::$app->formatter->asDatetime($models['main']->updated_at, I18N::getDateFormat())

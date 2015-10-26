@@ -9,7 +9,7 @@ namespace kalibao\backend\modules\tree\models\sheetType\crud;
 use Yii;
 use yii\data\ActiveDataProvider;
 use kalibao\common\components\crud\ModelFilterInterface;
-use kalibao\common\models\sheetType\SheetType;
+use kalibao\common\models\tree\SheetType;
 
 /**
  * This is the model filter class for controller "SheetType".
@@ -58,7 +58,7 @@ class ModelFilter extends SheetType implements ModelFilterInterface
             [['created_at_start', 'created_at_end', 'updated_at_start', 'updated_at_end'], 'date', 'format' => 'yyyy-MM-dd'],
             [['url_pick', 'url_zoom_front', 'url_zoom_back'], 'string', 'max' => 250],
             [['table'], 'string', 'max' => 64],
-            [['sheet_type_i18n_label'], 'string', 'max' => 50],
+            [['sheet_type_i18n_label'], 'string', 'max' => 50]
         ];
     }
 

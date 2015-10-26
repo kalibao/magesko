@@ -34,8 +34,6 @@ class TreeAsset extends AssetBundle
      */
     public $js = [
         'dist/js/jstree.min.js',
-        'dist/js/jquery.toaster.js',
-        'dist/js/bootstrap-toggle.min.js',
         'dist/js/kalibao.backend.tree.Tree.js',
     ];
 
@@ -44,7 +42,6 @@ class TreeAsset extends AssetBundle
      */
     public $css = [
         'dist/css/style.css',
-        'dist/css/bootstrap-toggle.min.css',
     ];
 
     /**

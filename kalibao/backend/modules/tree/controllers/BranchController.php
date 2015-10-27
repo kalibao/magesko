@@ -175,7 +175,7 @@ class BranchController extends Controller
         ]);
 
         if($saved) {
-            $this->redirect('/tree/tree/view?id=' . Yii::$app->request->get('tree'));
+            $this->redirect('/tree/tree/view?id=' . $models['main']->tree_id);
         }
 
         if ($request->isAjax) {

@@ -46,6 +46,8 @@
     this.$addButton = this.$container.find('#add-branch');
     this.$openAll = this.$container.find('#open-all');
     this.$closeAll = this.$container.find('#close-all');
+    this.$saveTree = this.$container.find('#save-tree');
+    this.$resetTree = this.$container.find('#reset-tree');
     this.initComponents();
     this.initEvents();
   };
@@ -138,23 +140,24 @@
       });
     });
 
-    this.$tree.on('move_node.jstree', function(e, data){ // fired when a node is moved
+    this.$tree.on('move_node.jstree', function(e, data){
       var parent = (data.parent == "#")?"#":data.parent.split('-')[1];
-      if (data.parent === data.old_parent) {
-        $.post('order-branch', { // change order without changing the parent branch
-          id: data.node.id.split('-')[1],  // id of the moved branch
-          order: data.position+1,          // new order
-          old: data.old_position+1,        // old order
-          parent: parent                   // parent of the moved branch
-        })
-      } else {
-        self.$tree.jstree().open_node(data.parent);
-        $.post('change-parent', { // change the parent branch
-          id: data.node.id.split('-')[1], // id of the moved branch
-          order: data.position+1,         // new order
-          parent: parent                  // parent of the moved branch
-        })
-      }
+      self.$tree.jstree().open_node(data.parent);
+    });
+
+    this.$saveTree.on('click', function() {
+      var newData = self.$tree.jstree().get_json();
+      $.post('rebuild-tree', {data: newData}, function(result) {
+        if (result) {
+          self.treeData = newData;
+          $.toaster({priority: 'success', title: 'Enregistré', message: 'Les changements ont été enregistrés'})
+        }
+      });
+    });
+
+    this.$resetTree.on('click', function() {
+      self.$tree.jstree().destroy();
+      self.initTree();
     });
 
     this.$addButton.on('click', function(){
@@ -189,6 +192,7 @@
       var params = $(this).data('params');
       $.post("../branch/delete-filter", params, function(){
         line.remove();
+        $.toaster({ priority : 'success', title : 'Enregistré', message : 'Le filtre a été supprimé'})
       })
     });
     this.$branchContainer.find('table input[type=text]').on('change', function () {

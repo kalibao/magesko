@@ -101,7 +101,7 @@ class BranchController extends Controller
             'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
         ];
         $b['access']['rules'][] = [
-            'actions' => ['delete-newFilter', 'advanced-drop-down-list', 'settings', 'export'],
+            'actions' => ['delete-filter', 'advanced-drop-down-list', 'settings', 'export'],
             'allow' => true,
             'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
         ];

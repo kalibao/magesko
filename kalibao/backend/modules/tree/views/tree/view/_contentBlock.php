@@ -24,8 +24,10 @@ $this->registerJs("
                             <a class="btn btn-primary btn-xs" id="open-all"><i class="fa fa-expand"></i></a>
                             <a class="btn btn-primary btn-xs" id="close-all"><i class="fa fa-compress"></i></a>
                         </legend>
+                        <a class="btn btn-primary btn-xs" id="add-branch">Ajouter &nbsp;<i class="fa fa-plus"></i></a>
                         <div id="tree"></div>
-                        <a class="btn btn-primary btn-xs" id="add-branch">Ajouter <i class="fa fa-plus"></i></a>
+                        <a class="btn btn-primary btn-xs" id="save-tree">Enregistrer &nbsp;<i class="glyphicon glyphicon-floppy-disk"></i></a>
+                        <a class="btn btn-default btn-xs" id="reset-tree">Annuler &nbsp;<i class="glyphicon glyphicon-refresh"></i></a>
                     </fieldset>
                 </div>
                 <div class="col-md-9" id="branch-container"></div>

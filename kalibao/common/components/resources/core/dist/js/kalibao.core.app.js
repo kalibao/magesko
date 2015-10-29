@@ -42,46 +42,59 @@
    * @param {bool} async Request is asynchronous. To be synchronous you will set value to false. The default value is true
    */
   $.kalibao.core.app.ajaxQuery = function (url, success, type, data, dataType, async) {
-    // default arguments
-    dataType = dataType || 'HTML';
-    type = type || 'GET';
-    async = (async !== undefined) ? async : true;
-    var contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
-    var processData = true;
+    if (!$.kalibao.core.app.hasUnsavedChanges()) {
+      // default arguments
+      dataType = dataType || 'HTML';
+      type = type || 'GET';
+      async = (async !== undefined) ? async : true;
+      var contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
+      var processData = true;
 
-    if (type.toUpperCase() === 'POST') {
-      if (data instanceof FormData) {
-        contentType = false;
-        processData = false;
-        data.append(yii.getCsrfParam(), yii.getCsrfToken());
-      } else {
-        data = data || '';
-        data = ((data !== '') ? data + '&' : '') + yii.getCsrfParam() + '=' + encodeURI(yii.getCsrfToken());
+      if (type.toUpperCase() === 'POST') {
+        if (data instanceof FormData) {
+          contentType = false;
+          processData = false;
+          data.append(yii.getCsrfParam(), yii.getCsrfToken());
+        } else {
+          data = data || '';
+          data = ((data !== '') ? data + '&' : '') + yii.getCsrfParam() + '=' + encodeURI(yii.getCsrfToken());
+        }
       }
-    }
-
-    $.ajax({
-      url: url,
-      data: data,
-      dataType: dataType,
-      type: type,
-      contentType : contentType,
-      processData : processData,
-      success: function (json) {
-        if (json.scripts) {
-          for (var i in json.scripts) {
-            eval(json.scripts[i]);
+      $.ajax({
+        url: url,
+        data: data,
+        dataType: dataType,
+        type: type,
+        contentType: contentType,
+        processData: processData,
+        success: function (json) {
+          if (json.scripts) {
+            for (var i in json.scripts) {
+              eval(json.scripts[i]);
+            }
           }
-        }
-        success(json);
-      },
-      error: function (xhr, status) {
-        if (xhr.status == 401) {
-          window.location.href = url;
-        }
-      },
-      async: async
-    });
+          success(json);
+        },
+        error: function (xhr, status) {
+          if (xhr.status == 401) {
+            window.location.href = url;
+          }
+        },
+        async: async
+      });
+    } else {
+      $('.content-wrapper > .content-dynamic').unblock();
+      $.toaster({ priority : 'warning', title : 'Attention', message : 'Il y a des changements non enregistrés'})
+    }
+  };
+
+  /**
+   * This function is used to check before changing page if there are unsaved changes
+   * You need to implement the function following your needs
+   * @returns {boolean}
+   */
+  $.kalibao.core.app.hasUnsavedChanges = function() {
+    return false;
   };
 
   /**

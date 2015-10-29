@@ -201,7 +201,7 @@ class Tree extends \yii\db\ActiveRecord
             if($actionBtns) {
                 $text .= " &nbsp; <i class=\"fa fa-edit\" id=\"edit-{$v['item']}\"></i>" .
                          " &nbsp; <i class=\"fa fa-paint-brush\" id=\"present-{$v['item']}\"></i>" .
-                         " &nbsp; <i class=\"fa fa-trash text-red\" id=\"delete-{$v['item']}\"></i>"
+                         " &nbsp; <i class=\"fa fa-trash text-red\" id=\"delete-{$v['item']}\"></i>";
             }
 
             Arr::set($tree, $v['path'], [
@@ -255,14 +255,14 @@ class Tree extends \yii\db\ActiveRecord
                 $path = '';
                 foreach($parents as $parent) {
                     if ($parent != end($parents)) {
-                        $path .= $data[$parent]['label'] .  '&nbsp;&nbsp;>>&nbsp;&nbsp;';
+                        $path .= $data[$parent]['label'] .  ' >> ';
                     } else {
                         $path .= $data[$parent]['label'];
                     }
                 }
-                $tree[] = $path;
+                $tree[(string)$d['item']] = $path;
             }
-            sort($tree);
+            asort($tree);
             Yii::$app->commonCache->set($tag, $tree, 0, $dependency);
             return $tree;
         }

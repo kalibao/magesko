@@ -9,6 +9,7 @@ namespace kalibao\backend\modules\product\controllers;
 use kalibao\backend\modules\product\components\product\crud\View;
 use kalibao\common\components\base\ExtraDataEvent;
 use kalibao\common\components\helpers\Date;
+use kalibao\common\models\branch\Branch;
 use kalibao\common\models\crossSelling\CrossSelling;
 use kalibao\common\models\discount\Discount;
 use kalibao\common\models\logisticStrategy\LogisticStrategy;
@@ -152,6 +153,8 @@ class ProductController extends Controller
      */
     public function actionView()
     {
+        Yii::$app->cache->flush();
+
         $request = Yii::$app->request;
         if ($request->get('id') === null) {
             throw new HttpException(404, Yii::t('kalibao.backend', 'product_not_found'));
@@ -656,6 +659,8 @@ class ProductController extends Controller
         $ad = array_map(function($i){return substr($i, 7);}, $ad);
 
         $sheetType = SheetType::findOne(['table' => 'product']);
+
+        $transaction =
         Sheet::deleteAll([
             'sheet_type_id' => $sheetType->id,
             'primary_key'   => $request->post('productId'),
@@ -666,7 +671,7 @@ class ProductController extends Controller
             $sheet->scenario = 'insert';
 
             $sheet->sheet_type_id = $sheetType->id;
-            $sheet->primaryKey = $request->post('productId');
+            $sheet->primary_key = $request->post('productId');
             $sheet->branch_id = $branch;
 
             if(!$sheet->save()) $errors = true;
@@ -811,11 +816,8 @@ class ProductController extends Controller
                     $this->dropDownLists['checkbox-drop-down-list'] = Html::checkboxInputFilterDropDownList();
                     break;
                 case 'category_i18n.title':
-                    $this->dropDownLists['category_i18n.title'] = Html::findDropDownListData(
-                        'kalibao\common\models\category\CategoryI18n',
-                        ['category_id', 'title'],
-                        [['i18n_id' => Yii::$app->language]]
-                    );
+                    $tree = Tree::findOne(Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id'));
+                    $this->dropDownLists['category_i18n.title'] = $tree->treeToList();
                     break;
                 default:
                     return [];

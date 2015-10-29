@@ -37,6 +37,7 @@
    * Init object
    */
   $.kalibao.backend.tree.View.prototype.init = function () {
+    var self = this;
     this.$container = $('#' + this.id);
     this.$wrapper = this.$container.closest('.content-dynamic');
     this.$main = this.$container.find('.content-main');
@@ -50,6 +51,10 @@
     this.$resetTree = this.$container.find('#reset-tree');
     this.initComponents();
     this.initEvents();
+    $.kalibao.core.app.hasUnsavedChanges = function() {
+      if (window.location.pathname.search('/tree/tree/view') === -1) return false;
+      return self.changed;
+    }
   };
 
   /**
@@ -143,6 +148,7 @@
     this.$tree.on('move_node.jstree', function(e, data){
       var parent = (data.parent == "#")?"#":data.parent.split('-')[1];
       self.$tree.jstree().open_node(data.parent);
+      self.changed = true;
     });
 
     this.$saveTree.on('click', function() {
@@ -151,6 +157,7 @@
         if (result) {
           self.treeData = newData;
           $.toaster({priority: 'success', title: 'Enregistré', message: 'Les changements ont été enregistrés'})
+          self.changed = false;
         }
       });
     });
@@ -158,6 +165,7 @@
     this.$resetTree.on('click', function() {
       self.$tree.jstree().destroy();
       self.initTree();
+      self.changed = false;
     });
 
     this.$addButton.on('click', function(){
@@ -252,5 +260,4 @@
       return results[1] || 0;
     }
   };
-
 })(jQuery);

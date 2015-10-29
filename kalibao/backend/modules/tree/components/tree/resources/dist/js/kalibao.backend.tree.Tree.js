@@ -37,6 +37,7 @@
    * Init object
    */
   $.kalibao.backend.tree.View.prototype.init = function () {
+    var self = this;
     this.$container = $('#' + this.id);
     this.$wrapper = this.$container.closest('.content-dynamic');
     this.$main = this.$container.find('.content-main');
@@ -44,8 +45,16 @@
     this.$tree = this.$container.find('#tree');
     this.$branchContainer = this.$container.find('#branch-container');
     this.$addButton = this.$container.find('#add-branch');
+    this.$openAll = this.$container.find('#open-all');
+    this.$closeAll = this.$container.find('#close-all');
+    this.$saveTree = this.$container.find('#save-tree');
+    this.$resetTree = this.$container.find('#reset-tree');
     this.initComponents();
     this.initEvents();
+    $.kalibao.core.app.hasUnsavedChanges = function() {
+      if (window.location.pathname.search('/tree/tree/view') === -1) return false;
+      return self.changed;
+    }
   };
 
   /**
@@ -78,7 +87,10 @@
       'core': {
         'data': this.treeData,
         'multiple': false,
-        'check_callback': true
+        'check_callback': true,
+        'themes': {
+          'variant': 'large'
+        }
       },
       'plugins': ['dnd', 'unique']
     });
@@ -91,7 +103,7 @@
     var self = this;
     this.$tree.on('click', '#add-branch', function(e){e.stopPropagation();});
 
-    this.$tree.on('click', '.fa', function(e){
+    this.$tree.on('click', '.fa', function(e){ // fired when an action button is clicked in a node
       e.stopPropagation();
       var data = e.target.id.split('-');
       var $node = $(this).parent();
@@ -121,11 +133,11 @@
       }
     });
 
-    this.$tree.on('changed.jstree', function(e, f){
+    this.$tree.on('changed.jstree', function(e, f){ // fired when a node is selected
       if (f.action != 'select_node') return;
       var data = f.node.id.split('-');
       var event = {
-        action: data[0],
+        branch: f.node.id,
         id: data[1]
       };
       $.get('../branch/view?id=' + event.id, function(response){
@@ -135,26 +147,39 @@
 
     this.$tree.on('move_node.jstree', function(e, data){
       var parent = (data.parent == "#")?"#":data.parent.split('-')[1];
-      if (data.parent === data.old_parent) {
-        $.post('order-branch', {
-          id: data.node.id.split('-')[1],
-          order: data.position+1,
-          old: data.old_position+1,
-          parent: parent
-        })
-      } else {
-        $.post('change-parent', {
-          id: data.node.id.split('-')[1],
-          order: data.position+1,
-          parent: parent
-        })
-      }
+      self.$tree.jstree().open_node(data.parent);
+      self.changed = true;
+    });
+
+    this.$saveTree.on('click', function() {
+      var newData = self.$tree.jstree().get_json();
+      $.post('rebuild-tree', {data: newData}, function(result) {
+        if (result) {
+          self.treeData = newData;
+          $.toaster({priority: 'success', title: 'Enregistré', message: 'Les changements ont été enregistrés'})
+          self.changed = false;
+        }
+      });
+    });
+
+    this.$resetTree.on('click', function() {
+      self.$tree.jstree().destroy();
+      self.initTree();
+      self.changed = false;
     });
 
     this.$addButton.on('click', function(){
       $.get('../branch/create?tree=' + self.urlParam('id'), function(response){
         self.$branchContainer.html(response.html);
       });
+    });
+
+    this.$openAll.on('click', function() {
+      self.$tree.jstree().open_all();
+    });
+
+    this.$closeAll.on('click', function() {
+      self.$tree.jstree().close_all();
     })
   };
 
@@ -175,6 +200,7 @@
       var params = $(this).data('params');
       $.post("../branch/delete-filter", params, function(){
         line.remove();
+        $.toaster({ priority : 'success', title : 'Enregistré', message : 'Le filtre a été supprimé'})
       })
     });
     this.$branchContainer.find('table input[type=text]').on('change', function () {
@@ -234,5 +260,4 @@
       return results[1] || 0;
     }
   };
-
 })(jQuery);

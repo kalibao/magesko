@@ -5,5 +5,6 @@
  */
 ?>
 <section class="content-header">
+    <a class="btn-close pull-right" href="#">×</a>
     <h1><?= $crudEdit->title; ?></h1>
 </section>

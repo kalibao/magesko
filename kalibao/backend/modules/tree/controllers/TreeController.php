@@ -49,6 +49,8 @@ class TreeController extends Controller
 
     private $dropDownLists = [];
 
+    private $treeLines;
+
     /**
      * @inheritdoc
      */
@@ -81,12 +83,17 @@ class TreeController extends Controller
         $b['access']['rules'][] = [
             'actions' => ['order-branch', 'advanced-drop-down-list', 'settings', 'export'],
             'allow' => true,
-            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
         ];
         $b['access']['rules'][] = [
             'actions' => ['change-parent', 'advanced-drop-down-list', 'settings', 'export'],
             'allow' => true,
-            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
+        ];
+        $b['access']['rules'][] = [
+            'actions' => ['rebuild-tree', 'advanced-drop-down-list', 'settings', 'export'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
         ];
         return $b;
     }
@@ -156,7 +163,7 @@ class TreeController extends Controller
         }
 
         $tree = Tree::findOne($request->get('id'));
-        $json = $tree->treeToJson();
+        $json = $tree->treeToJson(true);
         $title = ($tree->treeI18ns[0]->label == "")?Yii::t("kalibao.backend", "tree-home"):$tree->treeI18ns[0]->label;
 
         $vars = ['json', 'vars', 'title'];
@@ -262,6 +269,36 @@ class TreeController extends Controller
         return $branch->save();
     }
 
+    public function actionRebuildTree()
+    {
+        $request = Yii::$app->request;
+        $treeData = $request->post('data');
+        $this->treeLines = [];
+        $this->treeToLines($treeData);
+        $transaction = Yii::$app->getDb()->beginTransaction();
+        foreach ($this->treeLines as $line) {
+            Branch::updateAll(['parent' => $line['parent'], 'order' => $line['order']], ['id' => $line['id']]);
+        }
+        $transaction->commit();
+        TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic());
+        return true;
+    }
+
+    private function treeToLines($tree, $parent = 1)
+    {
+        foreach ($tree as $k => $branch) {
+            $id = explode('-', $branch['id'])[1];
+            $this->treeLines[] = [
+                'parent' => $parent,
+                'order' => $k + 1,
+                'id' => $id
+            ];
+            if (array_key_exists('children', $branch) && is_array($branch['children'])) {
+                $this->treeToLines($branch['children'], $id);
+            }
+        }
+    }
+
     /**
      * @inheritdoc
      */
@@ -289,4 +326,6 @@ class TreeController extends Controller
                 break;
         }
     }
+
+
 }

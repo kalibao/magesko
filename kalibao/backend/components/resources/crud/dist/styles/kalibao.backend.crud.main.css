@@ -30,3 +30,9 @@ label.required::before {
 table .form-group {
   margin-bottom: 0;
 }
+.content-header .btn-close {
+  font-size: 150%;
+  font-weight: bold;
+  border: 1px solid;
+  padding: 0 9px;
+}

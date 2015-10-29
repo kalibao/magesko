@@ -60,7 +60,7 @@ class ListGridRowEdit extends \kalibao\common\components\crud\ListGridRowEdit
             'attribute' => 'description',
             'type' => 'activeTextarea',
             'options' => [
-                'class' => 'form-control input-sm wysiwyg-textarea',
+                'class' => 'form-control input-sm',
                 'data-ckeditor-language' => $language
             ]
         ]);

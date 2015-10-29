@@ -200,7 +200,8 @@ class Tree extends \yii\db\ActiveRecord
             $text = $v['label'];
             if($actionBtns) {
                 $text .= " &nbsp; <i class=\"fa fa-edit\" id=\"edit-{$v['item']}\"></i>" .
-                         " &nbsp; <i class=\"fa fa-trash text-red\" id=\"delete-{$v['item']}\"></i>";
+                         " &nbsp; <i class=\"fa fa-paint-brush\" id=\"present-{$v['item']}\"></i>" .
+                         " &nbsp; <i class=\"fa fa-trash text-red\" id=\"delete-{$v['item']}\"></i>"
             }
 
             Arr::set($tree, $v['path'], [

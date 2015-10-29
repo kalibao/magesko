@@ -9,8 +9,8 @@ use \kalibao\common\components\helpers\Html;
 <thead>
 <tr class="form-inline">
     <th></th>
-    <?php foreach($crudTranslate->languages as $language): ?>
-        <th><?= Html::labelI18n($language); ?></th>
+    <?php foreach ($crudTranslate->items as $itemField): ?>
+        <th><?= $itemField->label !== null ? $itemField->label : $itemField->model->getAttributeLabel($itemField->attribute); ?></th>
     <?php endforeach; ?>
 </tr>
 </thead>

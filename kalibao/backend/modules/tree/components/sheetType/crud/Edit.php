@@ -64,15 +64,19 @@ class Edit extends \kalibao\common\components\crud\Edit
                 'placeholder' => $models['main']->getAttributeLabel('url_pick'),
             ]
         ]);
-
         $items[] = new InputField([
             'model' => $models['main'],
             'attribute' => 'table',
-            'type' => 'activeTextInput',
+            'type' => 'activeHiddenInput',
             'options' => [
-                'class' => 'form-control input-sm',
-                'maxlength' => true,
-                'placeholder' => $models['main']->getAttributeLabel('table'),
+                'class' => 'form-control input-sm input-select input-ajax-select',
+                'data-action' => Url::to([
+                    'advanced-drop-down-list',
+                    'id' => 'tables',
+                ]),
+                'data-allow-clear' => 1,
+                'data-placeholder' => Yii::t('kalibao', 'input_select'),
+                'data-text' => $models['main']->table,
             ]
         ]);
 

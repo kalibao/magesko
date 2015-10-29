@@ -189,6 +189,10 @@ class Controller extends \kalibao\common\components\web\Controller
                 return $this->getDropDownList($id);
             },
         ]);
+        
+        if($saved) {
+            $this->redirect(array('list'));
+        }
 
         if ($request->isAjax) {
             // set response format
@@ -245,6 +249,10 @@ class Controller extends \kalibao\common\components\web\Controller
                 return $this->getDropDownList($id);
             },
         ]);
+
+        if($saved) {
+            $this->redirect(array('list'));
+        }
 
         if ($request->isAjax) {
             // set response format

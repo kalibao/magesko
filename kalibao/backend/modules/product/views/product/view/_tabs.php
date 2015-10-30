@@ -21,6 +21,7 @@
     </li>
     <li><a href="#description" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_description') ?></a></li>
     <li><a href="#prices" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_prices') ?></a></li>
+    <li><a href="#catalog" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_catalog') ?></a></li>
     <li><a href="#logistic" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_logistic') ?></a></li>
     <li><a href="#cross_selling" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_cross_selling') ?></a></li>
     <li><a href="#discount" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_discount') ?></a></li>

@@ -3,8 +3,8 @@
  * @copyright Copyright (c) 2015 Kalibao
  * @license https://github.com/kalibao/magesko/blob/master/LICENSE
  */
-$col_1 = ['name', 'supplier_id', 'brand_id', 'accountant_category_id', 'stats_category_id', 'google_category_id'];
-$col_2 = ['exclude_discount_code', 'force_secure', 'archived', 'alternative_product', 'available_date', 'catalog_category_id'];
+$col_1 = ['name', 'supplier_id', 'brand_id', 'accountant_category_id', 'stats_category_id'];
+$col_2 = ['exclude_discount_code', 'force_secure', 'archived', 'alternative_product', 'available_date', 'google_category_id'];
 ?>
 
 <div class="tab-pane active" id="product">

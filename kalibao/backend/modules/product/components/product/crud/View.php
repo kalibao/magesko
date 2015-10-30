@@ -23,6 +23,8 @@ use kalibao\common\models\category\CategoryI18n;
  */
 class View extends \kalibao\common\components\crud\Edit
 {
+    protected $tree;
+
     /**
      * @inheritdoc
      */
@@ -44,6 +46,8 @@ class View extends \kalibao\common\components\crud\Edit
 
         // set items
         $items = [];
+
+        $tree = $this->getTree();
 
         if (!$models['main']->isNewRecord) {
             $items['id'] = new SimpleValueField([
@@ -392,5 +396,21 @@ class View extends \kalibao\common\components\crud\Edit
         }
 
         $this->setItems($items);
+    }
+
+    /**
+     * @return string
+     */
+    public function getTree()
+    {
+        return $this->tree;
+    }
+
+    /**
+     * @param string $tree
+     */
+    public function setTree($tree)
+    {
+        $this->tree = $tree;
     }
 }

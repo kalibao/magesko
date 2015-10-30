@@ -463,6 +463,29 @@ class Product extends \yii\db\ActiveRecord
         );
     }
 
+    public function getCategories($asJson = false)
+    {
+        $dependency = new TagDependency(['tags' => [
+            $this->generateTag(),
+            $this->generateTag($this->id),
+            $this->generateTag($this->id, 'categories'),
+        ]]);
+        $db = Yii::$app->db;
+        $data = $db->cache(function($db){
+            return $db->createCommand(
+                "select branch_id
+                 from sheet, sheet_type
+                 where sheet_type_id = sheet_type.id
+                   and `table` = 'product'
+                   and primary_key = :id",
+                [
+                    "id"    => $this->id
+                ]
+            )->queryAll();
+        }, 0, $dependency);
+        return ($asJson)?json_encode($data):$data;
+    }
+
     /**
      * function to generate a tag for caching data (alias to static method)
      * @param string $id id of the product

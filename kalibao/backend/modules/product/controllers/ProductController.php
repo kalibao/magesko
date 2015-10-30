@@ -9,30 +9,29 @@ namespace kalibao\backend\modules\product\controllers;
 use kalibao\backend\modules\product\components\product\crud\View;
 use kalibao\common\components\base\ExtraDataEvent;
 use kalibao\common\components\helpers\Date;
+use kalibao\common\models\branch\Branch;
 use kalibao\common\models\crossSelling\CrossSelling;
 use kalibao\common\models\discount\Discount;
 use kalibao\common\models\logisticStrategy\LogisticStrategy;
 use kalibao\common\models\product\Product;
 use kalibao\common\models\product\ProductI18n;
 use kalibao\common\models\productMedia\ProductMedia;
+use kalibao\common\models\sheet\Sheet;
+use kalibao\common\models\sheetType\SheetType;
+use kalibao\common\models\tree\Tree;
 use kalibao\common\models\variant\Variant;
 use kalibao\common\models\variant\VariantI18n;
 use kalibao\common\models\variantAttribute\VariantAttribute;
 use Yii;
 use yii\base\ErrorException;
 use yii\base\Exception;
-use yii\base\InvalidParamException;
-use yii\caching\Cache;
-use yii\caching\DbDependency;
 use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
 use kalibao\common\components\helpers\Html;
 use kalibao\backend\components\crud\Controller;
-use yii\db\Query;
 use yii\helpers\Url;
 use yii\web\BadRequestHttpException;
-use yii\web\ConflictHttpException;
 use yii\web\HttpException;
 use yii\web\Response;
 
@@ -138,6 +137,11 @@ class ProductController extends Controller
             'allow' => true,
             'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
         ];
+        $b['access']['rules'][] = [
+            'actions' => ['update-catalog', 'advanced-drop-down-list', 'settings', 'export'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
+        ];
 
         return $b;
     }
@@ -149,11 +153,14 @@ class ProductController extends Controller
      */
     public function actionView()
     {
+        Yii::$app->cache->flush();
+
         $request = Yii::$app->request;
         if ($request->get('id') === null) {
             throw new HttpException(404, Yii::t('kalibao.backend', 'product_not_found'));
         }
-
+        $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
+        $tree = Tree::findOne($catalogTreeId);
         $component = new View([
             'models' => $this->loadEditModels(['id' => $request->get('id')]),
             'language' => Yii::$app->language,
@@ -162,13 +169,14 @@ class ProductController extends Controller
             'uploadConfig' => $this->uploadConfig,
             'dropDownList' => function ($id) {
                 return $this->getDropDownList($id);
-            }
+            },
+            'tree' => [
+                'title' => $tree->treeI18ns[0]->label,
+                'json' => $tree->treeToJson(false),
+                'list' => $tree->treeToList()
+            ]
         ]);
 
-        //Yii::$app->cache->flush();
-        if ($request->get('nocache', false)) {
-            TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic());
-        }
         $create = false;
         if ($request->isAjax) {
             Yii::$app->response->format = Response::FORMAT_JSON;
@@ -638,6 +646,42 @@ class ProductController extends Controller
     }
 
     /**
+     * Remove media action
+     */
+    public function actionUpdateCatalog()
+    {
+        $errors = false;
+
+        $request = Yii::$app->request;
+        $rm = is_array($request->post('rm'))?$request->post('rm'):[];
+        $ad = is_array($request->post('ad'))?$request->post('ad'):[];
+        $rm = array_map(function($i){return substr($i, 7);}, $rm);
+        $ad = array_map(function($i){return substr($i, 7);}, $ad);
+
+        $sheetType = SheetType::findOne(['table' => 'product']);
+
+        $transaction =
+        Sheet::deleteAll([
+            'sheet_type_id' => $sheetType->id,
+            'primary_key'   => $request->post('productId'),
+            'branch_id'     => $rm
+        ]);
+        foreach($ad as $branch) {
+            $sheet = new Sheet();
+            $sheet->scenario = 'insert';
+
+            $sheet->sheet_type_id = $sheetType->id;
+            $sheet->primary_key = $request->post('productId');
+            $sheet->branch_id = $branch;
+
+            if(!$sheet->save()) $errors = true;
+        }
+
+        TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->post('productId'), 'categories'));
+        return $errors;
+    }
+
+    /**
      * Save edit models
      * @param array $models Models to save
      * @param array $requestParams Request parameters
@@ -772,11 +816,8 @@ class ProductController extends Controller
                     $this->dropDownLists['checkbox-drop-down-list'] = Html::checkboxInputFilterDropDownList();
                     break;
                 case 'category_i18n.title':
-                    $this->dropDownLists['category_i18n.title'] = Html::findDropDownListData(
-                        'kalibao\common\models\category\CategoryI18n',
-                        ['category_id', 'title'],
-                        [['i18n_id' => Yii::$app->language]]
-                    );
+                    $tree = Tree::findOne(Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id'));
+                    $this->dropDownLists['category_i18n.title'] = $tree->treeToList();
                     break;
                 default:
                     return [];

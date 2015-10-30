@@ -301,6 +301,16 @@ class Branch extends \yii\db\ActiveRecord
         }, 0, $dependency);
     }
 
+    public function countSheets()
+    {
+        return count(Sheet::findAll(['branch_id' => $this->id]));
+    }
+
+    public function countChildren()
+    {
+        return count(Branch::findAll(['parent' => $this->id]));
+    }
+
     /**
      * function to generate a tag for caching data (alias to static method)
      * @param string $id id of the product

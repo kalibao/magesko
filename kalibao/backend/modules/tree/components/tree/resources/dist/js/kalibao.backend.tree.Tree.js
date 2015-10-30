@@ -122,13 +122,29 @@
           break;
 
         case 'delete':
-          if (confirm('confirmer la suppression ? la branche et ses enfants seront supprimés')) {
-            $.post('../branch/delete-rows?id=' + event.id, {
-              rows: ['id=' + event.id]
-            }, function(){
-              self.$tree.jstree().delete_node($node);
+          $.post('../branch/delete?id=' + event.id,{}, function(response){
+            var modal = new $.kalibao.core.Modal({id:'modal-delete-branch'});
+            modal.setHeader(response.text);
+            modal.setBtnPrimary('Supprimer');
+            modal.setBtnSecondary('Fermer');
+
+            // buttons actions
+            modal.$component.find('.btn-secondary, .close').on('click', function () {
+              modal.close();
+              return false;
             });
-          }
+            modal.$component.find('.btn-primary').on('click', function () {
+              $.post('../branch/delete-rows?id=' + event.id, {
+                rows: ['id=' + event.id]
+              }, function(){
+                self.$tree.jstree().delete_node($node);
+                modal.close();
+                self.treeData = self.$tree.jstree().get_json();
+                $.toaster({priority: 'success', title: 'Enregistré', message: 'La branche a été supprimée'})
+              });
+            });
+            modal.open();
+          }, 'json');
           break;
       }
     });

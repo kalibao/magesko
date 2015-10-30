@@ -211,15 +211,22 @@ class ProductController extends Controller
         }
 
         // create a component to display data
+        $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
+        $tree = Tree::findOne($catalogTreeId);
         $component = new View([
-            'models' => $models,
+            'models' => $this->loadEditModels(['id' => $request->get('id')]),
             'language' => Yii::$app->language,
             'addAgain' => $request->get('add-again', true),
             'saved' => $saved,
             'uploadConfig' => $this->uploadConfig,
             'dropDownList' => function ($id) {
                 return $this->getDropDownList($id);
-            }
+            },
+            'tree' => [
+                'title' => $tree->treeI18ns[0]->label,
+                'json' => $tree->treeToJson(false),
+                'list' => $tree->treeToList()
+            ]
         ]);
 
         if ($request->isAjax) {
@@ -370,6 +377,8 @@ class ProductController extends Controller
             throw new HttpException(404, Yii::t('kalibao.backend', 'product_not_found'));
         }
 
+        $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
+        $tree = Tree::findOne($catalogTreeId);
         $component = new View([
             'models' => $this->loadEditModels(['id' => $request->get('id')]),
             'language' => Yii::$app->language,
@@ -378,7 +387,12 @@ class ProductController extends Controller
             'uploadConfig' => $this->uploadConfig,
             'dropDownList' => function ($id) {
                 return $this->getDropDownList($id);
-            }
+            },
+            'tree' => [
+                'title' => $tree->treeI18ns[0]->label,
+                'json' => $tree->treeToJson(false),
+                'list' => $tree->treeToList()
+            ]
         ]);
 
         foreach ($request->post('variant', []) as $id => $data) {
@@ -445,6 +459,8 @@ class ProductController extends Controller
         }
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
 
+        $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
+        $tree = Tree::findOne($catalogTreeId);
         $component = new View([
             'models' => $this->loadEditModels(['id' => $request->get('id')]),
             'language' => Yii::$app->language,
@@ -453,7 +469,12 @@ class ProductController extends Controller
             'uploadConfig' => $this->uploadConfig,
             'dropDownList' => function ($id) {
                 return $this->getDropDownList($id);
-            }
+            },
+            'tree' => [
+                'title' => $tree->treeI18ns[0]->label,
+                'json' => $tree->treeToJson(false),
+                'list' => $tree->treeToList()
+            ]
         ]);
 
         if ($request->isAjax) {
@@ -495,6 +516,8 @@ class ProductController extends Controller
         }
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id'), 'productVariant'));
 
+        $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
+        $tree = Tree::findOne($catalogTreeId);
         $component = new View([
             'models' => $this->loadEditModels(['id' => $request->get('id')]),
             'language' => Yii::$app->language,
@@ -503,7 +526,12 @@ class ProductController extends Controller
             'uploadConfig' => $this->uploadConfig,
             'dropDownList' => function ($id) {
                 return $this->getDropDownList($id);
-            }
+            },
+            'tree' => [
+                'title' => $tree->treeI18ns[0]->label,
+                'json' => $tree->treeToJson(false),
+                'list' => $tree->treeToList()
+            ]
         ]);
 
         if ($request->isAjax) {
@@ -586,6 +614,8 @@ class ProductController extends Controller
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id'), 'productVariant'));
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id'), 'productCrossSelling'));
 
+        $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
+        $tree = Tree::findOne($catalogTreeId);
         $component = new View([
             'models' => $this->loadEditModels(['id' => $request->get('id')]),
             'language' => Yii::$app->language,
@@ -594,7 +624,12 @@ class ProductController extends Controller
             'uploadConfig' => $this->uploadConfig,
             'dropDownList' => function ($id) {
                 return $this->getDropDownList($id);
-            }
+            },
+            'tree' => [
+                'title' => $tree->treeI18ns[0]->label,
+                'json' => $tree->treeToJson(false),
+                'list' => $tree->treeToList()
+            ]
         ]);
 
         if ($request->isAjax) {
@@ -660,7 +695,6 @@ class ProductController extends Controller
 
         $sheetType = SheetType::findOne(['table' => 'product']);
 
-        $transaction =
         Sheet::deleteAll([
             'sheet_type_id' => $sheetType->id,
             'primary_key'   => $request->post('productId'),

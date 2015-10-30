@@ -12,6 +12,7 @@ use kalibao\common\models\attributeTypeVisibility\AttributeTypeVisibility;
 use kalibao\common\models\tree\Tree;
 use Yii;
 use yii\base\ErrorException;
+use yii\base\InvalidParamException;
 use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 use kalibao\common\components\helpers\Html;
@@ -103,12 +104,17 @@ class BranchController extends Controller
         $b['access']['rules'][] = [
             'actions' => ['delete-filter', 'advanced-drop-down-list', 'settings', 'export'],
             'allow' => true,
-            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+            'roles' => [$this->getActionControllerPermission('delete'), 'permission.delete:*'],
         ];
         $b['access']['rules'][] = [
             'actions' => ['add-filter', 'advanced-drop-down-list', 'settings', 'export'],
             'allow' => true,
-            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
+        ];
+        $b['access']['rules'][] = [
+            'actions' => ['delete', 'advanced-drop-down-list', 'settings', 'export'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('delete'), 'permission.delete:*'],
         ];
         return $b;
     }
@@ -175,7 +181,7 @@ class BranchController extends Controller
         ]);
 
         if($saved) {
-            $this->redirect('/tree/tree/view?id=' . Yii::$app->request->get('tree'));
+            $this->redirect('/tree/tree/view?id=' . $models['main']->tree_id);
         }
 
         if ($request->isAjax) {
@@ -190,6 +196,80 @@ class BranchController extends Controller
         } else {
             return $this->render('crud/edit/edit', ['crudEdit' => $crudEdit]);
         }
+    }
+
+    /**
+     * Update action
+     * @return array|string
+     * @throws ErrorException
+     */
+    public function actionUpdate()
+    {
+        // request component
+        $request = Yii::$app->request;
+
+        // get primary key used to find model
+        $modelClass = $this->crudModelsClass['main'];
+        $primaryKey = $modelClass::primaryKey();
+        $conditions = [];
+        foreach ($primaryKey as $primaryKeyElm) {
+            if (($value = $request->get($primaryKeyElm, false)) === false || $value === '') {
+                throw new InvalidParamException();
+            } else {
+                $conditions[$primaryKeyElm] = $value;
+            }
+        }
+
+        // load models
+        $models = $this->loadEditModels($conditions);
+
+        // save models
+        $saved = false;
+        if ($request->isPost) {;
+            $saved = $this->saveEditModels($models, $request->post());
+        }
+
+        // create a component to display data
+        $crudEdit = new $this->crudComponentsClass['edit']([
+            'models' => $models,
+            'language' => Yii::$app->language,
+            'saved' => $saved,
+            'uploadConfig' => $this->uploadConfig,
+            'dropDownList' => function ($id) {
+                return $this->getDropDownList($id);
+            },
+        ]);
+
+        if($saved) {
+            $this->redirect('/tree/tree/view?id=' . $models['main']->tree_id);
+        }
+
+        if ($request->isAjax) {
+            // set response format
+            Yii::$app->response->format = Response::FORMAT_JSON;
+
+            return [
+                'html' => $this->renderAjax('crud/edit/_contentBlock', ['crudEdit' => $crudEdit]),
+                'scripts' => $this->registerClientSideAjaxScript(),
+                'title' => $crudEdit->title,
+            ];
+        } else {
+            return $this->render('crud/edit/edit', ['crudEdit' => $crudEdit]);
+        }
+    }
+
+    public function actionDelete()
+    {
+        $request = Yii::$app->request;
+        $id = $request->get('id');
+        $branch = Branch::findOne($id);
+        $sheetsNumber = $branch->countSheets();
+        $childNumber = $branch->countChildren();
+        return json_encode(['text' => '<big>Attention</big><br>'.
+            'Il y a ' . $sheetsNumber . ' produits affectés à cette branche.<br>'.
+            'En la supprimant, ces produits ne seront plus affectés (les produits ne sont pas supprimés)<br>'.
+            'De plus, la branche a ' . $childNumber . ' branches filles qui seront également supprimées'
+        ]);
     }
 
     /**

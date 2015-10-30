@@ -135,22 +135,6 @@ class TreeController extends Controller
     }
 
     /**
-     * @inheritdoc
-     */
-    protected function getDropDownList($id)
-    {
-        if (!isset($this->dropDownLists[$id])) {
-            switch ($id) {
-                default:
-                    return [];
-                    break;
-            }
-        }
-
-        return $this->dropDownLists[$id];
-    }
-
-    /**
      * View action
      * @return array|string
      * @throws HttpException
@@ -182,93 +166,6 @@ class TreeController extends Controller
         }
     }
 
-    /**
-     * order branch action
-     * @return array|string
-     * @throws HttpException
-     */
-    public function actionOrderBranch()
-    {
-        $request = Yii::$app->request;
-        if ($request->post('id') === null || $request->post('order') === null) {
-            throw new HttpException(400, Yii::t('kalibao.backend', 'invalid_parameter'));
-        }
-        $order  = $request->post('order');
-        $old    = $request->post('old');
-        $parent = ($request->post('parent') == '#')?1:$request->post('parent');
-        if ($order < $old)
-        {
-            $query = "UPDATE branch b
-                      SET b.order = b.order + 1
-                      WHERE b.parent = :parent
-                        AND b.order BETWEEN :l AND :h";
-            $low   = $order;
-            $high  = $old;
-        } else {
-            $query = "UPDATE branch b
-                      SET b.order = b.order - 1
-                      WHERE b.parent = :parent
-                        AND b.order BETWEEN :l AND :h";
-            $low   = $old;
-            $high  = $order;
-        }
-        Yii::$app->db->createCommand($query, [
-            'parent' => $parent,
-            'l' => $low,
-            'h' => $high,
-        ])->execute();
-
-        $branch = Branch::findOne($request->post('id'));
-        $branch->order = $order;
-        $branch->scenario = 'update';
-
-        TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic($branch->tree_id));
-        return $branch->save();
-    }
-
-    /**
-     * change branch parent action
-     * @return array|string
-     * @throws HttpException
-     */
-    public function actionChangeParent()
-    {
-        $request = Yii::$app->request;
-        if ($request->post('id') === null || $request->post('order') === null || $request->post('parent') === null) {
-            throw new HttpException(400, Yii::t('kalibao.backend', 'invalid_parameter'));
-        }
-        $branch    = Branch::findOne($request->post('id'));
-        $order     = $request->post('order');
-        $parent    = ($request->post('parent') == '#')?1:$request->post('parent');
-        $oldParent = $branch->parent;
-        $oldOrder  = $branch->order;
-
-        $query = "UPDATE branch b
-                  SET b.order = b.order + 1
-                  WHERE b.parent = :parent
-                    AND b.order >= :order";
-        Yii::$app->db->createCommand($query, [
-            'parent' => $parent,
-            'order'  => $order
-        ])->execute();
-
-        $query = "UPDATE branch b
-                  SET b.order = b.order - 1
-                  WHERE b.parent = :parent
-                    AND b.order >= :order";
-        Yii::$app->db->createCommand($query, [
-            'parent' => $oldParent,
-            'order'  => $oldOrder
-        ])->execute();
-
-        $branch->order    = $order;
-        $branch->parent   = $parent;
-        $branch->scenario = 'update';
-
-        TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic($branch->tree_id));
-        return $branch->save();
-    }
-
     public function actionRebuildTree()
     {
         $request = Yii::$app->request;
@@ -297,6 +194,22 @@ class TreeController extends Controller
                 $this->treeToLines($branch['children'], $id);
             }
         }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getDropDownList($id)
+    {
+        if (!isset($this->dropDownLists[$id])) {
+            switch ($id) {
+                default:
+                    return [];
+                    break;
+            }
+        }
+
+        return $this->dropDownLists[$id];
     }
 
     /**

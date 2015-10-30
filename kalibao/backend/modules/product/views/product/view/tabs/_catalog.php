@@ -25,7 +25,11 @@
             </div>
             <div class="col-md-6">
                 <fieldset>
-                    <legend><?= $component->tree['title'] ?></legend>
+                    <legend>
+                        <?= ucfirst($component->tree['title']) ?>&nbsp;
+                        <a class="btn btn-primary btn-xs" id="open-all"><i class="fa fa-expand"></i></a>
+                        <a class="btn btn-primary btn-xs" id="close-all"><i class="fa fa-compress"></i></a>
+                    </legend>
                     <div id="tree"></div>
                 </fieldset>
             </div>

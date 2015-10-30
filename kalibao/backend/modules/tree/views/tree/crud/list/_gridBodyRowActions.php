@@ -8,7 +8,7 @@ use yii\helpers\Url;
 ?>
 <td class="td-action" style="width:120px">
     <a href="<?= Url::to(['view'] + $row->getPk()); ?>" class="btn btn-sm btn-default btn-view" title="<?= Yii::t('kalibao', 'btn_view'); ?>">
-        <span class="glyphicon glyphicon-eye-open"></span>
+        <span class="fa fa-code-fork"></span>
     </a>
     <?php if (Yii::$app->user->canMultiple([$this->context->getActionControllerPermission('update'), 'permission.update:*'])): ?>
         <a href="<?= Url::to(['update'] + $row->getPk()); ?>" class="btn btn-sm btn-default btn-update" title="<?= Yii::t('kalibao', 'btn_update'); ?>">

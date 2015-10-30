@@ -49,6 +49,9 @@
     this.$logisticTab = this.$container.find('#logistic');
     this.$catalogTab = this.$container.find('#catalog');
     this.$tree = this.$container.find('#tree');
+    this.$openAll = this.$catalogTab.find('#open-all');
+    this.$closeAll = this.$catalogTab.find('#close-all');
+
     this.initComponents();
     this.initTree();
     this.initEvents();
@@ -108,13 +111,23 @@
       var ad = $(newData).not(self.initialData).get();
       var rm = $(self.initialData).not(newData).get();
       var productId = self.urlParam('id');
-      $.post('/product/product/update-catalog', {ad: ad, rm: rm, productId: productId})
+      $.post('/product/product/update-catalog', {ad: ad, rm: rm, productId: productId}, function(){
+        $.toaster({priority: 'success', title: 'Enregistré', message: 'Modifications enregistrées'})
+      });
+      self.initialData=newData;
     });
+
     this.$catalogTab.find('.reset-form').on('click', function() {
       $jstree.uncheck_all();
-      for (var i = 0; i < self.categories.length; i++) {
-        self.$tree.jstree().check_node('branch-' + self.categories[i].branch_id);
-      }
+      $jstree.check_node(self.initialData);
+    });
+
+    this.$openAll.on('click', function() {
+      $jstree.open_all();
+    });
+
+    this.$closeAll.on('click', function() {
+      $jstree.close_all();
     })
   };
 

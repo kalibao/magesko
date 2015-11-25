@@ -9,7 +9,7 @@ use yii\helpers\Url;
 <div class="actions">
     <div class="pull-right">
         <?php if (Yii::$app->user->canMultiple([$this->context->getActionControllerPermission('create'), 'permission.create:*'])): ?>
-            <a href="<?= Url::to(['create']); ?>?type_id=<?= Yii::$app->request->get('ModelFilter', ['attribute_type_id'])['attribute_type_id'] ?>" class="btn btn-sm btn-primary btn-create">
+            <a href="<?= Url::to(['create']); ?>?type_id=<?= Yii::$app->request->get('ModelFilter', ['attribute_type_id'=>''])['attribute_type_id'] ?>" class="btn btn-sm btn-danger btn-create">
                 <span class="glyphicon glyphicon-plus-sign"></span>
                 <b><?= Yii::t('kalibao', 'btn_add'); ?></b>
             </a>

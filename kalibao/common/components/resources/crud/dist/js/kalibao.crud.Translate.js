@@ -148,6 +148,29 @@
   $.kalibao.crud.Translate.prototype.initActionsEvents = function () {
     var self = this;
 
+    $(window).off('popstate');
+    $(window).on("popstate", function(e) {
+      var action = document.URL;
+      var params = '';
+      $.kalibao.core.app.ajaxQuery(
+        action,
+        function (json) {
+          $('title').html(json.title);
+          var $content = $(json.html);
+          self.$wrapper.html($content);
+          self.saveRequest(action, params);
+          if (self.activeScrollAuto) {
+            $.kalibao.core.app.scrollTop();
+          }
+          self.$wrapper.unblock();
+        },
+        'GET',
+        params,
+        'JSON',
+        true
+      );
+    });
+
     this.$main.find('.btn-submit').on('click', function() {
       self.submit();
       return false;

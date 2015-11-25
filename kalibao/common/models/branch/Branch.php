@@ -293,10 +293,12 @@ class Branch extends \yii\db\ActiveRecord
             foreach ($attributeTypes as $attributeType) {
                 $list[] = [
                     'id'    => $attributeType->attribute_type_id,
+                    'order' => $attributeType->order,
                     'i18n'  => $attributeType->attributeTypeI18ns[0]->value,
                     'label' => $attributeType->attributeTypeVisibilityI18ns[0]->label
                 ];
             }
+            usort($list, function($a,$b){return $a['order'] - $b['order'];});
             return $list;
         }, 0, $dependency);
     }

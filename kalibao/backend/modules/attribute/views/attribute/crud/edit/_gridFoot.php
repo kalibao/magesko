@@ -7,6 +7,9 @@
 <tfoot>
     <tr>
         <td colspan="2" class="text-center">
+            <?php if(Yii::$app->request->get('type_id', false)): ?>
+                <input type="hidden" value="<?= Yii::$app->request->get('type_id', false) ?>" name="Attribute[attribute_type_id]">
+            <?php endif; ?>
             <?php
             if (($crudEdit->models['main']->isNewRecord && Yii::$app->user->canMultiple([$this->context->getActionControllerPermission('create'), 'permission.create:*'])) ||
                 (!$crudEdit->models['main']->isNewRecord && Yii::$app->user->canMultiple([$this->context->getActionControllerPermission('update'), 'permission.update:*']))):

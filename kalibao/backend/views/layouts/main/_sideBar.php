@@ -109,8 +109,8 @@ use yii\helpers\Url;
                         <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:kalibao\backend\modules\supplier\controllers\SupplierController'])): ?>
                             <li><a href="<?= Url::to(['/supplier/supplier/list']); ?>"><i class="fa fa-circle-o"></i> <?= Yii::t('kalibao.backend', 'navbar_supplier_list'); ?></a></li>
                         <?php endif; ?>
-                        <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:kalibao\backend\modules\category\controllers\CategoryController'])): ?>
-                            <li><a href="<?= Url::to(['/category/category/list']); ?>"><i class="fa fa-circle-o"></i> <?= Yii::t('kalibao.backend', 'navbar_category_list'); ?></a></li>
+                        <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:kalibao\backend\modules\attribute-type\controllers\AttributeTypeController'])): ?>
+                            <li><a href="<?= Url::to(['/attribute-type/attribute-type/list']); ?>"><i class="fa fa-circle-o"></i> <?= Yii::t('kalibao.backend', 'navbar_attribute_list'); ?></a></li>
                         <?php endif; ?>
                     </ul>
                 </li>

@@ -55,24 +55,26 @@ class Edit extends \kalibao\common\components\crud\Edit
             ]);
         }
 
-        $items[] = new InputField([
-            'model' => $models['main'],
-            'attribute' => 'attribute_type_id',
-            'type' => 'activeHiddenInput',
-            'options' => [
-                'class' => 'form-control input-sm input-ajax-select',
-                'data-action' => Url::to([
-                    'advanced-drop-down-list',
-                    'id' => 'attribute_type_i18n.value',
-                ]),
-                'data-allow-clear' => 1,
-                'data-placeholder' => Yii::t('kalibao', 'input_select'),
-                'data-text' => !empty($models['main']->attribute_type_id) ? AttributeTypeI18n::findOne([
-                    'attribute_type_id' => $models['main']->attribute_type_id,
-                    'i18n_id' => $language
-                ])->value : '',
-            ]
-        ]);
+        if (! Yii::$app->request->get('type_id', false)) {
+            $items[] = new InputField([
+                'model' => $models['main'],
+                'attribute' => 'attribute_type_id',
+                'type' => 'activeHiddenInput',
+                'options' => [
+                    'class' => 'form-control input-sm input-ajax-select',
+                    'data-action' => Url::to([
+                        'advanced-drop-down-list',
+                        'id' => 'attribute_type_i18n.value',
+                    ]),
+                    'data-allow-clear' => 1,
+                    'data-placeholder' => Yii::t('kalibao', 'input_select'),
+                    'data-text' => !empty($models['main']->attribute_type_id) ? AttributeTypeI18n::findOne([
+                        'attribute_type_id' => $models['main']->attribute_type_id,
+                        'i18n_id' => $language
+                    ])->value : '',
+                ]
+            ]);
+        }
 
         $items[] = new InputField([
             'model' => $models['i18n'],

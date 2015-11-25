@@ -18,6 +18,7 @@ use kalibao\common\models\branch\BranchI18n;
  *
  * @property integer $attribute_type_id
  * @property integer $branch_id
+ * @property integer $order
  *
  * @property AttributeType $attributeType
  * @property Branch $branch
@@ -45,10 +46,10 @@ class AttributeTypeVisibility extends \yii\db\ActiveRecord
     {
         return [
             'insert' => [
-                'attribute_type_id', 'branch_id'
+                'attribute_type_id', 'branch_id', 'order'
             ],
             'update' => [
-                'attribute_type_id', 'branch_id'
+                'attribute_type_id', 'branch_id', 'order'
             ],
         ];
     }
@@ -60,7 +61,7 @@ class AttributeTypeVisibility extends \yii\db\ActiveRecord
     {
         return [
             [['attribute_type_id', 'branch_id'], 'required'],
-            [['attribute_type_id', 'branch_id'], 'integer']
+            [['attribute_type_id', 'branch_id', 'order'], 'integer']
         ];
     }
 
@@ -72,6 +73,7 @@ class AttributeTypeVisibility extends \yii\db\ActiveRecord
         return [
             'attribute_type_id' => Yii::t('kalibao.backend','Attribute Type ID'),
             'branch_id' => Yii::t('kalibao.backend','Branch ID'),
+            'order' => Yii::t('kalibao.backend','Order'),
         ];
     }
 

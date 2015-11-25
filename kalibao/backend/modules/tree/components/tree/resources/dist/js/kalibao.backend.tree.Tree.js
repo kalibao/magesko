@@ -231,11 +231,25 @@
         label: $input.val().split('|')[1]
       };
       if ($tbody.find('#attribute-' + attributeType.id).length === 0) {
-        var $line = $('<tr id="attribute-' + attributeType.id + '"><td>' + attributeType.label + '</td><td><input class="form-control input-sm" type="text" value="' + attributeType.label + '"></td></tr>')
+        var $line = $(
+          '<tr id="attribute-' + attributeType.id + '">' +
+            '<td>' + attributeType.label + '</td>' +
+            '<td><input class="form-control input-sm" type="text" value="' + attributeType.label + '"></td>' +
+            '<td><input type="text" class="form-control input-sm filter-order" disabled value="0"/></td>' +
+          '</tr>'
+        );
         $tbody.append($line);
         $line.find('input').select();
+        self.reorderFilters(null, {item: $line});
         self.$branchContainer.find('#save-filters').show();
       }
+    });
+    this.$branchContainer.find('.sortable').sortable({
+      cursor: "move",
+      placeholder: "sortable-placeholder",
+      axis: "y",
+      scroll: true,
+      stop: self.reorderFilters
     });
     this.$branchContainer.find('#save-filters').on('click', function() {
       var $btn = $(this);
@@ -245,21 +259,45 @@
       var update = [];
       $new.each(function() {
         var id     = $(this).attr('id').split('-')[1];
-        var i18n   = $(this).find('input').val();
+        var i18n   = $(this).find('input').eq(0).val();
+        var order  = $(this).find('input').eq(1).val();
         var branch = $btn.data('branch');
-        insert.push({id: id, i18n: i18n, branch: branch});
+        insert.push({id: id, i18n: i18n, order: order, branch: branch});
       });
       $old.each(function() {
         var id     = $(this).attr('id').split('-')[1];
-        var i18n   = $(this).find('input').val();
+        var i18n   = $(this).find('input').eq(0).val();
+        var order  = $(this).find('input').eq(1).val();
         var branch = $btn.data('branch');
-        update.push({id: id, i18n: i18n, branch: branch});
+        update.push({id: id, i18n: i18n, order: order, branch: branch});
       });
-      $.post('../branch/add-filter', {insert: insert, update: update}, function(){
-        self.$branchContainer.find('#save-filters').hide();
-        $.toaster({ priority : 'success', title : 'Enregistré', message : 'Les filtres ont été enregistrés'})
+      $.ajax({
+        method: 'post',
+        url: '../branch/add-filter',
+        data: {insert: insert, update: update},
+        success: function(){
+          self.$branchContainer.find('#save-filters').hide();
+          $.toaster({ priority : 'success', title : 'Enregistré', message : 'Les filtres ont été enregistrés'})
+        },
+        error: function(){
+          $.toaster({ priority : 'danger', title : 'Erreur', message : 'Une erreur est survenue lors de l\'enreistrement'})
+        }
       });
     });
+  };
+
+  /**
+   * Function to set the order value of filters after sorting them
+   * @param $event Object The event triggered
+   * @param $elem Object The ordered object
+   */
+  $.kalibao.backend.tree.View.prototype.reorderFilters = function($event, $elem) {
+    var $table = $elem['item'].parent();
+    var order = 1;
+    $table.find('tr').each(function(){
+      $(this).find('.filter-order').eq(0).val(order++);
+    });
+    $('#save-filters').show();
   };
 
   /**

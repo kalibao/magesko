@@ -11,6 +11,7 @@ use kalibao\common\models\product\Product;
 use kalibao\common\models\productMedia\ProductMedia;
 use Yii;
 use yii\base\ErrorException;
+use yii\caching\TagDependency;
 use yii\db\ActiveRecord;
 use kalibao\common\components\helpers\Html;
 use kalibao\backend\components\crud\Controller;

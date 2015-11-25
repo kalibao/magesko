@@ -153,8 +153,6 @@ class ProductController extends Controller
      */
     public function actionView()
     {
-        Yii::$app->cache->flush();
-
         $request = Yii::$app->request;
         if ($request->get('id') === null) {
             throw new HttpException(404, Yii::t('kalibao.backend', 'product_not_found'));

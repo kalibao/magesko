@@ -110,6 +110,7 @@
    * @param {string} params Request parameters
    */
   $.kalibao.core.app.changeUrl = function (action, params) {
+    var self = this;
     if(window.history.pushState && action != window.location && action !== false) {
       var href = action;
       if (href !== undefined) {

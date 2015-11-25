@@ -5,5 +5,6 @@
  */
 ?>
 <section class="content-header">
+    <a class="btn-close pull-right" href="/attribute-type/attribute-type">×</a>
     <h1><?= $crudList->title; ?></h1>
 </section>

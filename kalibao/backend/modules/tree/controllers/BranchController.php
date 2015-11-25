@@ -311,6 +311,7 @@ class BranchController extends Controller
             $model->scenario = 'insert';
             $model->attribute_type_id = $newFilter['id'];
             $model->branch_id = $newFilter['branch'];
+            $model->order = $newFilter['order'];
 
             $i18n = new AttributeTypeVisibilityI18n();
             $i18n->scenario = 'insert';
@@ -322,6 +323,13 @@ class BranchController extends Controller
             if (!($model->save() && $i18n->save())) $err = true;
         }
         foreach($oldFilters as $oldFilter) {
+            $model = AttributeTypeVisibility::findOne([
+                'attribute_type_id' => $oldFilter['id'],
+                'branch_id' => $oldFilter['branch'],
+            ]);
+            $model->scenario = 'update';
+            $model->order = $oldFilter['order'];
+
             $i18n = AttributeTypeVisibilityI18n::findOne([
                 'attribute_type_id' => $oldFilter['id'],
                 'branch_id' => $oldFilter['branch'],
@@ -330,10 +338,15 @@ class BranchController extends Controller
             $i18n->scenario = 'update';
             $i18n->label = $oldFilter['i18n'];
 
-            if (!$i18n->save()) $err = true;
+            if (!($model->save() && $i18n->save())) $err = true;
         }
-        if ($err) $transaction->rollBack();
-        else $transaction->commit();
+        if ($err) {
+            $transaction->rollBack();
+            throw new HttpException(500, "Internal server error");
+        }
+        else {
+            $transaction->commit();
+        }
     }
 
     /**

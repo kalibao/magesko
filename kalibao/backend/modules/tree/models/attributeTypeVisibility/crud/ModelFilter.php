@@ -16,6 +16,7 @@ use kalibao\common\models\tree\AttributeTypeVisibility;
  *
  * @property integer $attribute_type_id
  * @property integer $branch_id
+ * @property integer $order
  * @property integer $attribute_type_visibility_i18n_attribute_type_id
  * @property integer $attribute_type_visibility_i18n_branch_id
  * @property string $attribute_type_visibility_i18n_label
@@ -27,6 +28,7 @@ class ModelFilter extends AttributeTypeVisibility implements ModelFilterInterfac
 {
     public $branch_id;
     public $attribute_type_id;
+    public $order;
     public $attribute_type_visibility_i18n_label;
     public $attribute_type_visibility_i18n_branch_id;
     public $attribute_type_visibility_i18n_attribute_type_id;
@@ -38,7 +40,7 @@ class ModelFilter extends AttributeTypeVisibility implements ModelFilterInterfac
     {
         return [
             self::SCENARIO_DEFAULT => [
-                'attribute_type_id', 'branch_id', 'attribute_type_id', 'attribute_type_visibility_i18n_attribute_type_id', 'branch_id', 'attribute_type_visibility_i18n_branch_id', 'attribute_type_visibility_i18n_label'
+                'attribute_type_id', 'branch_id', 'attribute_type_id', 'attribute_type_visibility_i18n_attribute_type_id', 'branch_id', 'attribute_type_visibility_i18n_branch_id', 'attribute_type_visibility_i18n_label', 'order'
             ]
         ];
     }
@@ -49,7 +51,7 @@ class ModelFilter extends AttributeTypeVisibility implements ModelFilterInterfac
     public function rules()
     {
         return [
-            [['attribute_type_id', 'branch_id', 'attribute_type_id', 'attribute_type_visibility_i18n_attribute_type_id', 'branch_id', 'attribute_type_visibility_i18n_branch_id'], 'integer'],
+            [['attribute_type_id', 'branch_id', 'attribute_type_id', 'attribute_type_visibility_i18n_attribute_type_id', 'branch_id', 'attribute_type_visibility_i18n_branch_id', 'order'], 'integer'],
             [['attribute_type_visibility_i18n_label'], 'string', 'max' => 200]
         ];
     }
@@ -63,6 +65,7 @@ class ModelFilter extends AttributeTypeVisibility implements ModelFilterInterfac
             'attribute_type_id' => Yii::t('kalibao.backend','attribute_type_id'),
             'attribute_type_visibility_i18n_attribute_type_id' => Yii::t('kalibao.backend','attribute_type_visibility_i18n_attribute_type_id'),
             'branch_id' => Yii::t('kalibao.backend','branch_id'),
+            'order' => Yii::t('kalibao.backend','order'),
             'attribute_type_visibility_i18n_branch_id' => Yii::t('kalibao.backend','attribute_type_visibility_i18n_branch_id'),
             'attribute_type_visibility_i18n_label' => Yii::t('kalibao.backend','attribute_type_visibility_i18n_label'),
         ];

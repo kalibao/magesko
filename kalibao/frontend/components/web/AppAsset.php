@@ -34,5 +34,6 @@ class AppAsset extends AssetBundle
      */
     public $css = [
         'dist/css/clean-blog.css',
+        'dist/css/font-awesome.min.css'
     ];
 }

@@ -57,7 +57,6 @@ $col_2 = ['exclude_discount_code', 'force_secure', 'archived', 'alternative_prod
         </div>
         <?php if ($create): ?>
             <input type="hidden" class="form-control input-sm required" name="Product[base_price]" value="0" />
-            <input type="hidden" class="form-control input-sm required" name="Product[lidoli_category_id]" value="0" />
         <?php endif; ?>
         <input name="_scenario" type="hidden" value="update_product"/>
         <?= $this->render('../_buttons', ['propagation' => false]) ?>

@@ -6,15 +6,12 @@
 
 namespace kalibao\backend\modules\product\components\product\crud;
 
+use kalibao\common\components\crud\InputField;
+use kalibao\common\models\brand\Brand;
+use kalibao\common\models\product\ProductI18n;
+use kalibao\common\models\supplier\Supplier;
 use Yii;
 use yii\helpers\Url;
-use kalibao\common\components\crud\SimpleValueField;
-use kalibao\common\components\crud\InputField;
-use kalibao\common\components\i18n\I18N;
-use kalibao\common\models\product\ProductI18n;
-use kalibao\common\models\brand\Brand;
-use kalibao\common\models\supplier\Supplier;
-use kalibao\common\models\category\CategoryI18n;
 
 /**
  * Class Edit
@@ -63,17 +60,6 @@ class Edit extends \kalibao\common\components\crud\Edit
 
         $items[] = new InputField([
             'model' => $models['main'],
-            'attribute' => 'lidoli_category_id',
-            'type' => 'activeTextInput',
-            'options' => [
-                'class' => 'required form-control input-sm',
-                'maxlength' => true,
-                'placeholder' => $models['main']->getAttributeLabel('lidoli_category_id'),
-            ]
-        ]);
-
-        $items[] = new InputField([
-            'model' => $models['main'],
             'attribute' => 'brand_id',
             'type' => 'activeHiddenInput',
             'options' => [
@@ -105,18 +91,6 @@ class Edit extends \kalibao\common\components\crud\Edit
                 'data-text' => !empty($models['main']->supplier_id) ? Supplier::findOne([
                     'id' => $models['main']->supplier_id
                 ])->name : '',
-            ]
-        ]);
-
-        $items[] = new InputField([
-            'model' => $models['main'],
-            'attribute' => 'catalog_category_id',
-            'type' => 'activeDropDownList',
-            'data' => $dropDownList('category_i18n.title'),
-            'options' => [
-                'class' => 'required form-control input-sm',
-                'maxlength' => true,
-                'placeholder' => $models['main']->getAttributeLabel('catalog_category_id'),
             ]
         ]);
 

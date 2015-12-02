@@ -3,11 +3,12 @@
  * @copyright Copyright (c) 2015 Kalibao
  * @license https://github.com/kalibao/magesko/blob/master/LICENSE
  */
+$tree = ($component->tree['json'] === null)?json_encode([]):$component->tree['json'];
 
-$this->registerJs("
+$this->registerJs("console.log('foo');
     new $.kalibao.backend.product.View({
         id: '".$component->id."',
-        treeData: ". $component->tree['json'].",
+        treeData: ". $tree.",
         categories: ". $component->models['main']->getCategories(true) .",
         messages: $.extend($.kalibao.core.app.messages, { /* your messages */ })".
     (

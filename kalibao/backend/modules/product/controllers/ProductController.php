@@ -736,7 +736,6 @@ class ProductController extends Controller
             $models['main']->load($requestParams);
             $models['i18n']->load($requestParams);
 
-
             // get uploaded file instance
             $oldFileNames['main'] = [];
             $this->getUploadedFileInstances($models, $oldFileNames, $requestParams);

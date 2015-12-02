@@ -70,29 +70,6 @@ CREATE TABLE `bundle` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;
 
 
-CREATE TABLE `category` (
-  `id` bigint(20) unsigned not null auto_increment,
-  `parent` bigint(20) unsigned,
-  `media_id` bigint(20) unsigned not null,
-  `created_at` datetime not null default '0000-00-00 00:00:00',
-  `updated_at` datetime not null default '0000-00-00 00:00:00',
-  PRIMARY KEY (`id`),
-  KEY `fk_category_category1_idx` (`parent`),
-  KEY `fk_category_media1_idx` (`media_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=9;
-
-
-CREATE TABLE `category_i18n` (
-  `category_id` bigint(20) unsigned not null,
-  `i18n_id` varchar(10) not null,
-  `title` varchar(200),
-  `description` varchar(500),
-  PRIMARY KEY (`category_id`,`i18n_id`),
-  KEY `fk_category_i18n_category1_idx` (`category_id`),
-  KEY `fk_category_i18n_language1` (`i18n_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-
 CREATE TABLE `cross_selling` (
   `variant_id_1` bigint(20) unsigned not null,
   `variant_id_2` bigint(20) unsigned not null,
@@ -197,10 +174,8 @@ CREATE TABLE `product` (
   `available` tinyint(1) unsigned not null default '0',
   `available_date` datetime not null,
   `alternative_product` bigint(20) unsigned,
-  `lidoli_category_id` bigint(20) unsigned not null,
   `brand_id` bigint(20) unsigned not null,
   `supplier_id` bigint(20) unsigned not null,
-  `catalog_category_id` bigint(20) unsigned not null,
   `google_category_id` bigint(20) unsigned not null,
   `stats_category_id` bigint(20) unsigned not null,
   `accountant_category_id` bigint(20) unsigned not null,
@@ -210,10 +185,6 @@ CREATE TABLE `product` (
   `updated_at` datetime not null default '0000-00-00 00:00:00',
   PRIMARY KEY (`id`),
   KEY `fk_product_product1_idx` (`alternative_product`),
-  KEY `fk_product_category1_idx` (`catalog_category_id`),
-  KEY `fk_product_category2_idx` (`google_category_id`),
-  KEY `fk_product_category3_idx` (`stats_category_id`),
-  KEY `fk_product_category4_idx` (`accountant_category_id`),
   KEY `fk_product_brand1_idx` (`brand_id`),
   KEY `fk_product_supplier1_idx` (`supplier_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=3;

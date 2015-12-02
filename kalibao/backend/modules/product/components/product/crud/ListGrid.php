@@ -6,14 +6,12 @@
 
 namespace kalibao\backend\modules\product\components\product\crud;
 
-use Yii;
-use yii\helpers\Url;
 use kalibao\common\components\crud\DateRangeField;
 use kalibao\common\components\crud\InputField;
-use kalibao\common\models\product\ProductI18n;
 use kalibao\common\models\brand\Brand;
+use kalibao\common\models\product\ProductI18n;
 use kalibao\common\models\supplier\Supplier;
-use kalibao\common\models\category\CategoryI18n;
+use Yii;
 
 /**
  * Class ListGrid

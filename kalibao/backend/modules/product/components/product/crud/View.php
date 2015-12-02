@@ -5,15 +5,14 @@
  */
 namespace kalibao\backend\modules\product\components\product\crud;
 
+use kalibao\common\components\crud\InputField;
+use kalibao\common\components\crud\SimpleValueField;
+use kalibao\common\components\i18n\I18N;
+use kalibao\common\models\brand\Brand;
+use kalibao\common\models\product\ProductI18n;
+use kalibao\common\models\supplier\Supplier;
 use Yii;
 use yii\helpers\Url;
-use kalibao\common\components\crud\SimpleValueField;
-use kalibao\common\components\crud\InputField;
-use kalibao\common\components\i18n\I18N;
-use kalibao\common\models\product\ProductI18n;
-use kalibao\common\models\brand\Brand;
-use kalibao\common\models\supplier\Supplier;
-use kalibao\common\models\category\CategoryI18n;
 
 /**
  * Class Show
@@ -167,18 +166,6 @@ class View extends \kalibao\common\components\crud\Edit
                     'product_id' => $models['main']->alternative_product,
                     'i18n_id' => $language
                 ])->name : '',
-            ]
-        ]);
-
-        $items['lidoli_category_id'] = new InputField([
-            'model' => $models['main'],
-            'attribute' => 'lidoli_category_id',
-            'type' => 'activeTextInput',
-            'required' => true,
-            'options' => [
-                'class' => 'form-control input-sm required',
-                'maxlength' => true,
-                'placeholder' => $models['main']->getAttributeLabel('lidoli_category_id'),
             ]
         ]);
 

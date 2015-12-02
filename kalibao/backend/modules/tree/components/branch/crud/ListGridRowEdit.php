@@ -6,17 +6,15 @@
 
 namespace kalibao\backend\modules\tree\components\branch\crud;
 
+use kalibao\common\components\crud\InputField;
+use kalibao\common\components\crud\SimpleValueField;
+use kalibao\common\components\i18n\I18N;
+use kalibao\common\models\branch\BranchI18n;
+use kalibao\common\models\branchType\BranchTypeI18n;
+use kalibao\common\models\media\MediaI18n;
+use kalibao\common\models\tree\TreeI18n;
 use Yii;
 use yii\helpers\Url;
-use kalibao\common\components\crud\SimpleValueField;
-use kalibao\common\components\crud\InputField;
-use kalibao\common\components\i18n\I18N;
-use kalibao\common\models\branchType\BranchTypeI18n;
-use kalibao\common\models\tree\TreeI18n;
-use kalibao\common\models\branch\BranchI18n;
-use kalibao\common\models\media\MediaI18n;
-use kalibao\common\models\googleShoppingCategory\GoogleShoppingCategory;
-use kalibao\common\models\affiliationCategory\AffiliationCategory;
 
 /**
  * Class ListGridRowEdit

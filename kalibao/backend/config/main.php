@@ -57,9 +57,6 @@ return [
         'media' => [
             'class' => 'kalibao\backend\modules\media\Module',
         ],
-        'category' => [
-            'class' => 'kalibao\backend\modules\category\Module',
-        ],
         'attribute-type' => [
             'class' => 'kalibao\backend\modules\attributeType\Module',
         ],

@@ -105,6 +105,8 @@
 
     this.$tree.on('click', '.fa', function(e){ // fired when an action button is clicked in a node
       e.stopPropagation();
+      e.preventDefault();
+
       var data = e.target.id.split('-');
       var $node = $(this).parent();
       var event = {
@@ -249,7 +251,8 @@
       placeholder: "sortable-placeholder",
       axis: "y",
       scroll: true,
-      stop: self.reorderFilters
+      stop: self.reorderFilters,
+      cursorAt: { left: 5 }
     });
     this.$branchContainer.find('#save-filters').on('click', function() {
       var $btn = $(this);

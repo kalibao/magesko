@@ -6,21 +6,16 @@
 
 namespace kalibao\common\models\product;
 
-use Yii;
-use yii\behaviors\TimestampBehavior;
-use kalibao\common\models\bundle\Bundle;
+use kalibao\common\models\branch\Branch;
 use kalibao\common\models\brand\Brand;
-use kalibao\common\models\category\Category;
-use kalibao\common\models\supplier\Supplier;
+use kalibao\common\models\bundle\Bundle;
 use kalibao\common\models\product\ProductI18n;
 use kalibao\common\models\productMedia\ProductMedia;
+use kalibao\common\models\supplier\Supplier;
 use kalibao\common\models\variant\Variant;
-use kalibao\common\models\category\CategoryI18n;
+use Yii;
+use yii\behaviors\TimestampBehavior;
 use yii\caching\TagDependency;
-use yii\db\ActiveQuery;
-use yii\db\ActiveRecord;
-use yii\db\oci\QueryBuilder;
-use yii\db\Query;
 
 /**
  * This is the model class for table "product".
@@ -36,10 +31,8 @@ use yii\db\Query;
  * @property integer $available
  * @property string  $available_date
  * @property integer $alternative_product
- * @property integer $lidoli_category_id
  * @property integer $brand_id
  * @property integer $supplier_id
- * @property integer $catalog_category_id
  * @property integer $google_category_id
  * @property integer $stats_category_id
  * @property integer $accountant_category_id
@@ -50,17 +43,15 @@ use yii\db\Query;
  *
  * @property Bundle[] $bundles
  * @property Brand $brand
- * @property Category $catalogCategory
- * @property Category $googleCategory
- * @property Category $statsCategory
- * @property Category $accountantCategory
+ * @property Branch $googleCategory
+ * @property Branch $statsCategory
+ * @property Branch $accountantCategory
  * @property Product $alternativeProduct
  * @property Product[] $products
  * @property Supplier $supplier
  * @property ProductI18n[] $productI18ns
  * @property ProductMedia[] $productMedia
  * @property Variant[] $variants
- * @property CategoryI18n[] $categoryI18ns
  *
  * @package kalibao\common\models\product
  * @version 1.0
@@ -97,10 +88,10 @@ class Product extends \yii\db\ActiveRecord
     {
         return [
             'insert' => [
-                'exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'link_brand_product', 'link_product_test', 'available', 'available_date', 'alternative_product', 'lidoli_category_id', 'brand_id', 'supplier_id', 'catalog_category_id', 'google_category_id', 'stats_category_id', 'accountant_category_id', 'base_price', 'is_pack'
+                'exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'link_brand_product', 'link_product_test', 'available', 'available_date', 'alternative_product', 'brand_id', 'supplier_id', 'google_category_id', 'stats_category_id', 'accountant_category_id', 'base_price', 'is_pack'
             ],
             'update' => [
-                'exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'link_brand_product', 'link_product_test', 'available', 'available_date', 'alternative_product', 'lidoli_category_id', 'brand_id', 'supplier_id', 'catalog_category_id', 'google_category_id', 'stats_category_id', 'accountant_category_id', 'base_price', 'is_pack'
+                'exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'link_brand_product', 'link_product_test', 'available', 'available_date', 'alternative_product', 'brand_id', 'supplier_id', 'google_category_id', 'stats_category_id', 'accountant_category_id', 'base_price', 'is_pack'
             ],
             'update_product' => [
                 'exclude_discount_code', 'force_secure', 'archived', 'alternative_product', 'brand_id', 'supplier_id', 'stats_category_id', 'accountant_category_id'
@@ -117,9 +108,9 @@ class Product extends \yii\db\ActiveRecord
     {
         return [
             [['exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'available', 'is_pack'], 'in', 'range' => [0, 1]],
-            [['available_date', 'lidoli_category_id', 'brand_id', 'supplier_id', 'catalog_category_id', 'google_category_id', 'stats_category_id', 'accountant_category_id', 'base_price'], 'required'],
-            [['available_date'], 'date', 'format' => 'yyyy-MM-dd'],
-            [['alternative_product', 'lidoli_category_id', 'brand_id', 'supplier_id', 'catalog_category_id', 'google_category_id', 'stats_category_id', 'accountant_category_id'], 'integer'],
+            [['available_date', 'brand_id', 'supplier_id', 'google_category_id', 'stats_category_id', 'accountant_category_id', 'base_price'], 'required'],
+            [['available_date'], 'safe'],
+            [['alternative_product', 'brand_id', 'supplier_id', 'google_category_id', 'stats_category_id', 'accountant_category_id'], 'integer'],
             [['base_price'], 'number'],
             [['link_brand_product', 'link_product_test'], 'string', 'max' => 255]
         ];
@@ -142,10 +133,8 @@ class Product extends \yii\db\ActiveRecord
             'available'              => Yii::t('kalibao.backend', 'product_label_available'),
             'available_date'         => Yii::t('kalibao.backend', 'product_label_available_date'),
             'alternative_product'    => Yii::t('kalibao.backend', 'product_label_alternative_product'),
-            'lidoli_category_id'     => Yii::t('kalibao.backend', 'product_label_lidoli_category_id'),
             'brand_id'               => Yii::t('kalibao.backend', 'product_label_brand_id'),
             'supplier_id'            => Yii::t('kalibao.backend', 'product_label_supplier_id'),
-            'catalog_category_id'    => Yii::t('kalibao.backend', 'product_label_catalog_category_id'),
             'google_category_id'     => Yii::t('kalibao.backend', 'product_label_google_category_id'),
             'stats_category_id'      => Yii::t('kalibao.backend', 'product_label_stats_category_id'),
             'accountant_category_id' => Yii::t('kalibao.backend', 'product_label_accountant_category_id'),
@@ -170,38 +159,6 @@ class Product extends \yii\db\ActiveRecord
     public function getBrand()
     {
         return $this->hasOne(Brand::className(), ['id' => 'brand_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCatalogCategory()
-    {
-        return $this->hasOne(Category::className(), ['id' => 'catalog_category_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getGoogleCategory()
-    {
-        return $this->hasOne(Category::className(), ['id' => 'google_category_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getStatsCategory()
-    {
-        return $this->hasOne(Category::className(), ['id' => 'stats_category_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getAccountantCategory()
-    {
-        return $this->hasOne(Category::className(), ['id' => 'accountant_category_id']);
     }
 
     /**
@@ -263,27 +220,6 @@ class Product extends \yii\db\ActiveRecord
     public function getVariants()
     {
         return $this->hasMany(Variant::className(), ['product_id' => 'id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery
-     */
-    public function getCategoryI18ns()
-    {
-        return $this->hasMany(CategoryI18n::className(), ['category_id' => 'catalog_category_id']);
-    }
-
-    /**
-     * @return \yii\db\ActiveQuery | false
-     */
-    public function getCategoryI18n()
-    {
-        $i18ns = $this->categoryI18ns;
-        foreach ($i18ns as $i18n) {
-            if ($i18n->i18n_id == Yii::$app->language) return $i18n;
-        }
-        if (array_key_exists(0, $i18ns)) return $i18ns[0];
-        return false;
     }
 
     /**

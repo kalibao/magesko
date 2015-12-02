@@ -27,11 +27,15 @@ return [
         'news' => [
             'class' => 'kalibao\frontend\modules\news\Module',
         ],
+        'products' => [
+            'class' => 'kalibao\frontend\modules\products\Module',
+        ],
     ],
     'bootstrap' => [
         'cms',
         'contact',
-        'news'
+        'news',
+        'products'
     ],
     'components' => [
         'urlManager' => [

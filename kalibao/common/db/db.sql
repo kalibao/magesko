@@ -225,55 +225,6 @@ CREATE TABLE IF NOT EXISTS `bundle` (
 -- --------------------------------------------------------
 
 --
--- Structure de la table `category`
---
-
-CREATE TABLE IF NOT EXISTS `category` (
-  `id` bigint(20) unsigned NOT NULL COMMENT 'id of the category, ',
-  `parent` bigint(20) unsigned DEFAULT NULL COMMENT 'parent category of the current one, set to null if the category is a root category',
-  `media_id` bigint(20) unsigned NOT NULL COMMENT 'media associated to the category',
-  `created_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
-  `updated_at` datetime NOT NULL DEFAULT '0000-00-00 00:00:00'
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COMMENT='category tree used to sort products';
-
---
--- Contenu de la table `category`
---
-
-INSERT INTO `category` (`id`, `parent`, `media_id`, `created_at`, `updated_at`) VALUES
-(1, NULL, 1, '2015-06-10 08:27:56', '2015-06-10 08:27:56'),
-(2, 1, 1, '2015-07-15 10:51:47', '2015-07-15 10:51:47'),
-(3, 1, 1, '2015-07-15 10:52:58', '2015-07-15 10:52:58'),
-(4, 2, 1, '2015-07-15 10:54:10', '2015-07-15 10:54:10'),
-(5, 2, 1, '2015-07-15 10:56:17', '2015-07-15 10:56:17');
-
--- --------------------------------------------------------
-
---
--- Structure de la table `category_i18n`
---
-
-CREATE TABLE IF NOT EXISTS `category_i18n` (
-  `category_id` bigint(20) unsigned NOT NULL COMMENT 'id of the translated category',
-  `i18n_id` varchar(10) CHARACTER SET utf8 COLLATE utf8_bin NOT NULL COMMENT 'id of the language',
-  `title` varchar(200) DEFAULT NULL COMMENT 'translation for the title of the category',
-  `description` varchar(500) DEFAULT NULL COMMENT 'translation for the description of the category'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='translations for the categories';
-
---
--- Contenu de la table `category_i18n`
---
-
-INSERT INTO `category_i18n` (`category_id`, `i18n_id`, `title`, `description`) VALUES
-(1, 'fr', 'base', 'categorie de base'),
-(2, 'fr', 'Kitesurf', 'Tout pour le KiteSurf'),
-(3, 'fr', 'Wakeboard', 'Tout pour le wake'),
-(4, 'fr', 'Aile de kite', 'Kitesurf Les ailes'),
-(5, 'fr', 'Planches de kite', 'Kitesurf les planches');
-
--- --------------------------------------------------------
-
---
 -- Structure de la table `cms_image`
 --
 
@@ -1770,7 +1721,6 @@ INSERT INTO `message` (`id`, `message_group_id`, `source`, `created_at`, `update
 (683, 2, 'product_label_available', '2015-05-25 05:24:32', '2015-05-25 05:24:32'),
 (684, 2, 'product_label_available_date', '2015-05-25 05:24:59', '2015-05-25 05:24:59'),
 (685, 2, 'product_label_alternative_product', '2015-05-25 05:25:16', '2015-05-25 05:25:16'),
-(686, 2, 'product_label_lidoli_category_id', '2015-05-25 05:25:42', '2015-05-25 05:25:42'),
 (687, 2, 'product_label_brand_id', '2015-05-25 05:25:55', '2015-05-25 05:25:55'),
 (688, 2, 'product_label_supplier_id', '2015-05-25 05:26:10', '2015-05-25 05:26:10'),
 (689, 2, 'product_label_catalog_category_id', '2015-05-25 05:26:35', '2015-05-25 05:26:35'),
@@ -2632,8 +2582,6 @@ INSERT INTO `message_i18n` (`message_id`, `i18n_id`, `translation`) VALUES
 (684, 'fr', 'Date de disponibilité'),
 (685, 'en', 'Alternative product'),
 (685, 'fr', 'Produit alternatif'),
-(686, 'en', 'Lidoli category'),
-(686, 'fr', 'Catégorie Lidoli'),
 (687, 'en', 'Brand'),
 (687, 'fr', 'Marque'),
 (688, 'en', 'Supplier'),
@@ -2877,10 +2825,8 @@ CREATE TABLE IF NOT EXISTS `product` (
   `available` tinyint(1) unsigned NOT NULL DEFAULT '0' COMMENT '0 : the product is not yet available',
   `available_date` datetime NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'date from which the product will be available',
   `alternative_product` bigint(20) unsigned DEFAULT NULL COMMENT 'id of an alternative productwhich can replace the current one',
-  `lidoli_category_id` bigint(20) unsigned NOT NULL,
   `brand_id` bigint(20) unsigned NOT NULL COMMENT 'id of the product''s brand',
   `supplier_id` bigint(20) unsigned NOT NULL COMMENT 'id of the product''s supplier',
-  `catalog_category_id` bigint(20) unsigned NOT NULL COMMENT 'id of the catalog category in which the product is',
   `google_category_id` bigint(20) unsigned NOT NULL COMMENT 'id of the catalog category in which the product is for google bot',
   `stats_category_id` bigint(20) unsigned NOT NULL COMMENT 'id of the category in which the product is for statistics purposes',
   `accountant_category_id` bigint(20) unsigned NOT NULL COMMENT 'id of the category in which the product is for accountant purposes',
@@ -2894,8 +2840,8 @@ CREATE TABLE IF NOT EXISTS `product` (
 -- Contenu de la table `product`
 --
 
-INSERT INTO `product` (`id`, `exclude_discount_code`, `force_secure`, `archived`, `top_product`, `exclude_from_google`, `link_brand_product`, `link_product_test`, `available`, `available_date`, `alternative_product`, `lidoli_category_id`, `brand_id`, `supplier_id`, `catalog_category_id`, `google_category_id`, `stats_category_id`, `accountant_category_id`, `base_price`, `is_pack`, `created_at`, `updated_at`) VALUES
-(1, 0, 0, 0, 0, 0, NULL, NULL, 0, '2015-06-01 00:00:00', NULL, 0, 1, 1, 1, 1, 1, 1, 166.6583, 0, '2015-06-10 08:29:11', '2015-06-23 11:39:51');
+INSERT INTO `product` (`id`, `exclude_discount_code`, `force_secure`, `archived`, `top_product`, `exclude_from_google`, `link_brand_product`, `link_product_test`, `available`, `available_date`, `alternative_product`, `brand_id`, `supplier_id`, `google_category_id`, `stats_category_id`, `accountant_category_id`, `base_price`, `is_pack`, `created_at`, `updated_at`) VALUES
+(1, 0, 0, 0, 0, 0, NULL, NULL, 0, '2015-06-01 00:00:00', NULL, 1, 1, 1, 1, 1, 166.6583, 0, '2015-06-10 08:29:11', '2015-06-23 11:39:51');
 
 -- --------------------------------------------------------
 
@@ -3889,22 +3835,6 @@ ALTER TABLE `bundle`
   ADD KEY `fk_bundle_variant1_idx` (`variant_id`);
 
 --
--- Index pour la table `category`
---
-ALTER TABLE `category`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `fk_category_category1_idx` (`parent`),
-  ADD KEY `fk_category_media1_idx` (`media_id`);
-
---
--- Index pour la table `category_i18n`
---
-ALTER TABLE `category_i18n`
-  ADD PRIMARY KEY (`category_id`,`i18n_id`),
-  ADD KEY `fk_category_i18n_category1_idx` (`category_id`),
-  ADD KEY `fk_category_i18n_language1` (`i18n_id`);
-
---
 -- Index pour la table `cms_image`
 --
 ALTER TABLE `cms_image`
@@ -4301,10 +4231,6 @@ ALTER TABLE `person_gender_i18n`
 ALTER TABLE `product`
   ADD PRIMARY KEY (`id`),
   ADD KEY `fk_product_product1_idx` (`alternative_product`),
-  ADD KEY `fk_product_category1_idx` (`catalog_category_id`),
-  ADD KEY `fk_product_category2_idx` (`google_category_id`),
-  ADD KEY `fk_product_category3_idx` (`stats_category_id`),
-  ADD KEY `fk_product_category4_idx` (`accountant_category_id`),
   ADD KEY `fk_product_brand1_idx` (`brand_id`),
   ADD KEY `fk_product_supplier1_idx` (`supplier_id`);
 
@@ -4485,11 +4411,6 @@ ALTER TABLE `brand`
 --
 ALTER TABLE `bundle`
   MODIFY `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id of the bundle';
---
--- AUTO_INCREMENT pour la table `category`
---
-ALTER TABLE `category`
-  MODIFY `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT COMMENT 'id of the category, ',AUTO_INCREMENT=6;
 --
 -- AUTO_INCREMENT pour la table `cms_image`
 --
@@ -4715,21 +4636,6 @@ ALTER TABLE `bundle`
   ADD CONSTRAINT `fk_bundle_variant1` FOREIGN KEY (`variant_id`) REFERENCES `variant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_product_has_variant_product1` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_product_has_variant_variant1` FOREIGN KEY (`bundle_variant`) REFERENCES `variant` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Contraintes pour la table `category`
---
-ALTER TABLE `category`
-  ADD CONSTRAINT `fk_category_category1` FOREIGN KEY (`parent`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_category_media1` FOREIGN KEY (`media_id`) REFERENCES `media` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
---
--- Contraintes pour la table `category_i18n`
---
-ALTER TABLE `category_i18n`
-  ADD CONSTRAINT `category_i18n_ibfk_1` FOREIGN KEY (`i18n_id`) REFERENCES `language` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_category_i18n_category1` FOREIGN KEY (`category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_category_i18n_language1` FOREIGN KEY (`i18n_id`) REFERENCES `language` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 --
 -- Contraintes pour la table `cms_image`
@@ -5015,10 +4921,6 @@ ALTER TABLE `person_gender_i18n`
 --
 ALTER TABLE `product`
   ADD CONSTRAINT `fk_product_brand1` FOREIGN KEY (`brand_id`) REFERENCES `brand` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION,
-  ADD CONSTRAINT `fk_product_category1` FOREIGN KEY (`catalog_category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_product_category2` FOREIGN KEY (`google_category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_product_category3` FOREIGN KEY (`stats_category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_product_category4` FOREIGN KEY (`accountant_category_id`) REFERENCES `category` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_product_product1` FOREIGN KEY (`alternative_product`) REFERENCES `product` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_product_supplier1` FOREIGN KEY (`supplier_id`) REFERENCES `supplier` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 

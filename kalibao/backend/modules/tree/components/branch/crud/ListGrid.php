@@ -6,16 +6,14 @@
 
 namespace kalibao\backend\modules\tree\components\branch\crud;
 
-use Yii;
-use yii\helpers\Url;
 use kalibao\common\components\crud\DateRangeField;
 use kalibao\common\components\crud\InputField;
-use kalibao\common\models\branchType\BranchTypeI18n;
-use kalibao\common\models\tree\TreeI18n;
 use kalibao\common\models\branch\BranchI18n;
+use kalibao\common\models\branchType\BranchTypeI18n;
 use kalibao\common\models\media\MediaI18n;
-use kalibao\common\models\googleShoppingCategory\GoogleShoppingCategory;
-use kalibao\common\models\affiliationCategory\AffiliationCategory;
+use kalibao\common\models\tree\TreeI18n;
+use Yii;
+use yii\helpers\Url;
 
 /**
  * Class ListGrid

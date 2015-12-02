@@ -118,6 +118,7 @@
 
     $(window).off('popstate');
     $(window).on("popstate", function(e) {
+      console.log(e);
       var action = document.URL;
       var params = '';
       $.kalibao.core.app.ajaxQuery(

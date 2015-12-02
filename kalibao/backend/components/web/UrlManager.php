@@ -39,7 +39,7 @@ class UrlManager extends \yii\web\UrlManager
      */
     public function createUrl($params)
     {
-        if (!isset($params['language'])) {
+        if (is_array($params) && !isset($params['language'])) {
             $params['language'] = Yii::$app->language;
         }
 

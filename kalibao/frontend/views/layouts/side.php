@@ -29,10 +29,18 @@ BootstrapAsset::register($this);
         <?= $this->blocks['cms_block_page_1'] ?>
     <?php endif; ?>
 
-    <?= \kalibao\frontend\widgets\facets\Facets::widget(['branch' => Yii::$app->request->get('cat', null)]); ?>
     <!-- Main Content -->
     <div class="container">
-        <?= $content; ?>
+        <div class="row">
+            <div class="col-sm-3">
+                <?= \kalibao\frontend\widgets\categories\Categories::widget(['branch' => Yii::$app->request->get('cat', null)]); ?>
+                <?= \kalibao\frontend\widgets\facets\Facets::widget(['branch' => Yii::$app->request->get('cat', null)]); ?>
+                <?php $this->registerJs(\kalibao\frontend\widgets\facets\Facets::getJs()) ?>
+            </div>
+            <div class="col-sm-9">
+                <?= $content; ?>
+            </div>
+        </div>
     </div>
 
     <!-- Footer -->

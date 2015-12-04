@@ -29,19 +29,17 @@ class Module extends \yii\base\Module implements \yii\base\BootstrapInterface
                     'pattern' => '<language:'.$language.'>/<cms_slug:'.$list.'>/<page:\d+>',
                     'route' => 'products/products/index',
                     'defaults' => ['page' => 1]
-                ],
-            ], false);
-            $app->getUrlManager()->addRules([
-                [
-                    'pattern' => '<language:'.$language.'>/<cms_slug:'.$list.'>/<category:[\w-]+>/<page:\d+>',
+                ], [
+                    'pattern' => '<language:'.$language.'>/<cms_slug:'.$list.'>/<category:[\w-]*[a-zA-Z-][\w-]*>/<page:\d+>',
                     'route' => 'products/products/category',
                     'defaults' => ['page' => 1]
-                ],
-            ], false);
-            $app->getUrlManager()->addRules([
-                [
+                ], [
                     'pattern' => '<language:'.$language.'>/<cms_slug:'.$details.'>/<name:[\w-]+>',
                     'route' => 'products/products/details',
+                    'defaults' => ['page' => 1]
+                ], [
+                    'pattern' => '<language:'.$language.'>/<cms_slug:category_filtered>',
+                    'route' => 'products/products/category-filtered',
                     'defaults' => ['page' => 1]
                 ],
             ], false);

@@ -1,6 +1,7 @@
 <?php
 /**
  * @copyright Copyright (c) 2015 Kalibao
+ * Forked from laravel/framework
  * @license https://github.com/laravel/framework/blob/5.1/LICENSE.txt
  */
 
@@ -340,5 +341,17 @@ class Arr
             }
         }
         return $filtered;
+    }
+
+    public static function hasValues($input, $deepCheck = true) {
+        foreach($input as $value) {
+            if(is_array($value) && $deepCheck) {
+                if(self::hasValues($value, $deepCheck))
+                    return true;
+            }
+            elseif(!empty($value) && !is_array($value))
+                return true;
+        }
+        return false;
     }
 }

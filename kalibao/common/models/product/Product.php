@@ -12,7 +12,9 @@ use kalibao\common\models\bundle\Bundle;
 use kalibao\common\models\product\ProductI18n;
 use kalibao\common\models\productMedia\ProductMedia;
 use kalibao\common\models\supplier\Supplier;
+use kalibao\common\models\sheet\Sheet;
 use kalibao\common\models\variant\Variant;
+use kalibao\common\models\variantAttribute\VariantAttribute;
 use Yii;
 use yii\behaviors\TimestampBehavior;
 use yii\caching\TagDependency;
@@ -442,5 +444,37 @@ class Product extends \yii\db\ActiveRecord
     public static function generateTagStatic($id = '', $context = '')
     {
         return (md5('ProductTag' . $id . $context));
+    }
+
+    public static function countByAttribute($where = [])
+    {
+        $sheets = Sheet::find()
+            ->innerJoinWith('sheetType')
+            ->where([
+                'table' => 'product'
+            ])
+            ->andwhere($where)
+            ->select('sheet.id, sheet_type_id, primary_key')
+            ->asArray()
+            ->all();
+
+        $productIds = [];
+        foreach ($sheets as $sheet) {
+            $productIds[] = $sheet['primary_key'];
+        }
+
+        if (empty($productIds)) return false;
+
+        $command = Yii::$app->db->createCommand(
+            "SELECT `attribute_id`, `attribute_type_id`, count( distinct product_id) as 'number'
+             FROM `variant`
+             INNER JOIN `variant_attribute`
+             ON `variant`.`id` = `variant_attribute`.`variant_id`
+             INNER JOIN `attribute`
+             ON `variant_attribute`.`attribute_id` = `attribute`.`id`
+             WHERE `product_id` IN (".implode(',', $productIds).")
+             GROUP BY `attribute_id`"
+        );
+        return $command->queryAll();
     }
 }

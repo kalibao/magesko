@@ -5,7 +5,7 @@
  */
 $tree = ($component->tree['json'] === null)?json_encode([]):$component->tree['json'];
 
-$this->registerJs("console.log('foo');
+$this->registerJs("
     new $.kalibao.backend.product.View({
         id: '".$component->id."',
         treeData: ". $tree.",

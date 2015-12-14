@@ -214,18 +214,18 @@ Array.prototype.remove = function() {
     })
   };
 
-  /**
-   * Init facets
-   */
-  $.kalibao.frontend.facets.Nav.prototype.initFacets = function () {
-    var self = this;
-    this.currentFacets = JSON.parse(window.location.hash.substr(1));
-    $.each(this.currentFacets, function(){
-      $.each(this, function(){
-        self.$facetsContainer.find('[data-id='+this.split(':')[1]+']').find('input').prop('checked', true);
-      })
-    })
-  };
+//  /**
+//   * Init facets
+//   */
+//  $.kalibao.frontend.facets.Nav.prototype.initFacets = function () {
+//    var self = this;
+//    this.currentFacets = JSON.parse(window.location.hash.substr(1));
+//    $.each(this.currentFacets, function(){
+//      $.each(this, function(){
+//        self.$facetsContainer.find('[data-id='+this.split(':')[1]+']').find('input').prop('checked', true);
+//      })
+//    })
+//  };
 
   /**
    * returns the value of the url parameter (similar to $_GET() in php)

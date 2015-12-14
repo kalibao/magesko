@@ -189,7 +189,7 @@ Array.prototype.remove = function() {
     this.currentFacets = {};
 
     this.initEvents();
-    this.initFacets();
+    //this.initFacets();
   };
 
   /**

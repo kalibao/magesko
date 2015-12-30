@@ -44,7 +44,7 @@ DEFAULT CHARACTER SET = utf8;
 -- Table `tax`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `tax` (
-  `id` BIGINT UNSIGNED NOT NULL,
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   `rate` DECIMAL(10,3) NOT NULL,
   `created_at` timestamp NULL DEFAULT '0000-00-00 00:00:00',
   `updated_at` timestamp NULL DEFAULT '0000-00-00 00:00:00',

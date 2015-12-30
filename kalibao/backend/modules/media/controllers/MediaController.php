@@ -160,7 +160,6 @@ class MediaController extends Controller
 
         if ($request->get('product', false)) {
             $productMedia = new ProductMedia(['scenario' => 'insert']);
-            var_dump($crudEdit->models);
             $productMedia->media_id = $crudEdit->models['main']->id;
             $productMedia->product_id = $request->get('product');
             if (!$productMedia->save()) {

@@ -382,8 +382,47 @@
       );
     });
 
-    this.$main.find('#send-media').click(function(e){
-      setTimeout(function(){location.reload()}, 750);
+    this.$main.find('#send-media').off('click').click(function(e){
+      e.preventDefault();
+
+      if (window.FormData && ! self.validate(self.activeValidators, self.$main)) {
+        var $form = $(this).closest('form');
+        var action = $form.attr('action');
+        var params = new FormData();
+
+        $form.find('input, select, textarea').each(function () {
+          var $input = $(this);
+          if ($input.attr('name') !== undefined) {
+            var inputType = $input.attr('type');
+            if (inputType === 'file') {
+              if ($input.get(0).files.length > 0) {
+                params.append($input.attr('name'), $input.get(0).files[0]);
+              }
+            } else if(inputType === 'checkbox') {
+              if ($input.is(':checked')) {
+                params.append($input.attr('name'), $input.val());
+              }
+            } else {
+              params.append($input.attr('name'), $input.val());
+            }
+          }
+        });
+
+        self.$container.block(self.blockUIOptions);
+
+        $.kalibao.core.app.ajaxQuery(
+          action,
+          function (json) {
+            console.log('finish');
+            window.location.reload();
+          },
+          'POST',
+          params,
+          'JSON',
+          true
+        );
+      }
+      return false
     });
 
     this.$main.find('.delete-product-media').click(function(){

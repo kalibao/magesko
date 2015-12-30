@@ -78,6 +78,12 @@ return [
         'tree' => [
             'class' => 'kalibao\backend\modules\tree\Module',
         ],
+        'tax' => [
+            'class' => 'kalibao\backend\modules\tax\Module',
+        ],
+        'country' => [
+            'class' => 'kalibao\backend\modules\country\Module',
+        ],
     ],
     'components' => [
         'request' => [

@@ -189,7 +189,7 @@ Array.prototype.remove = function() {
     this.currentFacets = {};
 
     this.initEvents();
-    //this.initFacets();
+    this.initFacets();
   };
 
   /**
@@ -198,34 +198,50 @@ Array.prototype.remove = function() {
   $.kalibao.frontend.facets.Nav.prototype.initEvents = function () {
     var self = this;
     this.$facetsContainer.find('input').change(function(){
+      self.$productsZone.block($.extend($.blockUI.defaults, {
+        message: '&nbsp;'
+      }));
       var $el = $(this);
       var type = $el.closest('ul')[0].previousSibling.nodeValue;
       self.currentFacets[type] = self.currentFacets[type] || [];
       if ($el.is(':checked')) {
-        self.currentFacets[type].push($el.parent().text() + ':' + $el.parent().data('id'));
+        self.currentFacets[type].push($el.parent().text().split(' ')[0] + ':' + $el.parent().data('id'));
       } else {
-        self.currentFacets[type].remove($el.parent().text() + ':' + $el.parent().data('id'))
+        self.currentFacets[type].remove($el.parent().text().split(' ')[0] + ':' + $el.parent().data('id'))
       }
       var filters = JSON.stringify(self.currentFacets);
       var cat = self.urlParam('cat');
+      window.location.hash = btoa(filters);
       $.post('/fr/category_filtered', {filters: filters, cat: cat}, function(response){
         self.$productsZone.html(response)
       });
     })
   };
 
-//  /**
-//   * Init facets
-//   */
-//  $.kalibao.frontend.facets.Nav.prototype.initFacets = function () {
-//    var self = this;
-//    this.currentFacets = JSON.parse(window.location.hash.substr(1));
-//    $.each(this.currentFacets, function(){
-//      $.each(this, function(){
-//        self.$facetsContainer.find('[data-id='+this.split(':')[1]+']').find('input').prop('checked', true);
-//      })
-//    })
-//  };
+  /**
+   * Init facets
+   */
+  $.kalibao.frontend.facets.Nav.prototype.initFacets = function () {
+    var self = this;
+    if (window.location.hash == '') return;
+    try {
+      this.currentFacets = JSON.parse(atob(window.location.hash.substr(1)));
+    } catch(e) {
+      console.log('invalid hash');
+      return;
+    }
+    $.each(this.currentFacets, function(){
+      $.each(this, function(){
+        self.$facetsContainer.find('[data-id='+this.split(':')[1]+']').find('input').prop('checked', true);
+      });
+      var filters = JSON.stringify(self.currentFacets);
+      var cat = self.urlParam('cat');
+      var route = window.location.pathname.substr(window.location.pathname.indexOf('/', 1) + 1);
+      $.post('/fr/category_filtered', {filters: filters, cat: cat, route: route}, function(response){
+        self.$productsZone.html(response)
+      });
+    })
+  };
 
   /**
    * returns the value of the url parameter (similar to $_GET() in php)

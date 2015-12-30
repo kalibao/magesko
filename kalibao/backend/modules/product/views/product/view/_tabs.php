@@ -9,7 +9,7 @@
 <ul class="nav nav-tabs">
     <li><a href="#product" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_product') ?></a></li>
     <li class="dropdown">
-        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+        <a class="dropdown-toggle" data-toggle="dropdown">
             <?= Yii::t('kalibao.backend', 'product_tab_attribute') ?> <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">

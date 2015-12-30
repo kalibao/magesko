@@ -26,14 +26,24 @@ class AppAsset extends AssetBundle
      * @inheritdoc
      */
     public $publishOptions = [
-        //'forceCopy' => YII_ENV_DEV
+        'forceCopy' => YII_ENV_DEV
     ];
 
     /**
      * @inheritdoc
      */
     public $css = [
+        'dist/css/main.css',
         'dist/css/clean-blog.css',
         'dist/css/font-awesome.min.css'
     ];
+
+    /**
+     * @inheritdoc
+     */
+    public $depends = [
+        'yii\web\JqueryAsset',
+        'kalibao\common\components\web\BlockUIAsset',
+    ];
+
 }

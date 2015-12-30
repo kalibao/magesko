@@ -47,7 +47,7 @@ class ProductsController extends Controller
         }
 
         // page size
-        $pageSize = 5;
+        $pageSize = 10;
 
         // main query
         $query = Product::find()
@@ -90,7 +90,7 @@ class ProductsController extends Controller
     public function actionCategory()
     {
         $request = Yii::$app->request;
-        $pageSize = 5;
+        $pageSize = 10;
 
         $category = $request->get('cat', false);
         if ($category === false) {
@@ -154,7 +154,7 @@ class ProductsController extends Controller
     public function actionCategoryFiltered()
     {
         $request = Yii::$app->request;
-        $pageSize = 5;
+        $pageSize = 10;
 
         $category = $request->post('cat', false);
         $filters  = json_decode($request->post('filters', '{}'), true);
@@ -216,7 +216,10 @@ class ProductsController extends Controller
             'totalCount' => sizeof($models),
             'pageSize' => $pageSize,
             'defaultPageSize' => $pageSize,
-            'params' => $_GET
+            'params' => [
+                'cat' => $request->post('cat', false)
+            ],
+            'route' => $request->post('route', false)
         ]);
 
         $productUrl = '/' . CmsPageService::getSlugById(48, Yii::$app->language) . '/';

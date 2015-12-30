@@ -7,6 +7,7 @@
 use kalibao\common\components\cms\CmsPageService;
 use kalibao\common\components\helpers\URLify;
 use yii\widgets\LinkPager;
+
 ?>
 <div id="products">
     <?php foreach ($models as $model): ?>
@@ -14,14 +15,21 @@ use yii\widgets\LinkPager;
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
                 <div class="post-preview">
                     <h2 class="post-title">
-                        <a href="<?= Yii::$app->getUrlManager()->createUrl([$productUrl . URLify::filter($model->productI18ns[0]->name), 'prod' => $model->id]) ?>">
+                        <a href="<?= Yii::$app->getUrlManager()->createUrl([
+                            $productUrl . URLify::filter($model->productI18ns[0]->name),
+                            'prod' => $model->id
+                        ]) ?>">
                             <?= $model->productI18ns[0]->name; ?>
-                        </a>
+                        </a><br>
+                        <?php foreach ($model->attributeInfo as $attributeType => $datas): ?>
+                            <?php foreach ($datas as $data): ?>
+                                <span class="badge"><?= $data['value'] ?></span>
+                            <?php endforeach; ?>
+                        <?php endforeach ?>
                     </h2>
                     <p class="post-subtitle">
                         <?= $model->productI18ns[0]->short_description; ?>
                     </p>
-                    <p class="post-meta"></p>
                 </div>
                 <hr>
             </div>
@@ -32,7 +40,7 @@ use yii\widgets\LinkPager;
             <?=
             LinkPager::widget([
                 'pagination' => $pages,
-                'options' => [
+                'options'    => [
                     'class' => 'pagination pagination-sm no-margin pull-left'
                 ],
             ]);

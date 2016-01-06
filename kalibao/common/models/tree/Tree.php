@@ -163,7 +163,8 @@ class Tree extends \yii\db\ActiveRecord
                 "SELECT  hi.id AS item,
                 build_tree_path('.', hi.id) AS path,
                 hi.order,
-                bi18n.label as `label`
+                bi18n.label as `label`,
+                hi.visible
                 FROM    (
                     SELECT  build_tree(id) AS id,
                             @level AS level, tree_id
@@ -199,13 +200,13 @@ class Tree extends \yii\db\ActiveRecord
 
             $text = $v['label'];
             if($actionBtns) {
-                $text .= " &nbsp; <i title=\"Éditer\" class=\"fa fa-edit\" id=\"edit-{$v['item']}\"></i>" .
-                         " &nbsp; <i title=\"Modifier la présentation\" class=\"fa fa-paint-brush\" id=\"present-{$v['item']}\"></i>" .
-                         " &nbsp; <i title=\"Supprimer\" class=\"fa fa-trash text-red\" id=\"delete-{$v['item']}\"></i>";
+                $text .= " &nbsp; <i class=\"fa fa-edit\" id=\"edit-{$v['item']}\"  data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"".Yii::t('kalibao.backend', 'label_edit')."\"></i>" .
+                         " &nbsp; <i class=\"fa fa-paint-brush\" id=\"present-{$v['item']}\"  data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"".Yii::t('kalibao.backend', 'label_present')."\"></i>" .
+                         " &nbsp; <i class=\"fa fa-trash text-red\" id=\"delete-{$v['item']}\"  data-toggle=\"tooltip\" data-placement=\"bottom\" title=\"".Yii::t('kalibao', 'btn_delete')."\"></i>";
             }
-
             Arr::set($tree, $v['path'], [
                 "id"       => 'branch-' . $v['item'],
+                "li_attr"  => ['class' => ($v['visible'] == 1)?'':"cat-hidden"],
                 "text"     => $text,
                 "order"    => $v['order'],
                 "children" => []
@@ -232,6 +233,32 @@ class Tree extends \yii\db\ActiveRecord
             return $tree;
         }
     }
+
+    private function formatChildren($data)
+    {
+        if (empty($data)) return [];
+        $data = array_values($data);
+        foreach($data as &$d) {
+            $d['children'] = $this->formatChildren($d['children']);
+        }
+        return $data;
+    }
+
+    /*  this method seems to be slower than the other one for big trees
+    public function treeToJson()
+    {
+        $data = Branch::findAll(['tree_id' => 1]);
+        $tree = '';
+        foreach ($data as $d) {
+            $tree[] = [
+                'id'     => 'branch-' . $d->id,
+                'parent' => 'branch-' . $d->parent,
+                'text'   => 'branch-' . $d->id,
+            ];
+        }
+        return json_encode($tree);
+    }
+    */
 
     public function treeToList()
     {
@@ -267,32 +294,6 @@ class Tree extends \yii\db\ActiveRecord
             return $tree;
         }
     }
-
-    private function formatChildren($data)
-    {
-        if (empty($data)) return [];
-        $data = array_values($data);
-        foreach($data as &$d) {
-            $d['children'] = $this->formatChildren($d['children']);
-        }
-        return $data;
-    }
-
-    /*  this method seems to be slower than the other one for big trees
-    public function treeToJson()
-    {
-        $data = Branch::findAll(['tree_id' => 1]);
-        $tree = '';
-        foreach ($data as $d) {
-            $tree[] = [
-                'id'     => 'branch-' . $d->id,
-                'parent' => 'branch-' . $d->parent,
-                'text'   => 'branch-' . $d->id,
-            ];
-        }
-        return json_encode($tree);
-    }
-    */
 
     /**
      * function to generate a tag for caching data (alias to static method)

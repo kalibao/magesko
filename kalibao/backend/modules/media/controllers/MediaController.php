@@ -6,7 +6,9 @@
 
 namespace kalibao\backend\modules\media\controllers;
 
+use kalibao\common\components\helpers\Mime;
 use kalibao\common\models\media\Media;
+use kalibao\common\models\media\MediaI18n;
 use kalibao\common\models\product\Product;
 use kalibao\common\models\productMedia\ProductMedia;
 use Yii;
@@ -16,6 +18,7 @@ use yii\db\ActiveRecord;
 use kalibao\common\components\helpers\Html;
 use kalibao\backend\components\crud\Controller;
 use yii\helpers\FileHelper;
+use yii\web\HttpException;
 use yii\web\Response;
 
 /**
@@ -77,6 +80,11 @@ class MediaController extends Controller
             'allow' => true,
             'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
         ];
+        $b['access']['rules'][] = [
+            'actions' => ['from-url'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+        ];
 
         return $b;
     }
@@ -126,6 +134,46 @@ class MediaController extends Controller
         $filePath = $this->uploadConfig['kalibao\common\models\media\Media']['file']['basePath'] . '/' . $media->file;
         $fileName = (($media->mediaI18n)?$media->mediaI18n->title:$media->file) . '.' . strtolower(pathinfo($filePath)['extension']);
         return Yii::$app->response->sendFile($filePath, $fileName);
+    }
+
+
+    /**
+     * Create action
+     * @return string
+     * @throws HttpException
+     */
+    public function actionFromUrl()
+    {
+        $request = Yii::$app->request;
+        if (!$request->isPost) {
+            throw new HttpException(405, 'method not allowed');
+        }
+
+        $url = $request->post('media_url');
+        $import = ($request->post('media_import'))?true:false;
+        $title = $request->post('media_title');
+        $filename = ($import)? $this->grabImage($url, 'image') : $url;
+
+        $media = new Media(['scenario' => 'insert']);
+        $media->file = $filename;
+        $media->media_type_id = 1;
+        $saveMedia = $media->save();
+        if ($saveMedia) {
+            $media_i18n = new MediaI18n(['scenario' => 'insert']);
+            $media_i18n->media_id = $media->id;
+            $media_i18n->i18n_id = Yii::$app->language;
+            $media_i18n->title = $title;
+            $saveI18n = $media_i18n->save();
+            if ($saveI18n) {
+                $productMedia = new ProductMedia(['scenario' => 'insert']);
+                $productMedia->media_id = $media->id;
+                $productMedia->product_id = $request->get('product');
+                $saveProductMedia = $productMedia->save();
+                TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('product')));
+                if ($saveProductMedia) return json_encode(['success' => true]);
+            }
+        }
+        return json_encode(['success' => false]);
     }
 
     /**
@@ -235,5 +283,42 @@ class MediaController extends Controller
                 return [];
                 break;
         }
+    }
+
+    /**
+     * grab a file from given url and save it on the server
+     * @param string $url url of the file to grab
+     * @param bool|string $type restrict to a specific type based on the first part of the mime type. default to false
+     * @return bool|string path of the created file starting from the data folder or false if failed
+     */
+    private function grabImage($url, $type = false){
+        $mime = get_headers($url, true)['Content-Type'];
+
+        if ($type !== false && explode('/', $mime)[0] != $type) {
+            return false;
+        }
+
+        $ext = Mime::mimeToExtension($mime);
+        $name = md5(Yii::$app->getSecurity()->generateRandomString() . '.' . uniqid());
+        $dataPath = 'grabbed/' . substr($name, 0, 2) . '/';
+        $name = $dataPath . $name . $ext;
+        $path = $this->uploadConfig[$this->crudModelsClass['main']]['file']['basePath'] . '/';
+        $filename = $path . $name;
+
+        if (!file_exists($path . $dataPath)) mkdir($path . $dataPath, 0777, true);
+        $fp = fopen ($filename, 'w+');
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_FILE, $fp);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 1000);
+        curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0');
+
+        curl_exec($ch);
+
+        curl_close($ch);
+        fclose($fp);
+
+        return $name;
     }
 }

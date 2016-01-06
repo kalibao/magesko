@@ -51,16 +51,18 @@
     this.$resetTree = this.$container.find('#reset-tree');
     this.initComponents();
     this.initEvents();
+    $('[data-toggle="tooltip"]').tooltip();
     $.kalibao.core.app.hasUnsavedChanges = function() {
       if (window.location.pathname.search('/tree/tree/view') === -1) return false;
       return self.changed;
-    }
+    };
   };
 
   /**
    * Init events
    */
   $.kalibao.backend.tree.View.prototype.initEvents = function () {
+    this.$closeAll.hide();
     this.initActionsEvents();
     this.initTreeEvents();
     this.initFilterEvents();
@@ -101,6 +103,10 @@
    */
   $.kalibao.backend.tree.View.prototype.initTreeEvents = function () {
     var self = this;
+    this.$tree.on('ready.jstree open_node.jstree', function(){
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+
     this.$tree.on('click', '#add-branch', function(e){e.stopPropagation();});
 
     this.$tree.on('click', '.fa', function(e){ // fired when an action button is clicked in a node
@@ -194,10 +200,14 @@
 
     this.$openAll.on('click', function() {
       self.$tree.jstree().open_all();
+      self.$closeAll.show();
+      self.$openAll.hide();
     });
 
     this.$closeAll.on('click', function() {
       self.$tree.jstree().close_all();
+      self.$closeAll.hide();
+      self.$openAll.show();
     })
   };
 
@@ -247,6 +257,7 @@
       }
     });
     this.$branchContainer.find('.sortable').sortable({
+      handle: ".sort-handle",
       cursor: "move",
       placeholder: "sortable-placeholder",
       axis: "y",
@@ -277,7 +288,7 @@
       $.ajax({
         method: 'post',
         url: '../branch/add-filter',
-        data: {insert: insert, update: update},
+        data: {insert: insert, update: update, tree: self.urlParam('id')},
         success: function(){
           self.$branchContainer.find('#save-filters').hide();
           $.toaster({ priority : 'success', title : 'Enregistré', message : 'Les filtres ont été enregistrés'})

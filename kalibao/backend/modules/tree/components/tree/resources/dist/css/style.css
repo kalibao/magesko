@@ -1072,8 +1072,9 @@
   padding: 6px 12px;
 }
 
-#add-branch {
+#add-branch, #open-all, #close-all {
   margin-bottom: 5px;
+  margin-left: 7px;
 }
 
 #branch-container {
@@ -1082,4 +1083,11 @@
 
 .toggle {
   margin-bottom: -1px;
+}
+
+.cat-hidden {
+  color: #999;
+}
+.cat-hidden .text-red {
+  color: #ff8680 !important;
 }

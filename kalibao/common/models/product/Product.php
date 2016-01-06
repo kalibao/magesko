@@ -1,8 +1,8 @@
 <?php
 /**
-* @copyright Copyright (c) 2015 Kalibao
-* @license https://github.com/kalibao/magesko/blob/master/LICENSE
-*/
+ * @copyright Copyright (c) 2015 Kalibao
+ * @license https://github.com/kalibao/magesko/blob/master/LICENSE
+ */
 
 namespace kalibao\common\models\product;
 
@@ -28,20 +28,20 @@ use yii\caching\TagDependency;
  * @property integer $archived
  * @property integer $top_product
  * @property integer $exclude_from_google
- * @property string  $link_brand_product
- * @property string  $link_product_test
+ * @property string $link_brand_product
+ * @property string $link_product_test
  * @property integer $available
- * @property string  $available_date
+ * @property string $available_date
  * @property integer $alternative_product
  * @property integer $brand_id
  * @property integer $supplier_id
  * @property integer $google_category_id
  * @property integer $stats_category_id
  * @property integer $accountant_category_id
- * @property string  $base_price
+ * @property string $base_price
  * @property integer $is_pack
- * @property string  $created_at
- * @property string  $updated_at
+ * @property string $created_at
+ * @property string $updated_at
  *
  * @property Bundle[] $bundles
  * @property Brand $brand
@@ -89,17 +89,56 @@ class Product extends \yii\db\ActiveRecord
     public function scenarios()
     {
         return [
-            'insert' => [
-                'exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'link_brand_product', 'link_product_test', 'available', 'available_date', 'alternative_product', 'brand_id', 'supplier_id', 'google_category_id', 'stats_category_id', 'accountant_category_id', 'base_price', 'is_pack'
+            'insert'             => [
+                'exclude_discount_code',
+                'force_secure',
+                'archived',
+                'top_product',
+                'exclude_from_google',
+                'link_brand_product',
+                'link_product_test',
+                'available',
+                'available_date',
+                'alternative_product',
+                'brand_id',
+                'supplier_id',
+                'google_category_id',
+                'stats_category_id',
+                'accountant_category_id',
+                'base_price',
+                'is_pack'
             ],
-            'update' => [
-                'exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'link_brand_product', 'link_product_test', 'available', 'available_date', 'alternative_product', 'brand_id', 'supplier_id', 'google_category_id', 'stats_category_id', 'accountant_category_id', 'base_price', 'is_pack'
+            'update'             => [
+                'exclude_discount_code',
+                'force_secure',
+                'archived',
+                'top_product',
+                'exclude_from_google',
+                'link_brand_product',
+                'link_product_test',
+                'available',
+                'available_date',
+                'alternative_product',
+                'brand_id',
+                'supplier_id',
+                'google_category_id',
+                'stats_category_id',
+                'accountant_category_id',
+                'base_price',
+                'is_pack'
             ],
-            'update_product' => [
-                'exclude_discount_code', 'force_secure', 'archived', 'alternative_product', 'brand_id', 'supplier_id', 'stats_category_id', 'accountant_category_id'
+            'update_product'     => [
+                'exclude_discount_code',
+                'force_secure',
+                'archived',
+                'alternative_product',
+                'brand_id',
+                'supplier_id',
+                'stats_category_id',
+                'accountant_category_id'
             ],
             'update_description' => [],
-            'update_price' => ['base_price'],
+            'update_price'       => ['base_price'],
         ];
     }
 
@@ -109,10 +148,43 @@ class Product extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'available', 'is_pack'], 'in', 'range' => [0, 1]],
-            [['available_date', 'brand_id', 'supplier_id', 'google_category_id', 'stats_category_id', 'accountant_category_id', 'base_price'], 'required'],
+            [
+                [
+                    'exclude_discount_code',
+                    'force_secure',
+                    'archived',
+                    'top_product',
+                    'exclude_from_google',
+                    'available',
+                    'is_pack'
+                ],
+                'in',
+                'range' => [0, 1]
+            ],
+            [
+                [
+                    'available_date',
+                    'brand_id',
+                    'supplier_id',
+                    'google_category_id',
+                    'stats_category_id',
+                    'accountant_category_id',
+                    'base_price'
+                ],
+                'required'
+            ],
             [['available_date'], 'safe'],
-            [['alternative_product', 'brand_id', 'supplier_id', 'google_category_id', 'stats_category_id', 'accountant_category_id'], 'integer'],
+            [
+                [
+                    'alternative_product',
+                    'brand_id',
+                    'supplier_id',
+                    'google_category_id',
+                    'stats_category_id',
+                    'accountant_category_id'
+                ],
+                'integer'
+            ],
             [['base_price'], 'number'],
             [['link_brand_product', 'link_product_test'], 'string', 'max' => 255]
         ];
@@ -202,9 +274,13 @@ class Product extends \yii\db\ActiveRecord
     {
         $i18ns = $this->productI18ns;
         foreach ($i18ns as $i18n) {
-            if ($i18n->i18n_id == Yii::$app->language) return $i18n;
+            if ($i18n->i18n_id == Yii::$app->language) {
+                return $i18n;
+            }
         }
-        if (array_key_exists(0, $i18ns)) return $i18ns[0];
+        if (array_key_exists(0, $i18ns)) {
+            return $i18ns[0];
+        }
         return false;
     }
 
@@ -232,13 +308,13 @@ class Product extends \yii\db\ActiveRecord
     public function getAttributeInfo()
     {
         return $this->getDb()->cache(
-            function($db) {
+            function ($db) {
                 $a = [];
-                foreach($this->variants as $variant) {
-                    foreach($variant->variantAttributes as $varAtt) {
-                        $key = ($varAtt->attributeModel->attributeTypeI18n)?$varAtt->attributeModel->attributeTypeI18n->value:$varAtt->attributeModel->attributeTypeI18ns[0]->value;
+                foreach ($this->variants as $variant) {
+                    foreach ($variant->variantAttributes as $varAtt) {
+                        $key = ($varAtt->attributeModel->attributeTypeI18n) ? $varAtt->attributeModel->attributeTypeI18n->value : $varAtt->attributeModel->attributeTypeI18ns[0]->value;
                         $a[$key][$varAtt->primaryKey['attribute_id']] = [
-                            'value'  => ($varAtt->attributeI18n)?$varAtt->attributeI18n->value:$varAtt->attributeI18ns[0]->value,
+                            'value'  => ($varAtt->attributeI18n) ? $varAtt->attributeI18n->value : $varAtt->attributeI18ns[0]->value,
                             'price'  => $varAtt->extra_cost,
                             'id'     => $varAtt->primaryKey['attribute_id'],
                             'typeId' => $varAtt->attributeModel->attribute_type_id
@@ -246,10 +322,11 @@ class Product extends \yii\db\ActiveRecord
                     }
                 }
                 return $a;
-            }, 0, new TagDependency(['tags' => [
-                $this->generateTag(),
-                $this->generateTag($this->id),
-                $this->generateTag($this->id, 'productAttribute')
+            }, 0, new TagDependency([
+                'tags' => [
+                    $this->generateTag(),
+                    $this->generateTag($this->id),
+                    $this->generateTag($this->id, 'productAttribute')
                 ]
             ])
         );
@@ -263,21 +340,24 @@ class Product extends \yii\db\ActiveRecord
     public function getVariantList()
     {
         return $this->getDb()->cache(
-            function($db) {
+            function ($db) {
                 $variants = $this->variants;
-                foreach ($variants as $variant){
+                foreach ($variants as $variant) {
                     $variant->discount;
                     $variant->finalPrice;
                     $variant->variantI18n;
                     $variant->variantI18ns;
                 }
-                usort($variants, function($a,$b){return $a->order - $b->order;});
+                usort($variants, function ($a, $b) {
+                    return $a->order - $b->order;
+                });
                 return $variants;
-            }, 0, new TagDependency(['tags' => [
-                $this->generateTag(),
-                $this->generateTag($this->id),
-                $this->generateTag($this->id, 'productVariant')
-            ]
+            }, 0, new TagDependency([
+                'tags' => [
+                    $this->generateTag(),
+                    $this->generateTag($this->id),
+                    $this->generateTag($this->id, 'productVariant')
+                ]
             ])
         );
     }
@@ -290,20 +370,23 @@ class Product extends \yii\db\ActiveRecord
     public function getLogisticStrategy()
     {
         return $this->getDb()->cache(
-            function($db) {
+            function ($db) {
                 $variants = $this->variants;
-                foreach ($variants as $variant){
+                foreach ($variants as $variant) {
                     $variant->logisticStrategy;
                     $variant->logisticStrategyI18n;
                     $variant->logisticStrategyI18ns;
                 }
-                usort($variants, function($a,$b){return $a->order - $b->order;});
+                usort($variants, function ($a, $b) {
+                    return $a->order - $b->order;
+                });
                 return $variants;
-            }, 0, new TagDependency(['tags' => [
-                $this->generateTag(),
-                $this->generateTag($this->id),
-                $this->generateTag($this->id, 'productLogisticStrategy')
-            ]
+            }, 0, new TagDependency([
+                'tags' => [
+                    $this->generateTag(),
+                    $this->generateTag($this->id),
+                    $this->generateTag($this->id, 'productLogisticStrategy')
+                ]
             ])
         );
     }
@@ -316,28 +399,29 @@ class Product extends \yii\db\ActiveRecord
     public function getCrossSellingInfo()
     {
         return $this->getDb()->cache(
-            function($db) {
+            function ($db) {
                 $data = [];
                 $variants = $this->variants;
-                foreach($variants as $variant) {
+                foreach ($variants as $variant) {
                     $data[$variant->id] = [];
                     foreach ($variant->crossSellings as $cs) {
                         foreach ($cs->variantId2->variantAttributes as $va) {
                             $va->attributeI18ns;
                         }
-                        $data[$cs->variant_id_1][$cs->variant_id_1 . '-' . $cs->variant_id_2]['variant']     = $cs;
-                        $data[$cs->variant_id_1][$cs->variant_id_1 . '-' . $cs->variant_id_2]['discount']    = $cs->discount;
-                        $data[$cs->variant_id_1][$cs->variant_id_1 . '-' . $cs->variant_id_2]['variant2']    = $cs->variantId2;
-                        $data[$cs->variant_id_1][$cs->variant_id_1 . '-' . $cs->variant_id_2]['product']     = $cs->variantId2->product;
+                        $data[$cs->variant_id_1][$cs->variant_id_1 . '-' . $cs->variant_id_2]['variant'] = $cs;
+                        $data[$cs->variant_id_1][$cs->variant_id_1 . '-' . $cs->variant_id_2]['discount'] = $cs->discount;
+                        $data[$cs->variant_id_1][$cs->variant_id_1 . '-' . $cs->variant_id_2]['variant2'] = $cs->variantId2;
+                        $data[$cs->variant_id_1][$cs->variant_id_1 . '-' . $cs->variant_id_2]['product'] = $cs->variantId2->product;
                         $data[$cs->variant_id_1][$cs->variant_id_1 . '-' . $cs->variant_id_2]['producti18n'] = $cs->variantId2->productI18n;
                     }
                 }
                 return $data;
-            }, 0, new TagDependency(['tags' => [
-                $this->generateTag(),
-                $this->generateTag($this->id),
-                $this->generateTag($this->id, 'productCrossSelling')
-            ]
+            }, 0, new TagDependency([
+                'tags' => [
+                    $this->generateTag(),
+                    $this->generateTag($this->id),
+                    $this->generateTag($this->id, 'productCrossSelling')
+                ]
             ])
         );
     }
@@ -351,77 +435,81 @@ class Product extends \yii\db\ActiveRecord
     public function getThumbnailInfo()
     {
         return $this->getDb()->cache(
-            function($db) {
+            function ($db) {
                 $productMedia = $this->productMedia;
-                if(isset($productMedia[0])) {
+                if (isset($productMedia[0])) {
                     $media = $productMedia[0]->media;
                     $url = Yii::$app->cdnManager->getBaseUrl() . '/common/data/' . $media->file;
                     $alt = $media->mediaI18ns[0]->title;
                 } else {
-                    $url = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/PjxzdmcgaGVpZ2h0PSIxN3B4IiB2ZXJzaW9uPSIxLjEiIHZpZXdCb3g9IjAgMCAyMiAxNyIgd2lkdGg9IjIycHgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6c2tldGNoPSJodHRwOi8vd3d3LmJvaGVtaWFuY29kaW5nLmNvbS9za2V0Y2gvbnMiIHhtbG5zOnhsaW5rPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5L3hsaW5rIj48dGl0bGUvPjxkZWZzPjxwYXRoIGQ9Ik0xNS41ODI0MTM5LDMuOTU4MzY5NDQgTDE5Ljk4ODg4ODksMy45NTgzNjk0NCBDMTkuOTg4ODg4OSwzLjk1ODM2OTQ0IDIxLDMuOTU4MzY5NDQgMjEsNC45NzY4ODc5NSBMMjEsMTQuOTM5ODUwOSBDMjEsMTUuOTU4MzY5NCAxOS45ODg4ODg5LDE1Ljk1ODM2OTQgMTkuOTg4ODg4OSwxNS45NTgzNjk0IEwyLjAxMTExMTExLDE1Ljk1ODM2OTQgQzIuMDExMTExMTEsMTUuOTU4MzY5NCAxLDE1Ljk1ODM2OTQgMSwxNC45Mzk4NTA5IEwxLDQuOTc2ODg3OTUgQzEsMy45NTgzNjk0NCAyLjAxMTExMTExLDMuOTU4MzY5NDQgMi4wMTExMTExMSwzLjk1ODM2OTQ0IEw3LjQ3MzY2MjM0LDMuOTU4MzY5NDQgTDguNTg3MjA2ODQsMS45NTgzNjk0NCBMMTQuMzE0OTI5LDEuOTU4MzY5NDQgTDE1LjU4MjQxMzksMy45NTgzNjk0NCBaIE0xNi4yLDIuOTU4MzY5NDQgTDIwLDIuOTU4MzY5NDQgQzIwLDIuOTU4MzY5NDQgMjIsMi45NTgzNjk0NCAyMiw0Ljk1ODM2OTQzIEwyMiwxNC45NTgzNjk0IEMyMiwxNi45NTgzNjk0IDIwLDE2Ljk1ODM2OTQgMjAsMTYuOTU4MzY5NCBMMiwxNi45NTgzNjk0IEMyLDE2Ljk1ODM2OTQgMCwxNi45NTgzNjk0IDAsMTQuOTU4MzY5NCBMMCw0Ljk1ODM2OTQzIEMwLDIuOTU4MzY5NDQgMiwyLjk1ODM2OTQ0IDIsMi45NTgzNjk0NCBMNi44LDIuOTU4MzY5NDQgTDcuNzM4NzE5OTUsMS4zOTM4MzYyMSBDNy44ODIyOTc1MiwxLjE1NDU0MDI1IDguMjI1MzkwMDUsMC45NTgzNjk0NCA4LjUwMzQyMjc1LDAuOTU4MzY5NDQgTDE0LjQ5NjU3NzMsMC45NTgzNjk0NCBDMTQuNzY3MDk3NSwwLjk1ODM2OTQ0IDE1LjExNjk3OTEsMS4xNTMzMzQ1NSAxNS4yNjEyODAxLDEuMzkzODM2MjEgTDE2LjIsMi45NTgzNjk0NCBMMTYuMiwyLjk1ODM2OTQ0IFogTTExLjUsMTMuOTU4MzY5NCBDMTMuOTg1MjgxNSwxMy45NTgzNjk0IDE2LDExLjk0MzY1MDkgMTYsOS40NTgzNjk0NCBDMTYsNi45NzMwODc5NSAxMy45ODUyODE1LDQuOTU4MzY5NDQgMTEuNSw0Ljk1ODM2OTQ0IEM5LjAxNDcxODUxLDQuOTU4MzY5NDQgNyw2Ljk3MzA4Nzk1IDcsOS40NTgzNjk0NCBDNywxMS45NDM2NTA5IDkuMDE0NzE4NTEsMTMuOTU4MzY5NCAxMS41LDEzLjk1ODM2OTQgWiBNMTEuNSwxMi45NTgzNjk0IEMxMy40MzI5OTY3LDEyLjk1ODM2OTQgMTUsMTEuMzkxMzY2MSAxNSw5LjQ1ODM2OTQ0IEMxNSw3LjUyNTM3MjczIDEzLjQzMjk5NjcsNS45NTgzNjk0NCAxMS41LDUuOTU4MzY5NDQgQzkuNTY3MDAzMjksNS45NTgzNjk0NCA4LDcuNTI1MzcyNzMgOCw5LjQ1ODM2OTQ0IEM4LDExLjM5MTM2NjEgOS41NjcwMDMyOSwxMi45NTgzNjk0IDExLjUsMTIuOTU4MzY5NCBaIE0xNyw2Ljk1ODM2OTQ0IEMxNy41NTIyODQ4LDYuOTU4MzY5NDQgMTgsNi41MTA2NTQyMSAxOCw1Ljk1ODM2OTQ0IEMxOCw1LjQwNjA4NDY3IDE3LjU1MjI4NDgsNC45NTgzNjk0NCAxNyw0Ljk1ODM2OTQ0IEMxNi40NDc3MTUyLDQuOTU4MzY5NDQgMTYsNS40MDYwODQ2NyAxNiw1Ljk1ODM2OTQ0IEMxNiw2LjUxMDY1NDIxIDE2LjQ0NzcxNTIsNi45NTgzNjk0NCAxNyw2Ljk1ODM2OTQ0IFogTTQuMjIxNjc2NTgsMS40NTgzNjk0NCBDNC4wOTkyNDgsMS40NTgzNjk0NCA0LDEuNTQ3MTEyNzcgNCwxLjY1ODMzMDk0IEw0LDIuMjU4NDA3OTQgQzQsMi4zNjg4NDM2MyA0LjA5OTE4MDMxLDIuNDU4MzY5NDQgNC4yMjE2NzY1OCwyLjQ1ODM2OTQ0IEw1Ljc3ODMyMzQyLDIuNDU4MzY5NDQgQzUuOTAwNzUyLDIuNDU4MzY5NDQgNiwyLjM2OTYyNjExIDYsMi4yNTg0MDc5NCBMNiwxLjY1ODMzMDk0IEM2LDEuNTQ3ODk1MjUgNS45MDA4MTk2OSwxLjQ1ODM2OTQ0IDUuNzc4MzIzNDIsMS40NTgzNjk0NCBMNC4yMjE2NzY1OCwxLjQ1ODM2OTQ0IFoiIGlkPSJwYXRoLTEiLz48L2RlZnM+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIiBpZD0ibWl1IiBzdHJva2U9Im5vbmUiIHN0cm9rZS13aWR0aD0iMSI+PGcgaWQ9ImRldmljZV9jYW1lcmFfY2FwdHVyZV9waG90b19vdXRsaW5lX3N0cm9rZSI+PHVzZSBmaWxsPSIjMDAwMDAwIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIHhsaW5rOmhyZWY9IiNwYXRoLTEiLz48dXNlIGZpbGw9Im5vbmUiIHhsaW5rOmhyZWY9IiNwYXRoLTEiLz48L2c+PC9nPjwvc3ZnPg==";
+                    $url = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIGhlaWdodD0iOTYiIHdpZHRoPSI5NiI+PHBhdGggZD0iTTYwIDE2bDYgOEw2OCAyOEg3MmgxMmMyIDAgNCAyIDQgNHY0NGMwIDItMiA0LTQgNEgxMmMtMiAwLTQtMi00LTRWMzJjMC0yIDItNCA0LTRoMTIgNGwyLTQgNi04SDYwTTY0IDhIMzJsLTggMTJIMTJDNSAyMCAwIDI1IDAgMzJWNzZjMCA3IDUgMTIgMTIgMTJoNzJjNyAwIDEyLTUgMTItMTJWMzJjMC03LTUtMTItMTItMTJINzJMNjQgOCA2NCA4ek00OCA0MGM3IDAgMTIgNSAxMiAxMnMtNSAxMi0xMiAxMmMtNyAwLTEyLTUtMTItMTJTNDEgNDAgNDggNDBNNDggMzJjLTExIDAtMjAgOS0yMCAyMHM5IDIwIDIwIDIwYzExIDAgMjAtOSAyMC0yMFM1OSAzMiA0OCAzMkw0OCAzMnoiLz48L3N2Zz4=";
                     $alt = "No image";
                 }
                 return [
                     'url' => $url,
                     'alt' => $alt
                 ];
-            }, 0, new TagDependency(['tags' => [
-                $this->generateTag(),
-                $this->generateTag($this->id),
-                $this->generateTag($this->id, 'productCrossSelling')
-            ]
+            }, 0, new TagDependency([
+                'tags' => [
+                    $this->generateTag(),
+                    $this->generateTag($this->id),
+                    $this->generateTag($this->id, 'productCrossSelling')
+                ]
             ])
         );
     }
 
     /**
      * function to put in cache all media information related to a product
-     * @return Array All medias in an array of type "mediaType" => [medias]
+     * @return array All medias in an array of type "mediaType" => [medias]
      * @throws \Exception
      */
     public function getMediaTypes()
     {
         return $this->getDb()->cache(
-            function($db) {
+            function ($db) {
                 $data = [];
                 $productMedias = $this->productMedia;
                 foreach ($productMedias as $productMedia) {
                     $productMedia->media->mediaI18ns;
                     $productMedia->media->mediaTypeI18ns;
-                    $type = ($productMedia->media->mediaTypeI18n)?$productMedia->media->mediaTypeI18n->title:$productMedia->media->media_type_id;
+                    $type = ($productMedia->media->mediaTypeI18n) ? $productMedia->media->mediaTypeI18n->title : $productMedia->media->media_type_id;
                     $data[$type][] = $productMedia->media;
                 }
                 return $data;
-            }, 0, new TagDependency(['tags' => [
-                $this->generateTag(),
-                $this->generateTag($this->id),
-                $this->generateTag($this->id, 'productMedia')
-            ]
+            }, 0, new TagDependency([
+                'tags' => [
+                    $this->generateTag(),
+                    $this->generateTag($this->id),
+                    $this->generateTag($this->id, 'productMedia')
+                ]
             ])
         );
     }
 
     public function getCategories($asJson = false)
     {
-        $dependency = new TagDependency(['tags' => [
-            $this->generateTag(),
-            $this->generateTag($this->id),
-            $this->generateTag($this->id, 'categories'),
-        ]]);
+        $dependency = new TagDependency([
+            'tags' => [
+                $this->generateTag(),
+                $this->generateTag($this->id),
+                $this->generateTag($this->id, 'categories'),
+            ]
+        ]);
         $db = Yii::$app->db;
-        $data = $db->cache(function($db){
+        $data = $db->cache(function ($db) {
             return $db->createCommand(
-                "select branch_id
-                 from sheet, sheet_type
-                 where sheet_type_id = sheet_type.id
-                   and `table` = 'product'
-                   and primary_key = :id",
+                "SELECT branch_id
+                 FROM sheet, sheet_type
+                 WHERE sheet_type_id = sheet_type.id
+                   AND `table` = 'product'
+                   AND primary_key = :id",
                 [
-                    "id"    => $this->id
+                    "id" => $this->id
                 ]
             )->queryAll();
         }, 0, $dependency);
-        return ($asJson)?json_encode($data):$data;
+        return ($asJson) ? json_encode($data) : $data;
     }
 
     /**
@@ -463,16 +551,18 @@ class Product extends \yii\db\ActiveRecord
             $productIds[] = $sheet['primary_key'];
         }
 
-        if (empty($productIds)) return false;
+        if (empty($productIds)) {
+            return false;
+        }
 
         $command = Yii::$app->db->createCommand(
-            "SELECT `attribute_id`, `attribute_type_id`, count( distinct product_id) as 'number'
+            "SELECT `attribute_id`, `attribute_type_id`, count( DISTINCT product_id) AS 'number'
              FROM `variant`
              INNER JOIN `variant_attribute`
              ON `variant`.`id` = `variant_attribute`.`variant_id`
              INNER JOIN `attribute`
              ON `variant_attribute`.`attribute_id` = `attribute`.`id`
-             WHERE `product_id` IN (".implode(',', $productIds).")
+             WHERE `product_id` IN (" . implode(',', $productIds) . ")
              GROUP BY `attribute_id`"
         );
         return $command->queryAll();

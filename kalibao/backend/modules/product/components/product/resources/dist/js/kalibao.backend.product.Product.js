@@ -67,7 +67,7 @@
     this.initTabHash();
     this.initFormReset();
     this.initCopyEvents();
-    $('[data-toggle="tooltip"]').tooltip()
+    $('[data-toggle="tooltip"]').tooltip();
     this.$variantListTab.find('input[type=radio]').change(function() {
       $('input[type=radio]:checked').not(this).prop('checked', false);
     });
@@ -382,8 +382,16 @@
       );
     });
 
-    this.$main.find('#send-media').off('click').click(function(e){
+    this.$main.find('.select-media').change(function(){
+      $(this).find('option').each(function(){
+        $($(this).data('id')).hide();
+      });
+      $($(this).find(':selected').data('id')).show();
+    }).change();
+
+    this.$main.find('#send-media, #send-media-url').off('click').click(function(e){
       e.preventDefault();
+      console.log('coucou');
 
       if (window.FormData && ! self.validate(self.activeValidators, self.$main)) {
         var $form = $(this).closest('form');

@@ -35,7 +35,14 @@ class Facets extends \yii\base\Widget
      */
     public function init()
     {
-        if ($this->branch === null) return; //not in a branch => no facets
+        if ($this->branch === null) {
+            return;
+        } //not in a branch => no facets
+
+        $tag = md5('facets_widget' . $this->branch);
+        if ($html = Yii::$app->commonCache->get($tag)) {
+            return;
+        } //cached data => nothing to init
 
         $this->models['attribute_types_ids'] = Branch::getDb()->cache(
             function ($db) {
@@ -48,7 +55,7 @@ class Facets extends \yii\base\Widget
                     ->asArray()
                     ->all();
                 $data = [];
-                foreach($res as $r) {
+                foreach ($res as $r) {
                     $data[] = $r['id'];
                 }
                 return $data;
@@ -70,7 +77,7 @@ class Facets extends \yii\base\Widget
                     ->asArray()
                     ->all();
                 $data = [];
-                foreach($res as $r) {
+                foreach ($res as $r) {
                     $data[$r['attribute_type_id']] = $r['value'];
                 }
                 return $data;
@@ -93,7 +100,7 @@ class Facets extends \yii\base\Widget
                     ->asArray()
                     ->all();
                 $data = [];
-                foreach($res as $r) {
+                foreach ($res as $r) {
                     $data[$r['attribute_type_id']][$r['id']] = $r['value'];
                 }
                 return $data;
@@ -124,26 +131,43 @@ class Facets extends \yii\base\Widget
      */
     public function run()
     {
-        if ($this->branch === null) return '';
-//        var_dump($this->models['attribute_types_ids']);
-//        var_dump($this->models['attribute_types_names']);
-//        var_dump($this->models['attribute_types_content']);
-//        var_dump($this->models['count']);
-        $html = '<div class="panel panel-default">
-    <div class="panel-heading">
-        Facettes
-    </div>
-    <div id="facets-container" class="panel-body">';
-        foreach ($this->models['attribute_types_ids'] as $k){
-            $html .= $this->models['attribute_types_names'][$k] . '<ul>';
-            foreach ($this->models['attribute_types_content'][$k] as $id => $value) {
-                if (!array_key_exists($id, $this->models['count'])) continue;
-                $html .= '<li data-id="'. $id .'"><input type="checkbox">' . $value . ' (' . $this->models['count'][$id] . ')</li>';
-            }
-            $html .= '</ul>';
+        if ($this->branch === null) {
+            return '';
         }
-        $html .= '</div></div>';
-        return $html;
+        $tag = md5('facets_widget' . $this->branch);
+        if ($html = Yii::$app->commonCache->get($tag)) {
+            return $html;
+        } else {
+//            var_dump($this->models['attribute_types_ids']);
+//            var_dump($this->models['attribute_types_names']);
+//            var_dump($this->models['attribute_types_content']);
+//            var_dump($this->models['count']);
+            $html = '<div class="panel panel-default">
+                <div class="panel-heading">
+                    Facettes
+                </div>
+                <div id="facets-container" class="panel-body">';
+            foreach ($this->models['attribute_types_ids'] as $k) {
+                $html .= $this->models['attribute_types_names'][$k] . '<ul>';
+                foreach ($this->models['attribute_types_content'][$k] as $id => $value) {
+                    if (!array_key_exists($id, $this->models['count'])) {
+                        continue;
+                    }
+                    $html .= '<li data-id="' . $id . '"><input type="checkbox">' . $value . ' (' . $this->models['count'][$id] . ')</li>';
+                }
+                $html .= '</ul>';
+            }
+            $html .= '</div></div>';
+
+            $dependency = new TagDependency([
+                'tags' => [
+                    CmsMenuSimpleService::getCacheTag(),
+                    CmsMenuSimpleService::getCacheTag(null),
+                ],
+            ]);
+            Yii::$app->commonCache->set($tag, $html, 0, $dependency);
+            return $html;
+        }
     }
 
     public static function getJs()

@@ -1,18 +1,18 @@
 <?php
 /**
-* @copyright Copyright (c) 2015 Kalibao
-* @license https://github.com/kalibao/magesko/blob/master/LICENSE
-*/
+ * @copyright Copyright (c) 2015 Kalibao
+ * @license https://github.com/kalibao/magesko/blob/master/LICENSE
+ */
 
 namespace kalibao\common\models\media;
 
+use kalibao\common\models\category\Category;
+use kalibao\common\models\media\MediaI18n;
+use kalibao\common\models\mediaType\MediaType;
+use kalibao\common\models\mediaType\MediaTypeI18n;
+use kalibao\common\models\productMedia\ProductMedia;
 use Yii;
 use yii\behaviors\TimestampBehavior;
-use kalibao\common\models\category\Category;
-use kalibao\common\models\mediaType\MediaType;
-use kalibao\common\models\media\MediaI18n;
-use kalibao\common\models\productMedia\ProductMedia;
-use kalibao\common\models\mediaType\MediaTypeI18n;
 use yii\helpers\FileHelper;
 use yii\helpers\Url;
 
@@ -36,7 +36,6 @@ use yii\helpers\Url;
  */
 class Media extends \yii\db\ActiveRecord
 {
-
     /**
      * @inheritdoc
      */
@@ -67,10 +66,12 @@ class Media extends \yii\db\ActiveRecord
     {
         return [
             'insert' => [
-                'file', 'media_type_id'
+                'file',
+                'media_type_id'
             ],
             'update' => [
-                'file', 'media_type_id'
+                'file',
+                'media_type_id'
             ],
         ];
     }
@@ -81,8 +82,24 @@ class Media extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            ['file', 'file', 'skipOnEmpty' => false, 'when' => function ($model) { return $model->file == ''; }, 'whenClient' => "function (attribute, value) { return $(attribute.input).attr('value') === '' || $(attribute.input).attr('value') === undefined; }"],
-            ['file', 'file', 'skipOnEmpty' => true, 'when' => function ($model) { return $model->file !== ''; }, 'whenClient' => "function (attribute, value) { return $(attribute.input).attr('value') != '' && $(attribute.input).attr('value') !== undefined; }"],
+            [
+                'file',
+                'file',
+                'skipOnEmpty' => false,
+                'when'        => function ($model) {
+                    return $model->file == '';
+                },
+                'whenClient'  => "function (attribute, value) { return $(attribute.input).attr('value') === '' || $(attribute.input).attr('value') === undefined; }"
+            ],
+            [
+                'file',
+                'file',
+                'skipOnEmpty' => true,
+                'when'        => function ($model) {
+                    return $model->file !== '';
+                },
+                'whenClient'  => "function (attribute, value) { return $(attribute.input).attr('value') != '' && $(attribute.input).attr('value') !== undefined; }"
+            ],
             [['media_type_id'], 'required'],
             [['media_type_id'], 'integer']
         ];
@@ -94,11 +111,11 @@ class Media extends \yii\db\ActiveRecord
     public function attributeLabels()
     {
         return [
-            'id' => Yii::t('kalibao.backend','label_media_id'),
-            'file' => Yii::t('kalibao.backend','label_media_file'),
-            'media_type_id' => Yii::t('kalibao.backend','label_media_type_id'),
-            'created_at' => Yii::t('kalibao','model:created_at'),
-            'updated_at' => Yii::t('kalibao','model:updated_at'),
+            'id'            => Yii::t('kalibao.backend', 'label_media_id'),
+            'file'          => Yii::t('kalibao.backend', 'label_media_file'),
+            'media_type_id' => Yii::t('kalibao.backend', 'label_media_type_id'),
+            'created_at'    => Yii::t('kalibao', 'model:created_at'),
+            'updated_at'    => Yii::t('kalibao', 'model:updated_at'),
         ];
     }
 
@@ -133,9 +150,13 @@ class Media extends \yii\db\ActiveRecord
     {
         $i18ns = $this->mediaI18ns;
         foreach ($i18ns as $i18n) {
-            if ($i18n->i18n_id == Yii::$app->language) return $i18n;
+            if ($i18n->i18n_id == Yii::$app->language) {
+                return $i18n;
+            }
         }
-        if (array_key_exists(0, $i18ns)) return $i18ns[0];
+        if (array_key_exists(0, $i18ns)) {
+            return $i18ns[0];
+        }
         return false;
     }
 
@@ -162,90 +183,175 @@ class Media extends \yii\db\ActiveRecord
     {
         $i18ns = $this->mediaTypeI18ns;
         foreach ($i18ns as $i18n) {
-            if ($i18n->i18n_id == Yii::$app->language) return $i18n;
+            if ($i18n->i18n_id == Yii::$app->language) {
+                return $i18n;
+            }
         }
-        if (array_key_exists(0, $i18ns)) return $i18ns[0];
+        if (array_key_exists(0, $i18ns)) {
+            return $i18ns[0];
+        }
         return false;
     }
 
     /**
-     * function to display a media using HTML5 features. (based on mime type)
-     * outputs a video player, an audio player, a picture or a link
+     * extract information from media file and calls the appropriate function to render the file using mime type
      * @return string The HTML code to display media.
      * @throws \yii\base\InvalidConfigException
      */
     public function getHtml()
     {
-        $webpath  = Yii::$app->cdnManager->getBaseUrl() . '/common/data/' . $this->file;
-        $filepath = Yii::getAlias('@kalibao/data/') . $this->file;
-        $downloadUrl = Url::to(['/media/media/download'] + ['file' => $this->id]);
-        $mimeType = FileHelper::getMimeType($filepath);
-        $title = (($this->mediaI18n)?$this->mediaI18n->title:$this->file);
-        if (explode('/', $mimeType)[0] == 'video') {
-            return <<<VIDEO
-<div class="media">
-        <div class="media-left media-middle col-xs-5">
-            <video style="width:100%" class="thumbnail media-object" controls preload="auto" src="$webpath">Not supported</video>
-        </div>
-        <div class="media-body">
-            <h4 class="media-heading">$title</h4>
-            <p>
-                <b>Taille :</b> {$this->human_filesize(filesize($filepath))}<br>
-                <a href="$webpath" target="_blank">Apperçu</a> &bull; <a href="$downloadUrl">Télécharger</a> &bull; <i class="fa fa-trash delete-product-media" data-id=$this->id></i>
-                </p>
-        </div>
-</div>
-<hr/>
-VIDEO;
-        } elseif (explode('/', $mimeType)[0] == 'image') {
-            return <<<IMG
-<div class="media">
-        <div class="media-left media-middle col-xs-3">
-            <img style="width:100%" class="thumbnail media-object" src="$webpath" />
-        </div>
-        <div class="media-body">
-            <h4 class="media-heading">$title</h4>
-            <p>
-                <b>Taille :</b> {$this->human_filesize(filesize($filepath))}<br>
-                <a href="$webpath" target="_blank">Apperçu</a> &bull; <a href="$downloadUrl">Télécharger</a> &bull; <i class="fa fa-trash delete-product-media" data-id=$this->id></i>
-                </p>
-        </div>
-</div>
-<hr/>
-IMG;
-        } elseif (explode('/', $mimeType)[0] == 'audio') {
-        return <<<AUDIO
-<div class="media">
-        <div class="media-left media-middle col-xs-5">
-            <audio style="width:100%" class="media-object" controls preload="auto" src="$webpath">Not supported</audio>
-        </div>
-        <div class="media-body">
-            <h4 class="media-heading">$title</h4>
-            <p>
-                <b>Taille :</b> {$this->human_filesize(filesize($filepath))}<br>
-                <a href="$downloadUrl">Télécharger</a> &bull; <i class="fa fa-trash delete-product-media" data-id=$this->id></i>
-            </p>
-        </div>
-</div>
-<hr/>
-AUDIO;
-         } else {
-            return <<<LINK
-<div class="media">
-        <div class="media-left media-middle col-xs-2">
-            <i class="fa fa-3x fa-file-text"></i>
-        </div>
-        <div class="media-body">
-            <h4 class="media-heading">$title</h4>
-            <p>
-                <b>Taille :</b> {$this->human_filesize(filesize($filepath))}<br>
-                <a href="$downloadUrl">Télécharger</a> &bull; <i class="fa fa-trash delete-product-media" data-id=$this->id></i>
-            </p>
-        </div>
-</div>
-<hr/>
-LINK;
+        if (filter_var($this->file, FILTER_VALIDATE_URL) !== false) {
+            $headers = $mime = get_headers($this->file, true);
+
+            $paths['file'] = $this->file;
+            $paths['download'] = $this->file;
+            $paths['web'] = $this->file;
+
+            $mimeType = $headers['Content-Type'];
+
+            $fileInfo['size'] = array_key_exists('Content-Length', $headers) ?
+                $this->human_filesize($headers['Content-Length']) : 'inconnu';
+            $fileInfo['isExternal'] = true;
+
+            $title = '<i class="fa fa-external-link"></i> ' . (($this->mediaI18n) ? $this->mediaI18n->title : $this->file);
+        } else {
+            $paths['web'] = Yii::$app->cdnManager->getBaseUrl() . '/common/data/' . $this->file;
+            $paths['file'] = Yii::getAlias('@kalibao/data/') . $this->file;
+            $paths['download'] = Url::to(['/media/media/download'] + ['file' => $this->id]);
+
+            $mimeType = FileHelper::getMimeType($paths['file']);
+
+            $fileInfo['size'] = $this->human_filesize(filesize($paths['file']));
+            $fileInfo['isExternal'] = false;
+
+            $title = (($this->mediaI18n) ? $this->mediaI18n->title : $this->file);
         }
+
+        switch (explode('/', $mimeType)[0]) {
+            case 'video':
+                return $this->getVideoHtml($paths, $fileInfo, $this->id, $title);
+            case 'image':
+                if ($fileInfo['isExternal']) {
+                    $fileInfo['dimensions'] = 'inconnu';
+                } else {
+                    $dim = getimagesize($paths['file']);
+                    $fileInfo['dimensions'] = $dim[0] . ' × ' . $dim[1] . 'px';
+                }
+                return $this->getImageHtml($paths, $fileInfo, $this->id, $title);
+            case 'audio':
+                return $this->getAudioHtml($paths, $fileInfo, $this->id, $title);
+            default:
+                return $this->getLinkHtml($paths, $fileInfo, $this->id, $title);
+        }
+    }
+
+    /**
+     * returns the html for the video player
+     * @param array $paths web, download and file path of the file
+     * @param array $fileInfo various information about the file (size, is external)
+     * @param int $id id of the media
+     * @param string $title title of the media (i18n)
+     * @return string the rendered html
+     */
+    private function getVideoHtml($paths, $fileInfo, $id, $title)
+    {
+        return "<div class=\"media\">
+    <div class=\"media-left media-middle col-xs-5\">
+        <video style=\"width:100%\" class=\"thumbnail media-object\" controls preload=\"auto\" src=\"{$paths['web']}\">
+            Not supported
+        </video>
+    </div>
+    <div class=\"media-body\">
+        <h4 class=\"media-heading\">{$title}</h4>
+        <p>
+            <b>Taille :</b> {$fileInfo['size']}<br>
+            <a href=\"{$paths['web']}\" target=\"_blank\">Aperçu</a> &bull; <a download href=\"{$paths['download']}\">Télécharger</a> &bull;
+            <i class=\"fa fa-trash delete-product-media\" data-id={$id}></i>
+        </p>
+    </div>
+</div>
+<hr/>";
+    }
+
+    /**
+     * returns the html for the audio player
+     * @param array $paths web, download and file path of the file
+     * @param array $fileInfo various information about the file (size, is external)
+     * @param int $id id of the media
+     * @param string $title title of the media (i18n)
+     * @return string the rendered html
+     */
+    private function getAudioHtml($paths, $fileInfo, $id, $title)
+    {
+        return "<div class=\"media\">
+    <div class=\"media-left media-middle col-xs-5\">
+        <audio style=\"width:100%\" class=\"thumbnail media-object\" controls preload=\"auto\" src=\"{$paths['web']}\">
+            Not supported
+        </audio>
+    </div>
+    <div class=\"media-body\">
+        <h4 class=\"media-heading\">{$title}</h4>
+        <p>
+            <b>Taille :</b> {$fileInfo['size']}<br>
+            <a download href=\"{$paths['download']}\">Télécharger</a> &bull;
+            <i class=\"fa fa-trash delete-product-media\" data-id={$id}></i>
+        </p>
+    </div>
+</div>
+<hr/>";
+    }
+
+    /**
+     * returns the html for the image
+     * @param array $paths web, download and file path of the file
+     * @param array $fileInfo various information about the file (size, is external, dimension)
+     * @param int $id id of the media
+     * @param string $title title of the media (i18n)
+     * @return string the rendered html
+     */
+    private function getImageHtml($paths, $fileInfo, $id, $title)
+    {
+        return "<div class=\"media\">
+    <div class=\"media-left media-middle col-xs-3\">
+        <img style=\"width:100%\" class=\"thumbnail media-object\" src=\"{$paths['web']}\">
+    </div>
+    <div class=\"media-body\">
+        <h4 class=\"media-heading\">{$title}</h4>
+        <p>
+            <b>Taille :</b> {$fileInfo['size']}<br>
+            <b>Dimensions :</b> {$fileInfo['dimensions']}<br>
+            <a href=\"{$paths['web']}\" target=\"_blank\">Aperçu</a> &bull; <a download href=\"{$paths['download']}\">Télécharger</a> &bull;
+            <i class=\"fa fa-trash delete-product-media\" data-id={$id}></i>
+        </p>
+    </div>
+</div>
+<hr/>";
+    }
+
+    /**
+     * returns the html for unknown file types (renders a link and various information)
+     * @param array $paths web, download and file path of the file
+     * @param array $fileInfo various information about the file (size, is external)
+     * @param int $id id of the media
+     * @param string $title title of the media (i18n)
+     * @return string the rendered html
+     */
+    private function getLinkHtml($paths, $fileInfo, $id, $title)
+    {
+        return "<div class=\"media\">
+    <div class=\"media-left media-middle col-xs-3\">
+        <i class=\"fa fa-3x fa-file-text\"></i>
+    </div>
+    <div class=\"media-body\">
+        <h4 class=\"media-heading\">{$title}</h4>
+        <p>
+            <b>Taille :</b> {$fileInfo['size']}<br>
+            {$paths['web']}<a download href=\"{$paths['download']}\">Télécharger</a> &bull;
+            <i class=\"fa fa-trash delete-product-media\" data-id={$id}></i>
+        </p>
+    </div>
+</div>
+<hr/>";
     }
 
     /**
@@ -255,7 +361,8 @@ LINK;
      * @param int $decimals number of decimals for the result
      * @return string the size in a human readable format
      */
-    private function human_filesize($bytes, $decimals = 2) {
+    private function human_filesize($bytes, $decimals = 2)
+    {
         $sz = 'BKMGTP';
         $factor = floor((strlen($bytes) - 1) / 3);
         return sprintf("%.{$decimals}f", $bytes / pow(1024, $factor)) . ' ' . @$sz[$factor];

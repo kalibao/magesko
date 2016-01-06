@@ -21,10 +21,10 @@ $this->registerJs("
                     <fieldset>
                         <legend>
                             <?= ucfirst($title) ?>&nbsp;
-                            <a class="btn btn-primary btn-xs" id="open-all"><i class="fa fa-expand"></i></a>
-                            <a class="btn btn-primary btn-xs" id="close-all"><i class="fa fa-compress"></i></a>
                         </legend>
                         <a class="btn btn-primary btn-xs" id="add-branch"><?= Yii::t('kalibao', 'btn_add'); ?> &nbsp;<i class="fa fa-plus"></i></a>
+                        <a class="btn btn-primary btn-xs" id="open-all" data-toggle="tooltip" data-placement="bottom" title="<?= Yii::t('kalibao.backend', 'label_expand') ?>"><i class="fa fa-expand"></i></a>
+                        <a class="btn btn-primary btn-xs" id="close-all" data-toggle="tooltip" data-placement="bottom" title="<?= Yii::t('kalibao.backend', 'label_collapse') ?>"><i class="fa fa-compress"></i></a>
                         <div id="tree"></div>
                         <a class="btn btn-primary btn-xs" id="save-tree"><?= Yii::t('kalibao', 'btn_save'); ?> &nbsp;<i class="glyphicon glyphicon-floppy-disk"></i></a>
                         <a class="btn btn-default btn-xs" id="reset-tree"><?= Yii::t('kalibao.backend', 'btn_reset') ?> &nbsp;<i class="glyphicon glyphicon-refresh"></i></a>

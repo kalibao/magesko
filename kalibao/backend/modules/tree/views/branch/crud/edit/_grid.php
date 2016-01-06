@@ -19,6 +19,7 @@
             <tr>
                 <th class="col-xs-5">Attribut</th>
                 <th class="col-xs-6">Label</th>
+                <th></th>
                 <th class="col-xs-1">Ordre</th>
             </tr>
             </thead>
@@ -27,6 +28,7 @@
                 <tr id="attribute-<?= $attr['id']?>" class="saved">
                     <td><?= $attr['i18n'] ?> &nbsp; <i class="fa fa-lg fa-trash text-red delete-filter" data-params='{"attribute_type_id":<?= $attr['id'] ?>, "branch_id":<?= $crudEdit->models['main']->id ?>}'></i></td>
                     <td><input type="text" class="form-control input-sm" value="<?= (!empty($attr['label']))?$attr['label']:$attr['i18n'] ?>"></td>
+                    <td><span class="sort-handle badge"><i class="fa fa-arrows"></i></span></td>
                     <td><input type="text" class="form-control input-sm filter-order" disabled value="<?= ($attr['order'] === 0)?$i:$attr['order'] ?>"/></td>
                 </tr>
             <?php $i++; endforeach; ?>

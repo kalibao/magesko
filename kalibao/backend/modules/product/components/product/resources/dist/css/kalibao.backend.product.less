@@ -4,11 +4,19 @@
   position: relative;
   & tr {
     background-color: #fff;
-    cursor: ns-resize;
     &.sortable-placeholder {
       height: 50px;
       background-color: #CCCCCC;
     }
+  }
+  .sort-handle {
+    width: 50px;
+    background-color: #999;
+    display: inline-block;
+    cursor: ns-resize;
+    font-weight: lighter;
+    font-size: 16px;
+    line-height: 20px;
   }
 }
 
@@ -20,4 +28,14 @@
 }
 .mouse-pointer {
   cursor: pointer;
+}
+
+.nav-tabs {
+  &>li.active {
+    & > a {
+      background-color: #d8e9f3 !important;
+      color: #555555 !important;
+      border-color: #3C8DBC !important;
+    }
+  }
 }

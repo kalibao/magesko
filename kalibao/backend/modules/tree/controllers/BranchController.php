@@ -6,6 +6,8 @@
 
 namespace kalibao\backend\modules\tree\controllers;
 
+use kalibao\common\components\base\ExtraDataEvent;
+use kalibao\common\components\cms\CmsMenuSimpleService;
 use kalibao\common\models\attributeTypeVisibility\AttributeTypeVisibilityI18n;
 use kalibao\common\models\branch\Branch;
 use kalibao\common\models\attributeTypeVisibility\AttributeTypeVisibility;
@@ -265,7 +267,7 @@ class BranchController extends Controller
         $branch = Branch::findOne($id);
         $sheetsNumber = $branch->countSheets();
         $childNumber = $branch->countChildren();
-        return json_encode(['text' => '<big>Attention</big><br>'.
+        return json_encode(['text' => '<b>Attention</b><br>'.
             'Il y a ' . $sheetsNumber . ' produits affectés à cette branche.<br>'.
             'En la supprimant, ces produits ne seront plus affectés (les produits ne sont pas supprimés)<br>'.
             'De plus, la branche a ' . $childNumber . ' branches filles qui seront également supprimées'
@@ -346,6 +348,8 @@ class BranchController extends Controller
         }
         else {
             $transaction->commit();
+            TagDependency::invalidate(Yii::$app->commonCache, Tree::generateTagStatic($request->post('tree')));
+            TagDependency::invalidate(Yii::$app->commonCache, CmsMenuSimpleService::getCacheTag());
         }
     }
 

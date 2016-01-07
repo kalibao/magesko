@@ -346,9 +346,23 @@ class Media extends \yii\db\ActiveRecord
         <h4 class=\"media-heading\">{$title}</h4>
         <p>
             <b>Taille :</b> {$fileInfo['size']}<br>
-            {$paths['web']}<a download href=\"{$paths['download']}\">Télécharger</a> &bull;
+            <a download href=\"{$paths['download']}\">Télécharger</a> &bull;
             <i class=\"fa fa-trash delete-product-media\" data-id={$id}></i>
         </p>
+    </div>
+</div>
+<hr/>";
+    }
+
+    public function getEmbed()
+    {
+        if ($this->media_type_id != Yii::$app->variable->get('kalibao.backend', 'media_type_embed'))
+            return "ERROR !";
+
+        return "<div class=\"media\">
+    <div class=\"media-body\">
+        <h4 class=\"media-heading\">{$this->mediaI18n->title} &bull; <i class=\"fa fa-trash delete-product-media\" data-id={$this->id}></i></h4>
+        {$this->file}
     </div>
 </div>
 <hr/>";

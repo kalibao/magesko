@@ -83,7 +83,12 @@ class MediaController extends Controller
         $b['access']['rules'][] = [
             'actions' => ['from-url'],
             'allow' => true,
-            'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
+            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
+        ];
+        $b['access']['rules'][] = [
+            'actions' => ['embed'],
+            'allow' => true,
+            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
         ];
 
         return $b;
@@ -97,8 +102,13 @@ class MediaController extends Controller
         $id = (new \ReflectionClass($model))->getName() . '.' . $attributeName;
         switch ($id) {
             case $this->crudModelsClass['main'] . '.file':
-                $uploadedFile->name = md5(Yii::$app->getSecurity()->generateRandomString() . '.' . uniqid())
-                    . '.' . $model->$attributeName->extension;
+                $name = md5(Yii::$app->getSecurity()->generateRandomString() . '.' . uniqid()) . '.' . $model->$attributeName->extension;
+                $dataPath = 'products/upload/' . substr($name, 0, 2) . '/';
+                $name = $dataPath . $name;
+                $path = $this->uploadConfig[$this->crudModelsClass['main']]['file']['basePath'] . '/';
+
+                if (!file_exists($path . $dataPath)) mkdir($path . $dataPath, 0777, true);
+                $uploadedFile->name = $name;
                 break;
             default:
                 break;
@@ -156,13 +166,52 @@ class MediaController extends Controller
 
         $media = new Media(['scenario' => 'insert']);
         $media->file = $filename;
-        $media->media_type_id = 1;
+        $media->media_type_id = Yii::$app->variable->get('kalibao.backend', 'media_type_picture');;
         $saveMedia = $media->save();
         if ($saveMedia) {
             $media_i18n = new MediaI18n(['scenario' => 'insert']);
             $media_i18n->media_id = $media->id;
             $media_i18n->i18n_id = Yii::$app->language;
             $media_i18n->title = $title;
+            $saveI18n = $media_i18n->save();
+            if ($saveI18n) {
+                $productMedia = new ProductMedia(['scenario' => 'insert']);
+                $productMedia->media_id = $media->id;
+                $productMedia->product_id = $request->get('product');
+                $saveProductMedia = $productMedia->save();
+                TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('product')));
+                if ($saveProductMedia) return json_encode(['success' => true]);
+            }
+        }
+        return json_encode(['success' => false]);
+    }
+
+    /**
+     * Create action
+     * @return string
+     * @throws HttpException
+     */
+    public function actionEmbed()
+    {
+        $request = Yii::$app->request;
+        if (!$request->isPost) {
+            throw new HttpException(405, 'method not allowed');
+        }
+
+        $url = $request->post('media_url');
+        $code = $this->getEmbedCode($url);
+
+        if (!$code) return json_encode(['success' => false]);
+
+        $media = new Media(['scenario' => 'insert']);
+        $media->file = $code['html'];
+        $media->media_type_id = Yii::$app->variable->get('kalibao.backend', 'media_type_embed');;
+        $saveMedia = $media->save();
+        if ($saveMedia) {
+            $media_i18n = new MediaI18n(['scenario' => 'insert']);
+            $media_i18n->media_id = $media->id;
+            $media_i18n->i18n_id = Yii::$app->language;
+            $media_i18n->title = $code['title'];
             $saveI18n = $media_i18n->save();
             if ($saveI18n) {
                 $productMedia = new ProductMedia(['scenario' => 'insert']);
@@ -300,7 +349,7 @@ class MediaController extends Controller
 
         $ext = Mime::mimeToExtension($mime);
         $name = md5(Yii::$app->getSecurity()->generateRandomString() . '.' . uniqid());
-        $dataPath = 'grabbed/' . substr($name, 0, 2) . '/';
+        $dataPath = 'products/grabbed/' . substr($name, 0, 2) . '/';
         $name = $dataPath . $name . $ext;
         $path = $this->uploadConfig[$this->crudModelsClass['main']]['file']['basePath'] . '/';
         $filename = $path . $name;
@@ -320,5 +369,38 @@ class MediaController extends Controller
         fclose($fp);
 
         return $name;
+    }
+
+    private function getEmbedCode($url)
+    {
+        $oembedUrl = false;
+        if (strpos($url, 'youtu') !== false) $oembedUrl = $this->getOembedUrl($url, 'youtube'); //youtube.com & youtu.be
+        if (strpos($url, 'vimeo') !== false) $oembedUrl = $this->getOembedUrl($url, 'vimeo');
+        if (strpos($url, 'dailymotion') !== false) $oembedUrl = $this->getOembedUrl($url, 'dailymotion');
+
+        if (!$oembedUrl) return false;
+
+        $curl = curl_init($oembedUrl);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 30);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        $data = json_decode(curl_exec($curl), true);
+        curl_close($curl);
+
+        return $data;
+    }
+
+    private function getOembedUrl($videoUrl, $host)
+    {
+        switch ($host) {
+            case 'youtube':
+                return 'http://www.youtube.com/oembed?format=json&url=' . rawurlencode($videoUrl);
+            case 'vimeo':
+                return 'https://vimeo.com/api/oembed.json?url=' . rawurlencode($videoUrl);
+            case 'dailymotion':
+                return 'http://www.dailymotion.com/services/oembed?url=' . rawurlencode($videoUrl);
+            default:
+                return false;
+        }
     }
 }

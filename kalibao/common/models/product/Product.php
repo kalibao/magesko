@@ -474,7 +474,8 @@ class Product extends \yii\db\ActiveRecord
                     $productMedia->media->mediaI18ns;
                     $productMedia->media->mediaTypeI18ns;
                     $type = ($productMedia->media->mediaTypeI18n) ? $productMedia->media->mediaTypeI18n->title : $productMedia->media->media_type_id;
-                    $data[$type][] = $productMedia->media;
+                    $data[$productMedia->media->media_type_id][0] = $type;
+                    $data[$productMedia->media->media_type_id][1][] = $productMedia->media;
                 }
                 return $data;
             }, 0, new TagDependency([

@@ -171,4 +171,5 @@
 }
 .ajax-file-upload-container::after {
   clear: both;
+  content: ' ';
 }

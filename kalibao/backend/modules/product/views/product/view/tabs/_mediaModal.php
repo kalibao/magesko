@@ -25,7 +25,7 @@
                                 <!-- media from file -->
                                 <div style="display: none;" id="media-file">
                                     <div class="dropzone" id="dropzone"><div class="centered">Déposez vos fichiers ou cliquez pour parcourir</div></div>
-                                    <button class="btn btn-primary center-block btn-submit" id="send-media" data-dismiss="modal"><?= yii::t('kalibao', 'btn_save') ?></button>
+                                    <button class="btn btn-primary center-block btn-submit" id="send-media"><?= yii::t('kalibao', 'btn_save') ?></button>
                                 </div>
 
                                 <!-- media from url -->

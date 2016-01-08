@@ -24,13 +24,8 @@
 
                                 <!-- media from file -->
                                 <div style="display: none;" id="media-file">
-                                    <form method="post" action="<?= \yii\helpers\Url::to(['/media/media/create'] + ['product' => $component->models['main']->id]) ?>">
-                                        <input type="file" name="Media[file]" id="media-file"  class="input-advanced-uploader center-block"/>
-                                        <input type="hidden" name="Media[media_type_id]" value="<?= Yii::$app->variable->get('kalibao.backend', 'media_type_picture'); ?>">
-                                        <label><?= Yii::t('kalibao.backend', 'label_media_title') ?></label><input type="text" class="form-control input-sm" name="MediaI18n[title]"/>
-                                        <hr/>
-                                        <button class="btn btn-primary center-block btn-submit" id="send-media" data-dismiss="modal"><?= yii::t('kalibao', 'btn_save') ?></button>
-                                    </form>
+                                    <div class="dropzone" id="dropzone"><div class="centered">Déposez vos fichiers ou cliquez pour parcourir</div></div>
+                                    <button class="btn btn-primary center-block btn-submit" id="send-media" data-dismiss="modal"><?= yii::t('kalibao', 'btn_save') ?></button>
                                 </div>
 
                                 <!-- media from url -->
@@ -67,7 +62,6 @@
                                 <div id="media-url">
                                     <form method="post" action="<?= \yii\helpers\Url::to(['/media/media/embed'] + ['product' => $component->models['main']->id]) ?>">
                                         <label><?= Yii::t('kalibao.backend', 'label_media_url') ?> (Youtube, Dailymotion, Vimeo)</label><input type="text" class="form-control input-sm" name="media_url"/>
-                                        <label><?= Yii::t('kalibao.backend', 'label_media_title') ?></label><input type="text" class="form-control input-sm" name="media_title"/>
                                         <hr/>
                                         <button class="btn btn-primary center-block btn-submit" id="send-media-url" data-dismiss="modal"><?= yii::t('kalibao', 'btn_save') ?></button>
                                     </form>

@@ -45,21 +45,6 @@ class ListGridRowEdit extends \kalibao\common\components\crud\ListGridRowEdit
 
         $items[] = new InputField([
             'model' => $models['main'],
-            'attribute' => 'file',
-            'type' => 'activeFileInput',
-            'options' => [
-                'maxlength' => true,
-                'class' => 'input-advanced-uploader',
-                'placeholder' => $models['main']->getAttributeLabel('file'),
-                'data-type-uploader' => $uploadConfig['main']['file']['type'],
-                'data-file-url' => ($models['main']->file != '') ?
-                    $uploadConfig['main']['file']['baseUrl'] . '/'
-                    . $models['main']->file : '',
-            ]
-        ]);
-
-        $items[] = new InputField([
-            'model' => $models['main'],
             'attribute' => 'media_type_id',
             'type' => 'activeHiddenInput',
             'options' => [

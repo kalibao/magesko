@@ -6,17 +6,15 @@
 
 namespace kalibao\frontend\modules\products\controllers;
 
+use kalibao\common\components\cms\CmsContentBehavior;
 use kalibao\common\components\cms\CmsPageService;
 use kalibao\common\components\helpers\Arr;
 use kalibao\common\models\product\Product;
 use kalibao\common\models\sheet\Sheet;
-use Yii;
-use kalibao\common\models\cmsNews\CmsNews;
-use kalibao\common\components\cms\CmsContentBehavior;
 use kalibao\frontend\components\web\Controller;
+use Yii;
 use yii\base\InvalidParamException;
 use yii\data\Pagination;
-use yii\web\View;
 
 /**
  * Class ProductsController
@@ -66,10 +64,10 @@ class ProductsController extends Controller
         $countQuery = clone $query;
 
         $pages = new Pagination([
-            'totalCount' => $countQuery->count(),
-            'pageSize' => $pageSize,
+            'totalCount'      => $countQuery->count(),
+            'pageSize'        => $pageSize,
             'defaultPageSize' => $pageSize,
-            'params' => $_GET
+            'params'          => $_GET
         ]);
 
         $productUrl = '/' . CmsPageService::getSlugById(48, Yii::$app->language) . '/';
@@ -100,9 +98,9 @@ class ProductsController extends Controller
         $sheets = Sheet::find()
             ->innerJoinWith('sheetType')
             ->where([
-                'table' => 'product',
+                'table'     => 'product',
                 'branch_id' => $category
-                ])
+            ])
             ->select('sheet.id, sheet_type_id, primary_key')
             ->asArray()
             ->all();
@@ -122,7 +120,7 @@ class ProductsController extends Controller
                 }
             ])
             ->where([
-                'archived' => 0,
+                'archived'   => 0,
                 'product.id' => $productIds
             ]);
 
@@ -130,10 +128,10 @@ class ProductsController extends Controller
         $countQuery = clone $query;
 
         $pages = new Pagination([
-            'totalCount' => $countQuery->count(),
-            'pageSize' => $pageSize,
+            'totalCount'      => $countQuery->count(),
+            'pageSize'        => $pageSize,
             'defaultPageSize' => $pageSize,
-            'params' => $_GET
+            'params'          => $_GET
         ]);
 
         $models = $query->offset($pages->offset)
@@ -157,7 +155,7 @@ class ProductsController extends Controller
         $pageSize = 10;
 
         $category = $request->post('cat', false);
-        $filters  = json_decode($request->post('filters', '{}'), true);
+        $filters = json_decode($request->post('filters', '{}'), true);
         if ($category === false) {
             throw new InvalidParamException("missing parameter «cat»");
         }
@@ -165,7 +163,7 @@ class ProductsController extends Controller
         $sheets = Sheet::find()
             ->innerJoinWith('sheetType')
             ->where([
-                'table' => 'product',
+                'table'     => 'product',
                 'branch_id' => $category
             ])
             ->select('sheet.id, sheet_type_id, primary_key')
@@ -187,7 +185,7 @@ class ProductsController extends Controller
                 }
             ])
             ->where([
-                'archived' => 0,
+                'archived'   => 0,
                 'product.id' => $productIds
             ])
             ->all();
@@ -200,26 +198,29 @@ class ProductsController extends Controller
                 foreach ($filters as $name => $filter) { //iterate over attribute types
                     $matchType = !Arr::hasValues($filter);
                     foreach ($filter as $value) { //iterate over attribute values
-                        if (Arr::has($productAttributes, $name . '.' . explode(':', $value)[1]))
+                        if (Arr::has($productAttributes, $name . '.' . explode(':', $value)[1])) {
                             $matchType = true;
+                        }
                     }
                     $match &= $matchType;
                 }
-                if ($match) $models[] = $product;
+                if ($match) {
+                    $models[] = $product;
+                }
             }
-        }else {
+        } else {
             $models = $products;
         }
 
 
         $pages = new Pagination([
-            'totalCount' => sizeof($models),
-            'pageSize' => $pageSize,
+            'totalCount'      => sizeof($models),
+            'pageSize'        => $pageSize,
             'defaultPageSize' => $pageSize,
-            'params' => [
+            'params'          => [
                 'cat' => $request->post('cat', false)
             ],
-            'route' => $request->post('route', false)
+            'route'           => $request->post('route', false)
         ]);
 
         $productUrl = '/' . CmsPageService::getSlugById(48, Yii::$app->language) . '/';

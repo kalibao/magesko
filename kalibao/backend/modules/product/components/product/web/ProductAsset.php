@@ -33,6 +33,7 @@ class ProductAsset extends AssetBundle
      * @inheritdoc
      */
     public $js = [
+        'dist/js/jquery.uploadfile.min.js',
         'dist/js/kalibao.backend.product.Product.js',
     ];
 

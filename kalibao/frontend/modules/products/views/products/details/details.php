@@ -4,10 +4,6 @@
  * @license https://github.com/kalibao/magesko/blob/master/LICENSE
  */
 
-use kalibao\common\components\cms\CmsPageService;
-use kalibao\common\components\helpers\URLify;
-use yii\widgets\LinkPager;
-
 ?>
 <div class="row">
     <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">

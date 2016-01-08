@@ -41,22 +41,12 @@ class ListGrid extends \kalibao\common\components\crud\ListGrid
 
         // set head attributes
         $this->setGridHeadAttributes([
-            'file' => true,
             'media_type_i18n_title' => true,
             'media_i18n_title' => true,
         ]);
 
         // set head filters
         $this->setGridHeadFilters([
-            new InputField([
-                'model' => $model,
-                'attribute' => 'file',
-                'type' => 'activeTextInput',
-                    'options' => [
-                    'class' => 'form-control input-sm',
-                    'placeholder' => Yii::t('kalibao', 'input_search'),
-                ]
-            ]),
             new InputField([
                 'model' => $model,
                 'attribute' => 'media_type_id',
@@ -88,15 +78,6 @@ class ListGrid extends \kalibao\common\components\crud\ListGrid
 
         // set advanced filters
         $this->setAdvancedFilters([
-            new InputField([
-                'model' => $model,
-                'attribute' => 'file',
-                'type' => 'activeTextInput',
-                'options' => [
-                    'class' => 'form-control input-sm',
-                'placeholder' => Yii::t('kalibao', 'input_search'),
-                ]
-            ]),
             new InputField([
                 'model' => $model,
                 'attribute' => 'media_type_id',

@@ -20,6 +20,7 @@ use kalibao\backend\components\crud\Controller;
 use yii\helpers\FileHelper;
 use yii\web\HttpException;
 use yii\web\Response;
+use yii\web\UploadedFile;
 
 /**
  * Class MediaController
@@ -371,6 +372,11 @@ class MediaController extends Controller
         return $name;
     }
 
+    /**
+     * make a curl query to the oembed service of the given host and returns the data
+     * @param string $url url of the video for which the information is needed
+     * @return bool|mixed false if the oembex query url is not found or response array
+     */
     private function getEmbedCode($url)
     {
         $oembedUrl = false;

@@ -51,6 +51,9 @@
     this.$tree = this.$container.find('#tree');
     this.$openAll = this.$catalogTab.find('#open-all');
     this.$closeAll = this.$catalogTab.find('#close-all');
+    this.$dropzone = this.$main.find('#dropzone');
+    this.$sendMedia = this.$main.find('#send-media');
+
 
     this.initComponents();
     this.initTree();
@@ -389,7 +392,7 @@
       $($(this).find(':selected').data('id')).show();
     }).change();
 
-    this.$main.find('#send-media, #send-media-url').off('click').click(function(e){
+    this.$main.find('#send-media-url').off('click').click(function(e){
       e.preventDefault();
       console.log('coucou');
 
@@ -404,7 +407,9 @@
             var inputType = $input.attr('type');
             if (inputType === 'file') {
               if ($input.get(0).files.length > 0) {
-                params.append($input.attr('name'), $input.get(0).files[0]);
+                $.each($input.get(0).files, function(i, e){
+                  params.append($input.attr('name'), e);
+                });
               }
             } else if(inputType === 'checkbox') {
               if ($input.is(':checked')) {
@@ -437,6 +442,29 @@
       $.post('/product/product/remove-media?id=' + $(this).data('id') + '&product=' + self.urlParam('id'), function(){
         location.reload();
       });
+    });
+
+    this.$dropzone.uploadFile({
+      url: '/media/media/create?product=' + self.urlParam('id'),
+      fileName: 'Media[file]',
+      extraHTML: function(){
+        return '<label>Titre :</label><input type="text" class="form-control input-sm" name="MediaI18n[title]"/>';
+      },
+      autoSubmit: false,
+      formData: {'Media[media_type_id]': 1},
+      onSuccess: function(){
+        window.location.reload();
+      },
+      uploadStr: 'Parcourir',
+      dragDropStr: '<span> &nbsp; ou déposez vos Fichiers</span>',
+      acceptFiles: "image/*",
+      showPreview: true,
+      previewHeight: "100px",
+      previewWidth: "auto"
+    });
+
+    this.$sendMedia.click(function(){
+      self.$dropzone.startUpload();
     })
   };
 

@@ -168,6 +168,7 @@
 }
 .ajax-file-upload-container {
   margin: 20px 0 20px 0;
+  overflow: auto;
 }
 .ajax-file-upload-container::after {
   clear: both;

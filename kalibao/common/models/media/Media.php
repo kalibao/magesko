@@ -269,8 +269,7 @@ class Media extends \yii\db\ActiveRecord
             <i class=\"fa fa-trash delete-product-media\" data-id={$id}></i>
         </p>
     </div>
-</div>
-<hr/>";
+</div>";
     }
 
     /**
@@ -297,8 +296,7 @@ class Media extends \yii\db\ActiveRecord
             <i class=\"fa fa-trash delete-product-media\" data-id={$id}></i>
         </p>
     </div>
-</div>
-<hr/>";
+</div>";
     }
 
     /**
@@ -324,8 +322,7 @@ class Media extends \yii\db\ActiveRecord
             <i class=\"fa fa-trash delete-product-media\" data-id={$id}></i>
         </p>
     </div>
-</div>
-<hr/>";
+</div>";
     }
 
     /**
@@ -350,8 +347,7 @@ class Media extends \yii\db\ActiveRecord
             <i class=\"fa fa-trash delete-product-media\" data-id={$id}></i>
         </p>
     </div>
-</div>
-<hr/>";
+</div>";
     }
 
     public function getEmbed()
@@ -364,8 +360,7 @@ class Media extends \yii\db\ActiveRecord
         <h4 class=\"media-heading\">{$this->mediaI18n->title} &bull; <i class=\"fa fa-trash delete-product-media\" data-id={$this->id}></i></h4>
         {$this->file}
     </div>
-</div>
-<hr/>";
+</div>";
     }
 
     /**

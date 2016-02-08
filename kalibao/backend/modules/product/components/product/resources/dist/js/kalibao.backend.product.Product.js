@@ -439,8 +439,10 @@
     });
 
     this.$main.find('.delete-product-media').click(function(){
+      var that = this;
       $.post('/product/product/remove-media?id=' + $(this).data('id') + '&product=' + self.urlParam('id'), function(){
-        location.reload();
+        $.toaster({priority: 'success', title: 'Enregistré', message: 'Le media a été supprimé'});
+        that.closest('.media').remove();
       });
     });
 
@@ -452,7 +454,11 @@
       },
       autoSubmit: false,
       formData: {'Media[media_type_id]': 1},
-      onSuccess: function(){
+      onSuccess: function(file, data, xhr, pd){
+        $.toaster({priority: 'success', title: 'Enregistré', message: 'fichier ' + file[0] + ' envoyé'})
+      },
+      afterUploadAll: function(obj){
+        $.toaster({priority: 'success', title: 'Enregistré', message: obj.getFileCount() + ' fichiers envoyés'});
         window.location.reload();
       },
       uploadStr: 'Parcourir',

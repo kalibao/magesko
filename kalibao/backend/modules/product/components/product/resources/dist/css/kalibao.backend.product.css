@@ -174,3 +174,7 @@
   clear: both;
   content: ' ';
 }
+.ajax-file-upload-preview {
+  max-width: 100%;
+  max-height: 100px;
+}

@@ -459,11 +459,11 @@
       dragDropStr: '<span> &nbsp; ou déposez vos Fichiers</span>',
       acceptFiles: "image/*",
       showPreview: true,
-      previewHeight: "100px",
+      previewHeight: "auto",
       previewWidth: "auto"
     });
 
-    this.$sendMedia.click(function(){
+    this.$sendMedia.off('click').click(function(){
       self.$dropzone.startUpload();
     })
   };

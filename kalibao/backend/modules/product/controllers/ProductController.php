@@ -688,8 +688,8 @@ class ProductController extends Controller
         $request = Yii::$app->request;
         $rm = is_array($request->post('rm'))?$request->post('rm'):[];
         $ad = is_array($request->post('ad'))?$request->post('ad'):[];
-        $rm = array_map(function($i){return substr($i, 7);}, $rm);
-        $ad = array_map(function($i){return substr($i, 7);}, $ad);
+        $rm = array_map(function($i){return substr($i, 7);}, $rm); // substr : remove "branch-" and keep only the id
+        $ad = array_map(function($i){return substr($i, 7);}, $ad); // substr : remove "branch-" and keep only the id
 
         $sheetType = SheetType::findOne(['table' => 'product']);
 

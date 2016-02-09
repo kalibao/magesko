@@ -42,10 +42,10 @@
    * @param {bool} async Request is asynchronous. To be synchronous you will set value to false. The default value is true
    */
   $.kalibao.core.app.ajaxQuery = function (url, success, type, data, dataType, async) {
-    if (!$.kalibao.core.app.hasUnsavedChanges()) {
+    type = type || 'GET';
+    if (!$.kalibao.core.app.hasUnsavedChanges() || type.toUpperCase() === 'POST') {
       // default arguments
       dataType = dataType || 'HTML';
-      type = type || 'GET';
       async = (async !== undefined) ? async : true;
       var contentType = 'application/x-www-form-urlencoded; charset=UTF-8';
       var processData = true;

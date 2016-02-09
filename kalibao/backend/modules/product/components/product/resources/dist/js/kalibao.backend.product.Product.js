@@ -38,6 +38,7 @@
    * Init object
    */
   $.kalibao.backend.product.View.prototype.init = function () {
+    var self = this;
     this.$container = $('#' + this.id);
     this.$wrapper = this.$container.closest('.content-dynamic');
     this.$main = this.$container.find('.content-main');
@@ -53,7 +54,11 @@
     this.$closeAll = this.$catalogTab.find('#close-all');
     this.$dropzone = this.$main.find('#dropzone');
     this.$sendMedia = this.$main.find('#send-media');
+    this.changed = false;
 
+    $.kalibao.core.app.hasUnsavedChanges = function() {
+      return self.checkState($('.tab-pane.active'));
+    };
 
     this.initComponents();
     this.initTree();
@@ -69,6 +74,7 @@
     this.initDiscountEvents();
     this.initTabHash();
     this.initFormReset();
+    this.initFormChange();
     this.initCopyEvents();
     $('[data-toggle="tooltip"]').tooltip();
     this.$variantListTab.find('input[type=radio]').change(function() {
@@ -480,13 +486,7 @@
   $.kalibao.backend.product.View.prototype.initTabHash = function () {
     var hash = window.location.hash;
     hash && $('ul.nav a[href="' + hash + '"]').tab('show');
-
-    $('.nav-tabs a').click(function (e) {
-      $(this).tab('show');
-      var scrollmem = $('body').scrollTop();
-      window.location.hash = this.hash;
-      $('html,body').scrollTop(scrollmem);
-    });
+    this.saveState($('.tab-pane.active'));
   };
 
   /**
@@ -654,17 +654,82 @@
    * Init the buttons to reset the form into their original state
    */
   $.kalibao.backend.product.View.prototype.initFormReset = function() {
-    $('form').find(':input').each(function(i, elem) {
-      var input = $(elem);
-      input.data('initialState', input.val());
+    var self = this;
+    $('.tab-pane').each(function(i, e){
+      var $e = $(e);
+      $e.find('.reset-form').off('click').click(function(e){
+        e.preventDefault();
+        self.resetState($e.find('form'));
+        return false;
+      })
     });
-    $('.reset-form').click(function(e) {
-      e.preventDefault();
-      $(this).closest('form').find(':input').each(function (i, elem) {
-        var input = $(elem);
-        input.val(input.data('initialState'));
-      });
+
+    $('.nav-tabs>li>a').off('click').click(function(e){
+      if ($.inArray(window.location.hash, ['#media']) == -1) { // disable changes verification for some tabs
+        if (self.checkState($('.tab-pane.active'))) {
+          $.toaster({ priority : 'warning', title : 'Attention', message : 'Il y a des changements non enregistrés'});
+          return false;
+        }
+      }
+      // show tab
+      $(this).tab('show');
+      var scrollmem = $('body').scrollTop();
+      window.location.hash = this.hash;
+      $('html,body').scrollTop(scrollmem);
+      // noinspection JSJQueryEfficiency
+      self.saveState($('.tab-pane.active'));
     });
+  };
+
+  $.kalibao.backend.product.View.prototype.initFormChange = function() {
+    var self = this;
+    $('.btn-submit').each(function(){$(this).removeClass('btn-primary').addClass('btn-default disabled')});
+    $(':input').change(function(e){
+      var $e = $(this);
+      var $tab = $e.closest('.tab-pane');
+      if (self.checkState($tab)) {
+        $tab.find('.btn-submit').removeClass('btn-default disabled').addClass('btn-primary');
+      }
+      else {
+        $tab.find('.btn-submit').removeClass('btn-primary').addClass('btn-default disabled');
+      }
+    })
+  };
+
+  $.kalibao.backend.product.View.prototype.saveState  = function(tab) {
+    var $tab = $(tab);
+    $tab.find(':input').each(function(i, elem) {
+      var $input = $(elem);
+      if ($input.is(':checkbox')) $input.data('initialState', $input.is(':checked'));
+      else $input.data('initialState', $input.val());
+    });
+  };
+
+  $.kalibao.backend.product.View.prototype.resetState = function(tab) {
+    var $tab = $(tab);
+    $tab.find(':input').each(function(i, elem) {
+      var $input = $(elem);
+      if ($input.is(':checkbox')) $input.prop('checked', $input.data('initialState'));
+      else $input.val($input.data('initialState'));
+    });
+    // reload select 2 data from hidden input
+    $tab.find('input.input-ajax-select').each(function(){
+      $(this).trigger('change');
+    })
+  };
+
+  $.kalibao.backend.product.View.prototype.checkState = function(tab) {
+    var changed = false;
+    var $tab = $(tab);
+    $tab.find(':input').each(function(i, elem) {
+      var $input = $(elem);
+      if ($input.is(':checkbox')) {
+        if ($input.is(':checked') != $input.data('initialState')) changed = true;
+      } else {
+        if ($input.val() != $input.data('initialState')) changed = true;
+      }
+    });
+    return changed;
   };
 
   /**

@@ -91,6 +91,15 @@
     this.$dynamic = this.$container.find('.content-dynamic');
     this.initComponents();
     this.initEvents();
+    $.kalibao.core.app.hasUnsavedChanges = function() {
+      if (window.location.pathname.search('/list') !== -1) return false;
+      var changes = false;
+      self.$container.find('form').each(function(){
+        if (self.checkFormState(this, true)) changes = true;
+        else self.resetFormState(this);
+      });
+      return changes
+    };
   };
 
   /**

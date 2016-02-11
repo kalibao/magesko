@@ -709,6 +709,11 @@ class ProductController extends Controller
             if(!$sheet->save()) $errors = true;
         }
 
+        $product = Product::findOne($request->post('productId'));
+        $product->scenario = 'update';
+        $product->attributes = $request->post('Product');
+        if(!$product->save()) $errors = true;
+
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->post('productId'), 'categories'));
         return $errors;
     }

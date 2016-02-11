@@ -606,6 +606,7 @@
 
     $(window).off('popstate');
     $(window).on("popstate", function(e) {
+      if (window.location.hash != '') return;
       var action = document.URL;
       var params = '';
       $.kalibao.core.app.ajaxQuery(

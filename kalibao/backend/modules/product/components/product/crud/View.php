@@ -288,7 +288,8 @@ class View extends \kalibao\common\components\crud\Edit
             'type' => 'activeTextarea',
             'options' => [
                 'class' => 'form-control input-sm wysiwyg-textarea',
-                'data-ckeditor-language' => $language
+                'data-ckeditor-language' => $language,
+                'id' => 'product_sh_d'
             ]
         ]);
 
@@ -298,7 +299,8 @@ class View extends \kalibao\common\components\crud\Edit
             'type' => 'activeTextarea',
             'options' => [
                 'class' => 'form-control input-sm wysiwyg-textarea',
-                'data-ckeditor-language' => $language
+                'data-ckeditor-language' => $language,
+                'id' => 'product_lg_d'
             ]
         ]);
 
@@ -308,7 +310,8 @@ class View extends \kalibao\common\components\crud\Edit
             'type' => 'activeTextarea',
             'options' => [
                 'class' => 'form-control input-sm wysiwyg-textarea',
-                'data-ckeditor-language' => $language
+                'data-ckeditor-language' => $language,
+                'id' => 'product_comm'
             ]
         ]);
 
@@ -341,7 +344,8 @@ class View extends \kalibao\common\components\crud\Edit
             'type' => 'activeTextarea',
             'options' => [
                 'class' => 'form-control input-sm wysiwyg-textarea',
-                'data-ckeditor-language' => $language
+                'data-ckeditor-language' => $language,
+                'id' => 'product_ship'
             ]
         ]);
 

@@ -57,7 +57,8 @@
     this.changed = false;
 
     $.kalibao.core.app.hasUnsavedChanges = function() {
-      return self.checkState($('.tab-pane.active'));
+      if (window.location.pathname.search('/product/product') === -1) return false;
+      return self.checkFormState($('.tab-pane.active'));
     };
 
     this.initComponents();
@@ -70,11 +71,11 @@
    */
   $.kalibao.backend.product.View.prototype.initEvents = function () {
     this.initActionsEvents();
+    this.initFormReset();
+    this.initFormChange();
     this.initCrossSellingEvents();
     this.initDiscountEvents();
     this.initTabHash();
-    this.initFormReset();
-    this.initFormChange();
     this.initCopyEvents();
     $('[data-toggle="tooltip"]').tooltip();
     this.$variantListTab.find('input[type=radio]').change(function() {
@@ -117,18 +118,24 @@
     this.$catalogTab.find('.btn-submit').off('click').on('click', function(e) {
       e.preventDefault();
       var newData = $jstree.get_checked();
-      var ad = $(newData).not(self.initialData).get();
-      var rm = $(self.initialData).not(newData).get();
+      var ad = $(newData).not(self.initialData).get(); // present in new data and not in initial
+      var rm = $(self.initialData).not(newData).get(); // present in initial data and not in new
       var productId = self.urlParam('id');
-      $.post('/product/product/update-catalog', {ad: ad, rm: rm, productId: productId}, function(){
-        $.toaster({priority: 'success', title: 'Enregistré', message: 'Modifications enregistrées'})
+      var Product = {
+        link_brand_product: self.$catalogTab.find('[name="Product[link_brand_product]"]').val(),
+        link_product_test: self.$catalogTab.find('[name="Product[link_product_test]"]').val()
+      };
+      $.post('/product/product/update-catalog', {ad: ad, rm: rm, productId: productId, Product: Product}, function(){
+        $.toaster({priority: 'success', title: 'Enregistré', message: 'Modifications enregistrées'});
+        self.initialData=newData;
+        self.saveFormState($('.tab-pane.active'));
       });
-      self.initialData=newData;
     });
 
     this.$catalogTab.find('.reset-form').on('click', function() {
       $jstree.uncheck_all();
       $jstree.check_node(self.initialData);
+      self.$tree.removeClass('unsaved');
     });
 
     this.$openAll.on('click', function() {
@@ -486,7 +493,7 @@
   $.kalibao.backend.product.View.prototype.initTabHash = function () {
     var hash = window.location.hash;
     hash && $('ul.nav a[href="' + hash + '"]').tab('show');
-    this.saveState($('.tab-pane.active'));
+    this.saveFormState($('.tab-pane.active'));
   };
 
   /**
@@ -529,6 +536,7 @@
             $.kalibao.core.app.scrollTop();
           }
           self.$container.unblock();
+          self.saveFormState($('.tab-pane.active'));
         },
         'POST',
         params,
@@ -659,14 +667,14 @@
       var $e = $(e);
       $e.find('.reset-form').off('click').click(function(e){
         e.preventDefault();
-        self.resetState($e.find('form'));
+        self.resetFormState($e.find('form'));
         return false;
       })
     });
 
-    $('.nav-tabs>li>a').off('click').click(function(e){
-      if ($.inArray(window.location.hash, ['#media']) == -1) { // disable changes verification for some tabs
-        if (self.checkState($('.tab-pane.active'))) {
+    $('.nav-tabs>li a').off('click').click(function(e){
+      if ($.inArray(window.location.hash, ['#media', '#attribute', '#']) == -1) { // disable changes verification for some tabs
+        if (self.checkFormState($('.tab-pane.active'), true)) {
           $.toaster({ priority : 'warning', title : 'Attention', message : 'Il y a des changements non enregistrés'});
           return false;
         }
@@ -677,17 +685,34 @@
       window.location.hash = this.hash;
       $('html,body').scrollTop(scrollmem);
       // noinspection JSJQueryEfficiency
-      self.saveState($('.tab-pane.active'));
+      self.saveFormState($('.tab-pane.active'));
     });
   };
 
+  /**
+   * Init the events for unsaved data warning before changing page or product tab
+   */
   $.kalibao.backend.product.View.prototype.initFormChange = function() {
     var self = this;
-    $('.btn-submit').each(function(){$(this).removeClass('btn-primary').addClass('btn-default disabled')});
-    $(':input').change(function(e){
+    //sync ckeditors with textareas to catch the change event
+    for (var i in CKEDITOR.instances) {
+      CKEDITOR.instances[i].on('change', function() {this.updateElement(); $(this.element.$).change()});
+    }
+    $(':input').change(function(){
+      console.log('input change');
       var $e = $(this);
       var $tab = $e.closest('.tab-pane');
-      if (self.checkState($tab)) {
+      if (self.checkFormState($tab)) {
+        $tab.find('.btn-submit').removeClass('btn-default disabled').addClass('btn-primary');
+      }
+      else {
+        $tab.find('.btn-submit').removeClass('btn-primary').addClass('btn-default disabled');
+      }
+    });
+
+    this.$tree.on('changed.jstree', function(){
+      var $tab = self.$catalogTab;
+      if (self.checkTreeState()) {
         $tab.find('.btn-submit').removeClass('btn-default disabled').addClass('btn-primary');
       }
       else {
@@ -696,40 +721,98 @@
     })
   };
 
-  $.kalibao.backend.product.View.prototype.saveState  = function(tab) {
+  /**
+   * save the current state of the form in memory for later checks /!\ this function does not save data in database
+   * @param tab the container of the form
+   */
+  $.kalibao.backend.product.View.prototype.saveFormState  = function(tab) {
     var $tab = $(tab);
-    $tab.find(':input').each(function(i, elem) {
+    $tab.find(':input:not(:button)').each(function(i, elem) {
       var $input = $(elem);
       if ($input.is(':checkbox')) $input.data('initialState', $input.is(':checked'));
       else $input.data('initialState', $input.val());
     });
+    $('.unsaved').removeClass('unsaved');
+    $tab.find('.btn-submit').removeClass('btn-primary').addClass('btn-default disabled');
   };
 
-  $.kalibao.backend.product.View.prototype.resetState = function(tab) {
+  /**
+   * reverts all changes made on the form since last save
+   * @param tab the container of the form
+   */
+  $.kalibao.backend.product.View.prototype.resetFormState = function(tab) {
     var $tab = $(tab);
-    $tab.find(':input').each(function(i, elem) {
+    $tab.find(':input:not(:button)').each(function(i, elem) {
       var $input = $(elem);
       if ($input.is(':checkbox')) $input.prop('checked', $input.data('initialState'));
       else $input.val($input.data('initialState'));
+      $input.removeClass('unsaved');
     });
     // reload select 2 data from hidden input
     $tab.find('input.input-ajax-select').each(function(){
       $(this).trigger('change');
-    })
+    });
+    $tab.find('.btn-submit').removeClass('btn-primary').addClass('btn-default disabled');
   };
 
-  $.kalibao.backend.product.View.prototype.checkState = function(tab) {
+  /**
+   * checks if the form of the given tab contains unsaved data
+   * @param tab the container of the form
+   * @param notify if set to true, add a class to the unsaved elements
+   * @returns {boolean} true : unsaved data, false : no unsaved data
+   */
+  $.kalibao.backend.product.View.prototype.checkFormState = function(tab, notify) {
+    // set default value
+    notify = typeof notify !== 'undefined' ? notify : false;
+
     var changed = false;
     var $tab = $(tab);
-    $tab.find(':input').each(function(i, elem) {
+    $tab.find(':input:not(:button)').each(function(i, elem) {
       var $input = $(elem);
       if ($input.is(':checkbox')) {
-        if ($input.is(':checked') != $input.data('initialState')) changed = true;
+        if ($input.is(':checked') != $input.data('initialState')) {
+          if (notify) {
+            $input.removeClass('unsaved');
+            setTimeout(function(){$input.addClass('unsaved');}, 1); // setTimeout to restart animation
+          }
+          changed = true;
+        }
       } else {
-        if ($input.val() != $input.data('initialState')) changed = true;
+        if ($input.val() != $input.data('initialState')) {
+          if (notify) {
+            $input.removeClass('unsaved');
+            setTimeout(function(){$input.addClass('unsaved');}, 1); // setTimeout to restart animation
+          }
+          changed = true;
+        }
       }
     });
+    if (window.location.hash == '#catalog') changed = this.checkTreeState(notify) || changed;
     return changed;
+  };
+
+  /**
+   * Checks if the tree contains unsaved changes
+   * @param notify if set to true, add a class to the unsaved tree
+   * @returns {boolean} true : unsaved data, false : no unsaved data
+   */
+  $.kalibao.backend.product.View.prototype.checkTreeState = function(notify) {
+    // set default value
+    notify = typeof notify !== 'undefined' ? notify : false;
+    if (typeof this.initialData === 'undefined') return false;
+
+    var $jstree = this.$tree.jstree();
+    var $tree = this.$tree;
+
+    if (! $jstree.get_checked().equals(this.initialData)) {
+      if (notify) {
+        setTimeout(function(){$tree.addClass('unsaved');}, 1); // setTimeout to restart animation
+        $tree.removeClass('unsaved');
+      }
+      return true;
+    } else {
+      return false;
+    }
   };
 
   /**

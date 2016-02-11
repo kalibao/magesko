@@ -125,3 +125,25 @@
   padding: 5px;
   background-color: white;
 }
+.unsaved {
+  -webkit-animation: emphase 0.5s 1;
+  -o-animation: emphase 0.5s 1;
+  animation: emphase 0.5s 1;
+  border: 1px solid #f39c12;
+  -webkit-box-shadow: 0 0 1px 1px #f39c12;
+  -o-box-shadow: 0 0 1px 1px #f39c12;
+  box-shadow: 0 0 1px 1px #f39c12;
+}
+@keyframes emphase {
+  0%,
+  100% {
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    box-shadow: none;
+  }
+  50% {
+    -webkit-box-shadow: 0 0 5px 5px #f39c12;
+    -o-box-shadow: 0 0 5px 5px #f39c12;
+    box-shadow: 0 0 5px 5px #f39c12;
+  }
+}

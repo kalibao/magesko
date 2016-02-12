@@ -16,7 +16,7 @@ use kalibao\common\components\crud\SimpleValueField;
         <button type="button" class="close" aria-hidden="true">&times;</button>
     </h4>
 
-    <form method="GET" action="<?= Url::to(['list']); ?>">
+    <form method="GET" action="<?= Url::to(['list']); ?>" class="nocheck">
         <table class="table table-condensed">
             <tbody>
             <?php foreach ($crudList->advancedFilters as $itemField): ?>

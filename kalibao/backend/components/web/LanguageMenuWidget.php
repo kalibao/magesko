@@ -33,7 +33,7 @@ class LanguageMenuWidget extends Widget
         }
 
         // build form
-        $html = '<form method="post" class="current-language" action="' . Yii::$app->request->url . '">';
+        $html = '<form method="post" class="current-language nocheck" action="' . Yii::$app->request->url . '">';
         $html .= Html::dropDownList(
             'language', Yii::$app->language, $languageLabels, ['class' => 'language-selector form-control']
         );

@@ -26,7 +26,7 @@ class RbacPermissionRoleAsset extends AssetBundle
      * @inheritdoc
      */
     public $publishOptions = [
-        //'forceCopy' => YII_ENV_DEV
+        'forceCopy' => YII_ENV_DEV
     ];
 
     /**

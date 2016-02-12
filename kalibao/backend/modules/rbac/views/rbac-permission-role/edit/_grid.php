@@ -14,5 +14,9 @@
             <span class="glyphicon glyphicon-floppy-disk"></span>
             <span><?= Yii::t('kalibao', 'btn_save') ?></span>
         </a>
+        <button class="btn btn-warning reset-form">
+            <span class="glyphicon glyphicon-refresh"></span>
+            <span><?= Yii::t('kalibao', 'btn_cancel') ?></span>
+        </button>
     </div>
 </div>

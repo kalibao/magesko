@@ -9,12 +9,15 @@ use kalibao\common\components\crud\DateRangeField;
 use kalibao\common\components\crud\SimpleValueField;
 ?>
 <thead>
-    <tr>
-        <th></th>
-        <?php foreach ($models['rbacRoles'] as $rbacRole): ?>
-            <?php if (isset($rbacRole->rbacRoleI18ns[0])): ?>
-                <th><?= $rbacRole->rbacRoleI18ns[0]->title ?></th>
-            <?php endif ?>
-        <?php endforeach ?>
-    </tr>
+<tr>
+    <th class="text-center">
+        <a class="btn btn-default" href="#" title="top"><i class="fa fa-arrow-up"></i></a>
+        <a class="btn btn-default" href="#bottom" title="bottom"><i class="fa fa-arrow-down"></i></a>
+    </th>
+    <?php foreach ($models['rbacRoles'] as $rbacRole): ?>
+        <?php if (isset($rbacRole->rbacRoleI18ns[0])): ?>
+            <th><?= $rbacRole->rbacRoleI18ns[0]->title ?></th>
+        <?php endif ?>
+    <?php endforeach ?>
+</tr>
 </thead>

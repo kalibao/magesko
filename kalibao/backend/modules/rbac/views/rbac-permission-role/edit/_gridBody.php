@@ -10,7 +10,20 @@ use kalibao\common\components\crud\DateRangeField;
 use kalibao\common\components\crud\SimpleValueField;
 ?>
 <tbody>
-<?php foreach ($models['rbacPermissions'] as $rbacPermission): ?>
+<?php $i=0; foreach ($models['rbacPermissions'] as $rbacPermission): ?>
+    <?php $i++; if (($i%25) === 0): ?>
+        <tr>
+            <th class="text-center">
+                <a class="btn btn-default" href="#" title="top"><i class="fa fa-arrow-up"></i></a>
+                <a class="btn btn-default" href="#bottom" title="bottom"><i class="fa fa-arrow-down"></i></a>
+            </th>
+            <?php foreach ($models['rbacRoles'] as $rbacRole): ?>
+                <?php if (isset($rbacRole->rbacRoleI18ns[0])): ?>
+                    <th><?= $rbacRole->rbacRoleI18ns[0]->title ?></th>
+                <?php endif ?>
+            <?php endforeach ?>
+        </tr>
+    <?php endif; ?>
     <?php if (isset($rbacPermission->rbacPermissionI18ns[0])): ?>
     <tr>
         <td><?= $rbacPermission->rbacPermissionI18ns[0]->title; ?></td>

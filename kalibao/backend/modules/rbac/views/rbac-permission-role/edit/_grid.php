@@ -9,7 +9,7 @@
         <?= $this->render('_gridHead', ['models' => $models]); ?>
         <?= $this->render('_gridBody', ['models' => $models]); ?>
     </table>
-    <div class="text-center">
+    <div class="text-center" id="bottom">
         <a class="btn btn-primary btn-submit" href="#">
             <span class="glyphicon glyphicon-floppy-disk"></span>
             <span><?= Yii::t('kalibao', 'btn_save') ?></span>

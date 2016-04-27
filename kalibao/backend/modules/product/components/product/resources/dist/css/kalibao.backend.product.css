@@ -33,6 +33,10 @@
   color: #555555 !important;
   border-color: #3C8DBC !important;
 }
+#buy-prices-table tbody tr:first-child,
+#sell-prices-table tbody tr:first-child {
+  border-bottom: 2px solid #e5e5e5;
+}
 .media-body iframe {
   max-width: 100% !important;
   max-height: 250px !important;

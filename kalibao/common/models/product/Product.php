@@ -169,7 +169,6 @@ class Product extends \yii\db\ActiveRecord
                     'google_category_id',
                     'stats_category_id',
                     'accountant_category_id',
-                    'base_price'
                 ],
                 'required'
             ],

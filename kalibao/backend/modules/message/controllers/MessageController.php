@@ -182,12 +182,15 @@ class MessageController extends Controller
     {
         // request component
         $request = Yii::$app->request;
+        // session component
+        $session = Yii::$app->session;
         // load models
         $models = $this->loadEditModels();
 
         // save models
         $saved = false;
         if ($request->isPost) {
+            $session->set('backend.messages.lastGroup', $request->post('Message')['message_group_id']);
             $saved = $this->saveEditModels($models, $request->post());
         }
 

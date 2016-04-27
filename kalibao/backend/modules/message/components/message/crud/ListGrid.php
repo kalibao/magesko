@@ -117,7 +117,7 @@ class ListGrid extends \kalibao\common\components\crud\ListGrid
                     ]),
                     'data-allow-clear' => 1,
                     'data-placeholder' => Yii::t('kalibao', 'input_select'),
-                    'data-text' => !empty($model->message_group_id) ? $this->messageGroups[$model->message_group_id]->name : '',
+                    'data-text' => !empty($model->message_group_id) ? $this->messageGroups[$model->message_group_id]->title : '',
                 ]
             ])
         ];

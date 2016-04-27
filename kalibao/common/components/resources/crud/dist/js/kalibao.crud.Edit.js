@@ -93,7 +93,7 @@
     this.initEvents();
     $.kalibao.core.app.hasUnsavedChanges = function() {
       var changes = false;
-      $('form:not(.nocheck)').each(function(){
+      $('form.check-save').each(function(){
         if (self.checkFormState(this, true)) changes = true;
         else self.resetFormState(this);
       });

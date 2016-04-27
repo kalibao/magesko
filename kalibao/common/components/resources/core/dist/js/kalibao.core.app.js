@@ -168,7 +168,7 @@
     $input.datepicker($.extend(
       $.kalibao.core.app.datePickerLanguage,
       {dateFormat: 'yy-mm-dd'}
-    ));
+    )).datepicker('setDate', $input.attr('rel'));
   };
 
   /**

@@ -144,9 +144,10 @@ class View extends \kalibao\common\components\crud\Edit
             'type' => 'activeTextInput',
             'required' => true,
             'options' => [
-                'class' => 'form-control input-sm date-picker date-range required',
+                'class' => 'required form-control input-sm date-picker date-range',
                 'maxlength' => true,
                 'placeholder' => $models['main']->getAttributeLabel('available_date'),
+                'rel' => (isset($models['main']->available_date))?$models['main']->available_date:date('Y-m-d')
             ]
         ]);
 

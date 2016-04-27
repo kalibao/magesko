@@ -55,6 +55,7 @@ class Edit extends \kalibao\common\components\crud\Edit
                 'class' => 'required form-control input-sm date-picker date-range',
                 'maxlength' => true,
                 'placeholder' => $models['main']->getAttributeLabel('available_date'),
+                'rel' => $models['main']->available_date
             ]
         ]);
 

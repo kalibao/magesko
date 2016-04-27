@@ -59,7 +59,7 @@ class ModelFilter extends Message
         return [
             [['id', 'message_group_id'], 'integer'],
             [['created_at_start', 'created_at_end', 'updated_at_start', 'updated_at_end'], 'date', 'format' => 'yyyy-MM-dd'],
-            [['message_group_i18n_name', 'source'], 'string', 'max' => 255]
+            [['message_group_i18n_title', 'source'], 'string', 'max' => 255]
         ];
     }
 

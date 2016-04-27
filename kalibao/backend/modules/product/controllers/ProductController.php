@@ -25,6 +25,7 @@ use kalibao\common\models\variantAttribute\VariantAttribute;
 use Yii;
 use yii\base\ErrorException;
 use yii\base\Exception;
+use yii\base\InvalidParamException;
 use yii\caching\TagDependency;
 use yii\db\ActiveQuery;
 use yii\db\ActiveRecord;
@@ -49,6 +50,7 @@ class ProductController extends Controller
     protected $crudModelsClass = [
         'main' => 'kalibao\common\models\product\Product',
         'i18n' => 'kalibao\common\models\product\ProductI18n',
+        'variant' => 'kalibao\common\models\variant\Variant',
         'filter' => 'kalibao\backend\modules\product\models\product\crud\ModelFilter',
     ];
 
@@ -147,6 +149,61 @@ class ProductController extends Controller
     }
 
     /**
+     * Load edit models
+     * @param array $primaryKey Primary key
+     * @return mixed
+     * @throws InvalidParamException
+     */
+    protected function loadEditModels(array $primaryKey = [])
+    {
+        $models = [];
+
+        $modelClass = $this->crudModelsClass['main'];
+        if (!empty($primaryKey)) {
+            $models['main'] = $modelClass::findOne($primaryKey);
+            if ($models['main'] === null) {
+                throw new InvalidParamException('Main model could not be found.');
+            } else {
+                $models['main']->scenario = 'update';
+            }
+        } else {
+            $models['main'] = new $modelClass(['scenario' => 'insert']);
+        }
+
+        $models['i18n'] = new $this->crudModelsClass['i18n']();
+        $models['i18n']->scenario = 'beforeInsert';
+
+        if (!empty($primaryKey) && !$models['main']->isNewRecord) {
+            $tmp = $models['i18n']::findOne([
+                $this->getLinkModelI18n() => $models['main']->{key($primaryKey)},
+                'i18n_id' => Yii::$app->language
+            ]);
+
+            if ($tmp !== null) {
+                $models['i18n'] = $tmp;
+                $models['i18n']->scenario = 'update';
+                unset($tmp);
+            }
+        }
+
+        $tmp = $this->crudModelsClass['variant'];
+        if (!empty($primaryKey)) {
+            $results = $tmp::findAll(['product_id' => $primaryKey['id']]);
+            if (is_array($results)) {
+                foreach ($results as $result) {
+                    $pk = $result->primaryKey;
+                    $models['variant'][$pk] = $result;
+                    $models['variant'][$pk]->scenario = 'update';
+                }
+            }
+        } else {
+            $models['variant'] = new $tmp(['scenario' => 'insert']);
+        }
+
+        return $models;
+    }
+
+    /**
      * View action
      * @return array|string
      * @throws HttpException
@@ -154,6 +211,7 @@ class ProductController extends Controller
     public function actionView()
     {
         $request = Yii::$app->request;
+        $models = $this->loadEditModels(['id' => $request->get('id')]);
         if ($request->get('id') === null) {
             throw new HttpException(404, Yii::t('kalibao.backend', 'product_not_found'));
         }
@@ -185,6 +243,7 @@ class ProductController extends Controller
                 'title' => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
             ];
         } else {
+            //var_dump($models['variant']);
             return $this->render('view/view', compact('component', 'create'));
         }
     }
@@ -740,6 +799,10 @@ class ProductController extends Controller
             // load request
             $models['main']->load($requestParams);
             $models['i18n']->load($requestParams);
+            foreach ($models['variant'] as $id => $model) {
+                $model->scenario = $scenario;
+                $model->load(['Variant' => $requestParams['Variant'][$id]]);
+            }
 
             // get uploaded file instance
             $oldFileNames['main'] = [];
@@ -748,13 +811,22 @@ class ProductController extends Controller
             // validate model
             $validate['main'] = $models['main']->validate();
             $validate['i18n'] = true;
+            $validate['variant'] = true;
             if ($this->modelExist('i18n')) {
                 $validate['i18n'] = $models['i18n']->validate();
             }
+            if ($this->modelExist('variant')) {
+                foreach ($models['variant'] as $id => $model) {
+                    $validate['variant'] &= $model->validate();
+                }
+            }
 
-            if (! $validate['main'] || ! $validate['i18n']) {
+            if (! $validate['main'] || ! $validate['i18n'] || ! $validate['variant']) {
                 var_dump($models['main']->errors);
                 var_dump($models['i18n']->errors);
+                foreach ($models['variant'] as $id => $model) {
+                    var_dump($model->errors);
+                }
                 throw new Exception(1);
             }
 
@@ -765,6 +837,15 @@ class ProductController extends Controller
                     $models['i18n']->scenario = $scenario;
                     if (!$models['i18n']->save()) {
                         throw new Exception(2);
+                    }
+                }
+
+                if ($this->modelExist('variant')) {
+                    foreach ($models['variant'] as $id => $model) {
+                        $model->scenario = $scenario;
+                        if (!$model->save()) {
+                            throw new Exception(2);
+                        }
                     }
                 }
 

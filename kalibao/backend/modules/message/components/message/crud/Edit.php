@@ -48,6 +48,26 @@ class Edit extends \kalibao\common\components\crud\Edit
         // get drop down list methods
         $dropDownList = $this->getDropDownList();
 
+        // get message group
+        if (!empty($models['main']->message_group_id)) {
+            $messageGroup = MessageGroupI18n::findOne([
+                'message_group_id' => $models['main']->message_group_id,
+                'i18n_id'          => $language
+            ])->title;
+            $messageGroupId = $models['main']->message_group_id;
+        } else {
+            if ((Yii::$app->session->get('backend.messages.lastGroup') === null)) {
+                $messageGroup = null;
+                $messageGroupId = null;
+            } else {
+                $messageGroup = MessageGroupI18n::findOne([
+                    'message_group_id' => Yii::$app->session->get('backend.messages.lastGroup'),
+                    'i18n_id'          => $language
+                ])->title;
+                $messageGroupId = Yii::$app->session->get('backend.messages.lastGroup');
+            };
+        }
+
         // set items
         $items = [];
 
@@ -67,10 +87,8 @@ class Edit extends \kalibao\common\components\crud\Edit
                 'data-update-action' => Url::to('/message/message-group/update'),
                 'data-update-argument' => 'id',
                 'data-related-field' => '.link_message_group_title',
-                'data-text' => !empty($models['main']->message_group_id) ? MessageGroupI18n::findOne([
-                    'message_group_id' => $models['main']->message_group_id,
-                    'i18n_id' => $language
-                ])->title : '',
+                'data-text' => $messageGroup,
+                'value' => $messageGroupId,
             ]
         ]);
 

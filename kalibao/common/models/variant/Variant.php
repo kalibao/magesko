@@ -30,6 +30,8 @@ use kalibao\common\models\logisticStrategy\LogisticStrategyI18n;
  * @property integer $visible
  * @property integer $primary
  * @property integer $top_selling
+ * @property float $buy_price
+ * @property float $sell_price
  * @property integer $height
  * @property integer $width
  * @property integer $length
@@ -89,16 +91,19 @@ class Variant extends \yii\db\ActiveRecord
     {
         return [
             'insert' => [
-                'product_id', 'code', 'supplier_code', 'barcode', 'order', 'visible', 'primary', 'top_selling', 'height', 'width', 'length', 'weight', 'logistic_strategy_id', 'last_inventory_date', 'shipping_period_start', 'shipping_period_end', 'selling_period_start', 'selling_period_end', 'discount_id'
+                'product_id', 'code', 'supplier_code', 'barcode', 'order', 'visible', 'primary', 'top_selling', 'height', 'width', 'length', 'weight', 'logistic_strategy_id', 'last_inventory_date', 'shipping_period_start', 'shipping_period_end', 'selling_period_start', 'selling_period_end', 'discount_id', 'buy_price', 'sell_price'
             ],
             'update' => [
-                'product_id', 'code', 'supplier_code', 'barcode', 'order', 'visible', 'primary', 'top_selling', 'height', 'width', 'length', 'weight', 'logistic_strategy_id', 'last_inventory_date', 'shipping_period_start', 'shipping_period_end', 'selling_period_start', 'selling_period_end', 'discount_id'
+                'product_id', 'code', 'supplier_code', 'barcode', 'order', 'visible', 'primary', 'top_selling', 'height', 'width', 'length', 'weight', 'logistic_strategy_id', 'last_inventory_date', 'shipping_period_start', 'shipping_period_end', 'selling_period_start', 'selling_period_end', 'discount_id', 'buy_price', 'sell_price'
             ],
             'update-variant' => [
                 'code', 'supplier_code', 'barcode', 'order', 'visible', 'primary', 'top_selling'
             ],
             'update-logistic' => [
                 'height', 'width', 'length', 'weight', 'logistic_strategy_id'
+            ],
+            'update_price' => [
+                'buy_price', 'sell_price'
             ],
         ];
     }
@@ -114,6 +119,7 @@ class Variant extends \yii\db\ActiveRecord
             [['visible', 'primary', 'top_selling'], 'in', 'range' => [0, 1]],
             [['last_inventory_date', 'shipping_period_start', 'shipping_period_end', 'selling_period_start', 'selling_period_end'], 'date', 'format' => 'yyyy-MM-dd'],
             [['code'], 'string', 'max' => 15],
+            [['buy_price', 'sell_price'], 'number'],
             [['supplier_code', 'barcode'], 'string', 'max' => 100]
         ];
     }
@@ -194,7 +200,7 @@ class Variant extends \yii\db\ActiveRecord
      */
     public function getVariantAttributes()
     {
-        return $this->hasMany(VariantAttribute::className(), ['variant_id' => 'id']);
+        return $this->hasMany(VariantAttribute::className(), ['variant_id' => 'id'])->join('inner join', 'attribute', 'attribute_id = attribute.id')->orderBy('attribute_type_id');
     }
 
     /**
@@ -267,5 +273,15 @@ class Variant extends \yii\db\ActiveRecord
             $price += (float) $va->extra_cost;
         }
         return $price;
+    }
+
+    public function getBuyPrice() {
+        $decimals = (int)Yii::$app->variable->get('kalibao.backend', 'price_decimals_count');
+        return number_format(floatval($this->buy_price), $decimals);
+    }
+
+    public function getSellPrice() {
+        $decimals = (int)Yii::$app->variable->get('kalibao.backend', 'price_decimals_count');
+        return number_format(floatval($this->sell_price), $decimals);
     }
 }

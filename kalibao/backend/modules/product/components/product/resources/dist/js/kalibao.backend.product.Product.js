@@ -75,6 +75,7 @@
     this.initFormChange();
     this.initCrossSellingEvents();
     this.initDiscountEvents();
+    this.calcPrices();
     this.initTabHash();
     this.initCopyEvents();
     $('[data-toggle="tooltip"]').tooltip();
@@ -192,7 +193,6 @@
       var vat = parseFloat($(this).attr("data-vat"));
       $e.val(Math.round($(this).val() / (1 + vat)*10000)/10000);
     });
-    $("#prices").find("input").keyup(self.calcPrices).keyup();
 
     this.$discountTab.find(".discount-rate" ).keyup(function(){
       self.updateDiscount("rate", $("#discount"));
@@ -592,31 +592,80 @@
    * calculates the sell prices and margins
    */
   $.kalibao.backend.product.View.prototype.calcPrices = function () {
-    var $bpl = $("#buy-prices-table").find("tr");
-    var $spl = $("#sell-prices-table").find("tr");
-    var basePrice = parseFloat($("#base_price").val());
-    var vat = parseFloat($("#priceTTC").data("vat"));
+    var self = this;
+    var $buyPriceInput     = $('#buyPrice');
+    var $sellPriceHTInput  = $('#priceHT');
+    var $sellPriceTTCInput = $('#priceTTC');
+    var $sellPriceTable = $('#sell-prices-table');
+    var $buyPriceListInputs = $('#buy-prices-table').find('input[name*="price"]');
+    var $sellPriceHTListInputs = $sellPriceTable.find('td:nth-child(2) input').slice(1);
+    var $sellPriceTTCListInputs = $sellPriceTable.find('td:nth-child(3) input').slice(1);
+    var $marginCoeffInputs = $sellPriceTable.find('td:nth-child(4) input');
+    var $marginRateInputs = $sellPriceTable.find('td:nth-child(5) input');
+    var multiplier = 1 + $sellPriceHTInput.data('vat');
 
-    for (var i = $bpl.length - 1; i >= 1; i--) {
-      var buyPrice = parseFloat($bpl.eq(i).find("input").first().val());
-      if (isNaN(buyPrice)) buyPrice = 0;
-      var extraCost = 0;
-      $spl.eq(i).find("span").each(function(){
-        extraCost += parseFloat($(this).data("extracost"));
+    var updateMargin = function(line) {
+      if (line == null) {
+        $buyPriceListInputs.each(function(){
+          updateMargin($buyPriceListInputs.index($(this))); // updateMargin for each line
+        })
+      }
+      var buy = $buyPriceListInputs.eq(line).val();
+      var sell = $sellPriceTTCListInputs.eq(line).val();
+
+      $marginCoeffInputs.eq(line).val((sell/buy).toFixed(2));
+      $marginRateInputs.eq(line).val((100 - (buy/sell)*100).toFixed(2) + ' %');
+    };
+
+    // events for all lines
+    $buyPriceInput.on('input', function(){
+      var price = $(this).val();
+      $buyPriceListInputs.each(function(){
+        $(this).val(price);
+        updateMargin();
+      })
+    });
+
+    $sellPriceHTInput.on('input', function(){
+      var price = $(this).val();
+      $sellPriceHTListInputs.each(function(){  // copy to all HT inputs
+        $(this).val(parseFloat(price).toFixed(6));
       });
-      var priceTTC = Math.round((extraCost + basePrice) * (1+vat)*10000)/10000;
-      var prices = [
-        Math.round((extraCost + basePrice)*10000)/10000,
-        priceTTC,
-        Math.round((priceTTC / buyPrice)*100)/100,
-        100-Math.round((buyPrice / priceTTC)*10000)/100 + " %"
-      ];
-      var $inputs = $spl.eq(i).find("input");
-      $inputs.eq(0).val(prices[0]);
-      $inputs.eq(1).val(prices[1]);
-      $inputs.eq(2).val(prices[2]);
-      $inputs.eq(3).val(prices[3]);
-    }
+      $sellPriceTTCListInputs.each(function(){ // calc all TTC inputs
+        $(this).val((price * multiplier).toFixed(6));
+      });
+      updateMargin();
+    });
+
+    $sellPriceTTCInput.on('input', function(){
+      var price = $(this).val();
+      $sellPriceTTCListInputs.each(function(){ // copy to all TTC input
+        $(this).val(parseFloat(price).toFixed(6));
+      });
+      $sellPriceHTListInputs.each(function(){  // calc all HT inputs
+        $(this).val((price / multiplier).toFixed(6));
+      });
+      updateMargin();
+    });
+
+
+    // individual line edit
+    $sellPriceHTListInputs.on('input', function(){
+      var index = $sellPriceHTListInputs.index($(this));
+      $sellPriceTTCListInputs.eq(index).val(($(this).val() * multiplier).toFixed(6));
+      updateMargin(index);
+    });
+
+    $sellPriceTTCListInputs.on('input', function(){
+      var index = $sellPriceTTCListInputs.index($(this));
+      $sellPriceHTListInputs.eq(index).val(($(this).val() / multiplier).toFixed(6));
+      updateMargin(index);
+    });
+
+    $buyPriceListInputs.on('input', function(){updateMargin();})
+
+    // trigger input event to calc all datas
+    $sellPriceHTListInputs.trigger('input');
   };
 
   /**
@@ -767,7 +816,7 @@
 
     var changed = false;
     var $tab = $(tab);
-    $tab.find(':input:not(:button)').each(function(i, elem) {
+    $tab.find(':input:not(:button):not(.nocheck)').each(function(i, elem) {
       var $input = $(elem);
       if ($input.is(':checkbox')) {
         if ($input.is(':checked') != $input.data('initialState')) {

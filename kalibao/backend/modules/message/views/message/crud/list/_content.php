@@ -23,6 +23,16 @@ use yii\helpers\Url;
         <div class="box-body">
             <div class="row">
                 <div class="col-xs-12">
+                    <div class="text-center">
+                        <a title="Traduire" class="btn btn-danger btn-translate-all" href="<?= Url::to(['list'] + $crudList->requestParams); ?>">
+                            <span class="glyphicon glyphicon-globe"></span>
+                            <span><?= Yii::t('kalibao.backend', 'btn_translate_all_message') ?></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
                     <?= $this->render('crud/list/_grid', ['crudList' => $crudList], $this->context); ?>
                 </div>
             </div>

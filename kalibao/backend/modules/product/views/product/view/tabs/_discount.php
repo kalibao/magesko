@@ -39,8 +39,8 @@ use \kalibao\common\components\i18n\I18N;
                         <td><input class="form-control input-sm discount-price" type="text"/></td>
                         <td><input class="form-control input-sm discount-value" type="text"/></td>
                         <td><input class="form-control input-sm discount-rate" type="text" name="discount[<?= $variant->discount->id ?>][percent]" value="<?= $variant->discount->percent ?>"/></td>
-                        <td><input class="form-control input-sm date-picker" type="text" name="discount[<?= $variant->discount->id ?>][start_date]" value="<?= Yii::$app->formatter->asDate($variant->discount->start_date, I18N::getDateFormat(I18N::DATE_FORMAT)) ?>"/></td>
-                        <td><input class="form-control input-sm date-picker" type="text" name="discount[<?= $variant->discount->id ?>][end_date]" value="<?= Yii::$app->formatter->asDate($variant->discount->end_date, I18N::getDateFormat(I18N::DATE_FORMAT)) ?>"/></td>
+                        <td><input class="form-control input-sm date-picker" type="text" name="discount[<?= $variant->discount->id ?>][start_date]" rel="<?= Yii::$app->formatter->asDate($variant->discount->start_date, I18N::getDateFormat(I18N::DATE_FORMAT, 'jquery')) ?>"/></td>
+                        <td><input class="form-control input-sm date-picker" type="text" name="discount[<?= $variant->discount->id ?>][end_date]" rel="<?= Yii::$app->formatter->asDate($variant->discount->end_date, I18N::getDateFormat(I18N::DATE_FORMAT, 'jquery')) ?>"/></td>
                         <td><input class="form-control input-sm discount-final-price" type="text" disabled/></td>
                     </tr>
                     <tr>
@@ -53,8 +53,8 @@ use \kalibao\common\components\i18n\I18N;
                         <td><input class="form-control input-sm discount-price" type="text"/></td>
                         <td><input class="form-control input-sm discount-value" type="text"/></td>
                         <td><input class="form-control input-sm discount-rate" type="text" name="discount[<?= $variant->discount->id ?>][percent_vip]" value="<?= $variant->discount->percent_vip ?>"/></td>
-                        <td><input class="form-control input-sm date-picker" type="text" name="discount[<?= $variant->discount->id ?>][start_date_vip]" value="<?= Yii::$app->formatter->asDate($variant->discount->start_date_vip, I18N::getDateFormat(I18N::DATE_FORMAT)) ?>"/></td>
-                        <td><input class="form-control input-sm date-picker" type="text" name="discount[<?= $variant->discount->id ?>][end_date_vip]" value="<?= Yii::$app->formatter->asDate($variant->discount->end_date_vip, I18N::getDateFormat(I18N::DATE_FORMAT)) ?>"/></td>
+                        <td><input class="form-control input-sm date-picker" type="text" name="discount[<?= $variant->discount->id ?>][start_date_vip]" rel="<?= Yii::$app->formatter->asDate($variant->discount->start_date_vip, I18N::getDateFormat(I18N::DATE_FORMAT, 'jquery')) ?>"/></td>
+                        <td><input class="form-control input-sm date-picker" type="text" name="discount[<?= $variant->discount->id ?>][end_date_vip]" rel="<?= Yii::$app->formatter->asDate($variant->discount->end_date_vip, I18N::getDateFormat(I18N::DATE_FORMAT, 'jquery')) ?>"/></td>
                         <td><input class="form-control input-sm discount-final-price" type="text" disabled/></td>
                     </tr>
                 <?php endforeach; ?>

@@ -16,7 +16,6 @@
             <li><a href="#attribute" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_attribute') ?></a></li>
             <li class="divider"></li>
             <li><a href="#variant-list" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_variant_list') ?></a></li>
-            <li><a href="#variant-price" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_variant_price') ?></a></li>
         </ul>
     </li>
     <li><a href="#description" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_description') ?></a></li>

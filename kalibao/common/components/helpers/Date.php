@@ -22,15 +22,18 @@ class Date {
      * Supported input formats are d-m-yyyy, dd-mm-yyyy, yyyy-mm-dd, yyyy-m-d
      * Supported delimiters are . / - _ and space
      *
-     * @return      string The date converted in the MySQL datetime format
+     * @return      string The date converted in the MySQL datetime format or false if error
      */
     public static function dateToMysql($date)
     {
         if (preg_match("/(\d{1,2})[-_\/\.\ ](\d{1,2})[-_\/\.\ ](\d{4})/", $date, $result)) { //french format
             $date = $result[3] . '-' . sprintf('%02d', $result[2]) . '-' . sprintf('%02d', $result[1]) . ' 00:00:00';
         } else { // english format
-            preg_match("/(\d{4})[-_\/\.\ ](\d{1,2})[-_\/\.\ ](\d{1,2})/", $date, $result);
-            $date = $result[1] . '-' . sprintf('%02d', $result[2]) . '-' . sprintf('%02d', $result[3]) . ' 00:00:00';
+            if (preg_match("/(\d{4})[-_\/\.\ ](\d{1,2})[-_\/\.\ ](\d{1,2})/", $date, $result)) {
+                $date = $result[1] . '-' . sprintf('%02d', $result[2]) . '-' . sprintf('%02d', $result[3]) . ' 00:00:00';
+            } else { // not a date
+                return false;
+            }
         }
 
         return $date;

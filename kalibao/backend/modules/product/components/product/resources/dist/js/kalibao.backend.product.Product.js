@@ -662,7 +662,7 @@
       updateMargin(index);
     });
 
-    $buyPriceListInputs.on('input', function(){updateMargin();})
+    $buyPriceListInputs.on('input', function(){updateMargin();});
 
     // trigger input event to calc all datas
     $sellPriceHTListInputs.trigger('input');

@@ -16,6 +16,13 @@ namespace kalibao\common\components\web;
 class AdminLTEAsset extends AssetBundle
 {
     /**
+     * @var boolean whether to automatically generate the needed language js files.
+     * If this is true, the language js files will be determined based on the actual usage of [[DatePicker]]
+     * and its language settings. If this is false, you should explicitly specify the language js files via [[js]].
+     */
+    public $autoGenerate = true;
+    
+    /**
      * @inheritdoc
      */
     public $sourcePath = '@kalibao/common/components/resources/adminLTE';
@@ -24,7 +31,7 @@ class AdminLTEAsset extends AssetBundle
      * @inheritdoc
      */
     public $publishOptions = [
-        //'forceCopy' => YII_ENV_DEV
+        'forceCopy' => YII_ENV_DEV
     ];
 
     /**
@@ -32,6 +39,7 @@ class AdminLTEAsset extends AssetBundle
      */
     public $css = [
         'dist/css/AdminLTE.min.css',
+        'plugins/datepicker/datepicker3.css',
     ];
 
     /**
@@ -39,6 +47,7 @@ class AdminLTEAsset extends AssetBundle
      */
     public $js = [
         'dist/js/app.min.js',
+        'plugins/datepicker/bootstrap-datepicker.js',
     ];
 
     /**

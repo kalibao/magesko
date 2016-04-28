@@ -20,10 +20,14 @@ class I18N extends \yii\i18n\I18N
 
     /**
      * Get date format of current language
+     * @param int $date
+     * @param string $forceLanguage
+     * @return string
      */
-    public static function getDateFormat($date = self::DATETIME_FORMAT)
+    public static function getDateFormat($date = self::DATETIME_FORMAT, $forceLanguage = null)
     {
-        switch(\Yii::$app->language)
+        $lang = ($forceLanguage === null)?\Yii::$app->language:$forceLanguage;
+        switch($lang)
         {
             case 'fr':
             case 'fr_FR':
@@ -31,6 +35,12 @@ class I18N extends \yii\i18n\I18N
                     return 'dd MM yyyy, HH:mm:ss';
                 } elseif ($date == self::DATE_FORMAT) {
                     return 'dd MM yyyy';
+                }
+            case 'jquery':
+                if ($date == self::DATETIME_FORMAT) {
+                    return 'dd/MM/yyyy, HH:mm:ss';
+                } elseif ($date == self::DATE_FORMAT) {
+                    return 'dd/MM/yyyy';
                 }
             default:
                 if ($date == self::DATETIME_FORMAT) {

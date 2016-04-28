@@ -54,7 +54,7 @@ class AppAsset extends AssetBundle
         'yii\bootstrap\BootstrapPluginAsset',
         'yii\widgets\ActiveFormAsset',
         'yii\validators\ValidationAsset',
-        'yii\jui\JuiAsset',
+        'kalibao\common\components\web\JuiAsset',
         'kalibao\common\components\web\BlockUIAsset',
     ];
 }

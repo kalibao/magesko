@@ -268,11 +268,8 @@ class Variant extends \yii\db\ActiveRecord
 
     public function getFinalPrice()
     {
-        $price = (float) $this->product->base_price;
-        foreach ($this->variantAttributes as $va) {
-            $price += (float) $va->extra_cost;
-        }
-        return $price;
+        $decimals = (int)Yii::$app->variable->get('kalibao.backend', 'price_decimals_count');
+        return number_format(floatval($this->buy_price), $decimals);
     }
 
     public function getBuyPrice() {

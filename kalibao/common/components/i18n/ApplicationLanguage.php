@@ -6,6 +6,7 @@
 
 namespace kalibao\common\components\i18n;
 
+use kalibao\common\components\web\AdminLTEAsset;
 use Yii;
 use yii\base\Component;
 use yii\base\InvalidConfigException;
@@ -277,19 +278,20 @@ class ApplicationLanguage extends Component
      */
     public static function registerClientSideDatePickerLanguage($view)
     {
+//        return;
         $language = Yii::$app->language;
 
         if ($language != 'en-US' && $language != 'en') {
-            $bundle = DatePickerLanguageAsset::register($view);
+            $bundle = AdminLTEAsset::register($view);
             if ($bundle->autoGenerate) {
                 $fallbackLanguage = substr($language, 0, 2);
-                if ($fallbackLanguage !== $language && !file_exists(Yii::getAlias($bundle->sourcePath . "/ui/i18n/datepicker-$language.js"))) {
+                if ($fallbackLanguage !== $language && !file_exists(Yii::getAlias($bundle->sourcePath . "/plugins/datepicker/locales/bootstrap-datepicker.$language.js"))) {
                     $language = $fallbackLanguage;
                 }
-                $view->registerJsFile($bundle->baseUrl . "/ui/i18n/datepicker-$language.js", [
-                    'depends' => [JuiAsset::className()],
+                $view->registerJsFile($bundle->baseUrl . "/plugins/datepicker/locales/bootstrap-datepicker.$language.js", [
+                    'depends' => [AdminLTEAsset::className()],
                 ]);
-                $view->registerJs("$.kalibao.core.app.datePickerLanguage = $.datepicker.regional['{$language}'];");
+                $view->registerJs("$.kalibao.core.app.datePickerLanguage = {language: '{$language}'}");
             }
         }
     }

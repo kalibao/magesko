@@ -6,6 +6,8 @@
 
 namespace kalibao\common\components\web;
 
+use yii\web\View;
+
 /**
  * Class AppAsset provide an asset bundle containing main application resources.
  *
@@ -38,6 +40,7 @@ class AppAsset extends AssetBundle
      * @inheritdoc
      */
     public $js = [
+        'dist/js/pace.js',
         'dist/js/kalibao.core.app.js',
         'dist/js/kalibao.core.tools.js',
         'dist/js/kalibao.core.Modal.js',
@@ -57,4 +60,13 @@ class AppAsset extends AssetBundle
         'kalibao\common\components\web\JuiAsset',
         'kalibao\common\components\web\BlockUIAsset',
     ];
+
+    /**
+     * @inheritdoc
+     */
+    public function init()
+    {
+        $this->jsOptions['position'] = View::POS_BEGIN;
+        parent::init();
+    }
 }

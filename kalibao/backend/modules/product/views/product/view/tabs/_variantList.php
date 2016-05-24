@@ -32,7 +32,7 @@ $modals = '';
                                 <?php endforeach; ?>
                             </td>
                             <td><input value="<?= empty($variant->code)?$variant->id:$variant->code ?>" name="variant[<?= $variant->id ?>][code]" class="form-control input-sm" type="text"/></td>
-                            <td><input disabled value="<?= empty($variant->order)?$i++:$variant->order ?>" name="variant[<?= $variant->id ?>][order]" class="form-control input-sm variant-order" type="text"/></td>
+                            <td><span class="sort-handle badge"><i class="fa fa-arrows"></i></span><input disabled value="<?= empty($variant->order)?$i++:$variant->order ?>" name="variant[<?= $variant->id ?>][order]" class="form-control input-sm variant-order" type="text"/></td>
                             <td><input value="<?= $variant->supplier_code ?>" name="variant[<?= $variant->id ?>][supplier_code]" class="form-control input-sm" type="text"/></td>
                             <td><input value="<?= $variant->barcode ?>" name="variant[<?= $variant->id ?>][barcode]" class="form-control input-sm" type="text"/></td>
                             <td class="form-inline"><div class="checkbox"><label><input <?= $variant->visible ? 'checked': '' ?>  name="variant[<?= $variant->id ?>][visible]" type="checkbox"/></label></div></td>
@@ -57,8 +57,8 @@ $modals = '';
                 </a>
             </div>
             <div class="col-xs-6">
-                <a class="btn btn-primary" href="#variant-price" data-toggle="tab">
-                    <span><?= Yii::t('kalibao.backend', 'product_tab_variant_price') ?></span>
+                <a class="btn btn-primary" href="#variant-generator" data-toggle="tab">
+                    <span><?= Yii::t('kalibao.backend', 'product_tab_variant_generator') ?></span>
                 </a>
             </div>
         </div>

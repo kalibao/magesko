@@ -185,3 +185,15 @@
 .dropdown-menu {
   box-shadow: 0 0 5px rgba(100, 100, 100, 0.5);
 }
+.tooltip-danger .tooltip-inner {
+  background-color: #dd4b39;
+  border-color: #d73925;
+}
+.tooltip-danger .tooltip-arrow {
+  border-top-color: #d73925 !important;
+}
+input.variant-order {
+  width: 50%;
+  margin-left: 10px;
+  display: inline-block;
+}

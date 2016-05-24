@@ -135,7 +135,8 @@ class Product extends \yii\db\ActiveRecord
                 'brand_id',
                 'supplier_id',
                 'stats_category_id',
-                'accountant_category_id'
+                'accountant_category_id',
+                'available_date'
             ],
             'update_description' => [],
             'update_price'       => ['base_price'],
@@ -185,7 +186,7 @@ class Product extends \yii\db\ActiveRecord
                 'integer'
             ],
             [['base_price'], 'number'],
-            [['link_brand_product', 'link_product_test'], 'string', 'max' => 255]
+            [['link_brand_product', 'link_product_test'], 'url', 'defaultScheme' => 'http'],
         ];
     }
 
@@ -487,6 +488,11 @@ class Product extends \yii\db\ActiveRecord
         );
     }
 
+    /**
+     * @param bool $asJson
+     * @return mixed
+     * @throws \Exception
+     */
     public function getCategories($asJson = false)
     {
         $dependency = new TagDependency([

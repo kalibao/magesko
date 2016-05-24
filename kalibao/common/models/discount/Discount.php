@@ -77,7 +77,11 @@ class Discount extends \yii\db\ActiveRecord
     {
         return [
             [['percent', 'percent_vip'], 'number'],
-            [['start_date', 'end_date', 'start_date_vip', 'end_date_vip'], 'date', 'format' => 'yyyy-MM-dd HH:mm:ss']
+            [['start_date', 'end_date', 'start_date_vip', 'end_date_vip'], 'date', 'format' => 'yyyy-MM-dd HH:mm:ss'],
+            [['start_date', 'end_date', 'start_date_vip', 'end_date_vip'], 'compare', 'compareValue' => '2000-01-01 00:00:00', 'operator' => '>='],
+            [['start_date', 'end_date', 'start_date_vip', 'end_date_vip'], 'compare', 'compareValue' => '2999-12-31 23:59:59', 'operator' => '<='],
+            [['start_date'], 'compare', 'compareAttribute' => 'end_date', 'operator' => '<='],
+            [['start_date_vip'], 'compare', 'compareAttribute' => 'end_date_vip', 'operator' => '<='],
         ];
     }
 
@@ -93,7 +97,7 @@ class Discount extends \yii\db\ActiveRecord
             'end_date' => Yii::t('kalibao.backend','end date of the discount'),
             'percent_vip' => Yii::t('kalibao.backend','discount rate for premium clients in percent'),
             'start_date_vip' => Yii::t('kalibao.backend','begining date of the discount for premium clients'),
-            'end_date_vip' => Yii::t('kalibao.backend','end date of the discount for mremium clients'),
+            'end_date_vip' => Yii::t('kalibao.backend','end date of the discount for premium clients'),
             'created_at' => Yii::t('kalibao','model:created_at'),
             'updated_at' => Yii::t('kalibao','model:updated_at'),
         ];

@@ -45,6 +45,11 @@ use yii\web\Response;
 class ProductController extends Controller
 {
     /**
+     * @event Event an event that is triggered before the edit model are saved
+     */
+    const EVENT_BEFORE_SAVE = 'event.save.before';
+    
+    /**
      * @inheritdoc
      */
     protected $crudModelsClass = [
@@ -75,7 +80,11 @@ class ProductController extends Controller
     public function init()
     {
         parent::init();
-
+        
+        $this->on(self::EVENT_BEFORE_SAVE, function($data){
+            $data->extraData['models']['main']->available_date = Date::dateToMysql($data->extraData['models']['main']->available_date);
+        });
+        
         // set upload config
         $this->uploadConfig = [
             $this->crudModelsClass['main'] => [
@@ -243,7 +252,6 @@ class ProductController extends Controller
                 'title' => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
             ];
         } else {
-            //var_dump($models['variant']);
             return $this->render('view/view', compact('component', 'create'));
         }
     }
@@ -287,14 +295,7 @@ class ProductController extends Controller
         ]);
 
         if ($request->isAjax) {
-            // set response format
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            return [
-                'html' => $this->renderAjax('view/_contentBlock', ['component' => $component, 'create' => false]),
-                'scripts' => $this->registerClientSideAjaxScript(),
-                'title' => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
-            ];
+            return $this->getReturnArray($models, $component, false, $saved);
         } else {
             return $this->render('view/view', ['component' => $component, 'create' => false]);
         }
@@ -332,14 +333,7 @@ class ProductController extends Controller
         ]);
 
         if ($request->isAjax) {
-            // set response format
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            return [
-                'html' => $this->renderAjax('view/_contentBlock', ['component' => $crudEdit, 'create' => !$saved]),
-                'scripts' => $this->registerClientSideAjaxScript(),
-                'title' => $crudEdit->title,
-            ];
+            return $this->getReturnArray($models, $crudEdit, !$saved, $saved);
         } else {
             return $this->render('view/view', ['component' => $crudEdit, 'create' => !$saved]);
         }
@@ -362,17 +356,19 @@ class ProductController extends Controller
             throw new BadRequestHttpException('Missing parameter');
         }
         $delete = [];
+        $variants = [];
         foreach ($ids as $id) {
             if ($id == '') continue;
             $variants = VariantAttribute::find()->where(['attribute_id' => $id])->joinWith('variant')->all();
             foreach ($variants as $variant) {
-                //var_dump($variant);die();
                 if ($variant->variant->product == $request->get('product'));
                 $delete[] = $variant->variant->id;
             }
         }
         Variant::deleteAll(['id'=>$delete]);
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('product')));
+
+        return $this->getReturnArray($variants, null, false, true);
     }
 
     /**
@@ -390,32 +386,45 @@ class ProductController extends Controller
                 $variant->delete();
         }
         $combinations = $this->generate_combinations($request->post('data'));
-        foreach($combinations as $combination) {
-            $discount = new Discount(['scenario' => 'insert']);
-            $logistic = new LogisticStrategy(['scenario' => 'insert']);
-            $discount->save();
-            $logistic->save();
-            $variant = new Variant();
-            $variant->scenario = 'insert';
-            $variant->product_id = $request->post('product');
-            $variant->discount_id = $discount->id;
-            $variant->logistic_strategy_id = $logistic->id;
-            if ($variant->save()) {
-                foreach($combination as $attribute) {
-                    $variantAttribute = new VariantAttribute();
-                    $variantAttribute->scenario = 'insert';
-                    $variantAttribute->attribute_id = $attribute;
-                    $variantAttribute->variant_id = $variant->id;
-                    $variantAttribute->save();
+        try {
+            foreach ($combinations as $combination) {
+                $discount = new Discount(['scenario' => 'insert']);
+                $logistic = new LogisticStrategy(['scenario' => 'insert']);
+                $d = $discount->save();
+                $l = $logistic->save();
+                if ($d && $l) {
+                    $variant = new Variant();
+                    $variant->scenario = 'insert';
+                    $variant->product_id = $request->post('product');
+                    $variant->discount_id = $discount->id;
+                    $variant->logistic_strategy_id = $logistic->id;
+                    if ($variant->save()) {
+                        foreach ($combination as $attribute) {
+                            $variantAttribute = new VariantAttribute();
+                            $variantAttribute->scenario = 'insert';
+                            $variantAttribute->attribute_id = $attribute;
+                            $variantAttribute->variant_id = $variant->id;
+                            if (!$variantAttribute->save()) { // error in variant attribute
+                                throw new ErrorException('variantAttribute');
+                            }
+                        }
+                    } else { // error in variant
+                        throw new ErrorException('variant');
+                    }
+                } else { // error in logistic or discount
+                    if (!$d) throw new ErrorException('discount');
+                    if (!$l) throw new ErrorException('logistic');
                 }
-            } else {
-                var_dump("error");
-                if ($transaction->isActive) $transaction->rollBack();
-                throw new ErrorException();
             }
+            TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
+            $transaction->commit();
+            return $this->getReturnArray($product, null, false, true);
+        } catch (ErrorException $e) {
+            if ($transaction->isActive) {
+                $transaction->rollBack();
+            }
+            return $this->getReturnArray($product, null, false, false);
         }
-        TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
-        $transaction->commit();
     }
 
     /**
@@ -426,6 +435,8 @@ class ProductController extends Controller
     public function actionSaveVariant()
     {
         $request = Yii::$app->request;
+        $errors = false;
+        $models = [];
 
         if (!$request->isPost) {
             throw new HttpException(405, 'method not allowed');
@@ -456,65 +467,94 @@ class ProductController extends Controller
             $data['visible'] = (isset($data['visible']) && $data['visible'] == 'on')?1:0;
             $data['top_selling'] = (isset($data['top_selling']) && $data['top_selling'] == 'on')?1:0;
             $data['primary'] = (isset($data['primary']) && $data['primary'] == 'on')?1:0;
-            $variant = Variant::findOne($id);
-            $variant->scenario = 'update-variant';
-            $variant->attributes = $data;
-            if (! $variantI18n = VariantI18n::findOne(['i18n_id' => Yii::$app->language, 'variant_id' => $variant->id])) {
+            $models['variant'] = Variant::findOne($id);
+            $models['variant']->scenario = 'update-variant';
+            $models['variant']->attributes = $data;
+            if (! $models['variantI18n'] = VariantI18n::findOne(['i18n_id' => Yii::$app->language, 'variant_id' => $models['variant']->id])) {
                 $variantI18n = new VariantI18n();
             }
-            $variantI18n->scenario = 'insert';
-            $variantI18n->i18n_id = Yii::$app->language;
-            $variantI18n->variant_id = $variant->id;
-            $variantI18n->description = $data['description'];
+            $models['variantI18n']->scenario = 'insert';
+            $models['variantI18n']->i18n_id = Yii::$app->language;
+            $models['variantI18n']->variant_id = $models['variant']->id;
+            $models['variantI18n']->description = $data['description'];
 
-            if (! $variant->save() || ! $variantI18n->save()) {
-                var_dump($variant->errors, $variantI18n->errors);
-                die();
+            if (! $models['variant']->save() || ! $models['variantI18n']->save()) {
+                $errors = true;
             }
         }
 
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
 
-        if ($request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            return [
-                'html' => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => false]),
-                'scripts' => $this->registerClientSideAjaxScript(),
-                'title' => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
-            ];
-        } else {
-            return $this->render('view/view', ['component' => $component, 'create' => false]);
-        }
+        return $this->getReturnArray($models, $component, false, !$errors);
     }
 
+//    /**
+//     * Save variant price action
+//     * @return array|string
+//     * @throws HttpException
+//     */
+//    public function actionSaveVariantPrice()
+//    {
+//        $request = Yii::$app->request;
+//
+//        if (!$request->isPost) {
+//            throw new HttpException(405, 'method not allowed');
+//        }
+//        if ($request->get('id') === null) {
+//            throw new HttpException(404, Yii::t('kalibao.backend', 'product_not_found'));
+//        }
+//        foreach ($request->post('attribute', []) as $id => $data) {
+//            $variantAttributes = VariantAttribute::findAll(['attribute_id' => $id]);
+//            foreach ($variantAttributes as $variantAttribute) {
+//                $variantAttribute->scenario = 'update';
+//                $variantAttribute->attributes = $data;
+//                if (! $variantAttribute->save()) {
+//                    Yii::$app->response->format = Response::FORMAT_JSON;
+//                    return ['status' => 'error'] + $variantAttribute->getErrors();
+//                }
+//            }
+//        }
+//        TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
+//
+//        $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
+//        $tree = Tree::findOne($catalogTreeId);
+//        $component = new View([
+//            'models' => $this->loadEditModels(['id' => $request->get('id')]),
+//            'language' => Yii::$app->language,
+//            'addAgain' => $request->get('add-again', true),
+//            'saved' => false,
+//            'uploadConfig' => $this->uploadConfig,
+//            'dropDownList' => function ($id) {
+//                return $this->getDropDownList($id);
+//            },
+//            'tree' => [
+//                'title' => $tree->treeI18ns[0]->label,
+//                'json' => $tree->treeToJson(false),
+//                'list' => $tree->treeToList()
+//            ]
+//        ]);
+//
+//        if ($request->isAjax) {
+//            Yii::$app->response->format = Response::FORMAT_JSON;
+//
+//            return [
+//                'html' => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => false]),
+//                'scripts' => $this->registerClientSideAjaxScript(),
+//                'title' => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
+//            ];
+//        } else {
+//            return $this->render('view/view', ['component' => $component, 'create' => false]);
+//        }
+//    }
+
     /**
-     * Save variant price action
+     * Save variant logistic strategy action
      * @return array|string
      * @throws HttpException
      */
-    public function actionSaveVariantPrice()
+    public function actionSaveVariantLogistic()
     {
         $request = Yii::$app->request;
-
-        if (!$request->isPost) {
-            throw new HttpException(405, 'method not allowed');
-        }
-        if ($request->get('id') === null) {
-            throw new HttpException(404, Yii::t('kalibao.backend', 'product_not_found'));
-        }
-        foreach ($request->post('attribute', []) as $id => $data) {
-            $variantAttributes = VariantAttribute::findAll(['attribute_id' => $id]);
-            foreach ($variantAttributes as $variantAttribute) {
-                $variantAttribute->scenario = 'update';
-                $variantAttribute->attributes = $data;
-                if (! $variantAttribute->save()) {
-                    var_dump($variantAttribute->errors);
-                    die();
-                }
-            }
-        }
-        TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
 
         $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
         $tree = Tree::findOne($catalogTreeId);
@@ -533,28 +573,6 @@ class ProductController extends Controller
                 'list' => $tree->treeToList()
             ]
         ]);
-
-        if ($request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            return [
-                'html' => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => false]),
-                'scripts' => $this->registerClientSideAjaxScript(),
-                'title' => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
-            ];
-        } else {
-            return $this->render('view/view', ['component' => $component, 'create' => false]);
-        }
-    }
-
-    /**
-     * Save variant logistic strategy action
-     * @return array|string
-     * @throws HttpException
-     */
-    public function actionSaveVariantLogistic()
-    {
-        $request = Yii::$app->request;
 
         if (!$request->isPost) {
             throw new HttpException(405, 'method not allowed');
@@ -567,38 +585,14 @@ class ProductController extends Controller
             $variant->scenario = 'update-logistic';
             $variant->attributes = $data;
             if (! $variant->save()) {
-                var_dump($variant->errors);
-                die();
+                return $this->getReturnArray($variant, $component, false, false);
             }
         }
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id'), 'productVariant'));
 
-        $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
-        $tree = Tree::findOne($catalogTreeId);
-        $component = new View([
-            'models' => $this->loadEditModels(['id' => $request->get('id')]),
-            'language' => Yii::$app->language,
-            'addAgain' => $request->get('add-again', true),
-            'saved' => false,
-            'uploadConfig' => $this->uploadConfig,
-            'dropDownList' => function ($id) {
-                return $this->getDropDownList($id);
-            },
-            'tree' => [
-                'title' => $tree->treeI18ns[0]->label,
-                'json' => $tree->treeToJson(false),
-                'list' => $tree->treeToList()
-            ]
-        ]);
 
         if ($request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            return [
-                'html' => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => false]),
-                'scripts' => $this->registerClientSideAjaxScript(),
-                'title' => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
-            ];
+            return $this->getReturnArray(null, $component, false);
         } else {
             return $this->render('view/view', ['component' => $component, 'create' => false]);
         }
@@ -610,29 +604,33 @@ class ProductController extends Controller
      */
     public function actionAddCrossSale()
     {
+        $models = [];
         $errors = false;
         $transaction = Product::getDb()->beginTransaction();
         $request = Yii::$app->request;
-        $discount = new Discount(['scenario' => 'insert']);
-        if(!$discount->save()) {
+        $models['discount'] = new Discount(['scenario' => 'insert']);
+        $models['discount']->end_date = (new \DateTime())->format('Y-m-d H:i:s');
+        $models['discount']->end_date_vip = (new \DateTime())->format('Y-m-d H:i:s');
+        $models['discount']->start_date = (new \DateTime())->format('Y-m-d H:i:s');
+        $models['discount']->start_date_vip = (new \DateTime())->format('Y-m-d H:i:s');
+        if(!$models['discount']->save()) {
             $errors = true;
         }
-        $crossSelling = new CrossSelling(['scenario' => 'insert']);
-        $crossSelling->discount_id  = $discount->id;
-        $crossSelling->variant_id_1 = $request->post('variant1');
-        $crossSelling->variant_id_2 = $request->post('variant2');
-        if(!$crossSelling->save()) {
+        $models['crossSelling'] = new CrossSelling(['scenario' => 'insert']);
+        $models['crossSelling']->discount_id  = $models['discount']->id;
+        $models['crossSelling']->variant_id_1 = $request->post('variant1');
+        $models['crossSelling']->variant_id_2 = $request->post('variant2');
+        if(!$models['crossSelling']->save()) {
             $errors = true;
         }
         if ($errors) {
-            var_dump($crossSelling->errors, $discount->errors);
             $transaction->rollBack();
         } else {
             $transaction->commit();
             TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
             TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
         }
-
+        return $this->getReturnArray($models, null, false, !$errors);
     }
 
     /**
@@ -650,7 +648,7 @@ class ProductController extends Controller
         }
         $errors = false;
         $transaction = Discount::getDb()->beginTransaction();
-        foreach ($request->post('discount', []) as $id => $data) {
+        foreach ($request->post('discount') as $id => $data) {
             $data['start_date'] = Date::dateToMysql($data['start_date']);
             $data['end_date'] = Date::dateToMysql($data['end_date']);
             $data['start_date_vip'] = Date::dateToMysql($data['start_date_vip']);
@@ -660,7 +658,6 @@ class ProductController extends Controller
             $discount->attributes = $data;
             if (!$discount->save()) {
                 $errors = true;
-                var_dump($discount->errors);
             }
         }
         if ($errors) {
@@ -690,13 +687,7 @@ class ProductController extends Controller
         ]);
 
         if ($request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            return [
-                'html' => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => false]),
-                'scripts' => $this->registerClientSideAjaxScript(),
-                'title' => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
-            ];
+            return $this->getReturnArray(isset($discount)?$discount:null, $component, false, !$errors);
         } else {
             return $this->render('view/view', ['component' => $component, 'create' => false]);
         }
@@ -717,13 +708,13 @@ class ProductController extends Controller
         $logistic->logisticData = $request->post('strategy');
         if(!$logistic->save()) {
             $transaction->rollBack();
-            var_dump($logistic->errors);
-            var_dump($logistic);
+            $errors = true;
         } else {
             $transaction->commit();
+            $errors = false;
             TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('product'), 'productLogisticStrategy'));
         }
-
+        return $this->getReturnArray($logistic, null, false, !$errors);
     }
 
     /**
@@ -743,6 +734,7 @@ class ProductController extends Controller
     public function actionUpdateCatalog()
     {
         $errors = false;
+        $models = [];
 
         $request = Yii::$app->request;
         $rm = is_array($request->post('rm'))?$request->post('rm'):[];
@@ -766,15 +758,17 @@ class ProductController extends Controller
             $sheet->branch_id = $branch;
 
             if(!$sheet->save()) $errors = true;
+            $models[] = $sheet;
         }
 
         $product = Product::findOne($request->post('productId'));
         $product->scenario = 'update';
         $product->attributes = $request->post('Product');
-        if(!$product->save()) $errors = true;
+        if($product->validate(['link_brand_product', 'link_product_test'])) {if (!$product->save()) $errors = true;} else $errors = true;
+        $models[] = $product;
 
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->post('productId'), 'categories'));
-        return $errors;
+        return $this->getReturnArray($models, null, false, !$errors);
     }
 
     /**
@@ -799,15 +793,24 @@ class ProductController extends Controller
             // load request
             $models['main']->load($requestParams);
             $models['i18n']->load($requestParams);
-            foreach ($models['variant'] as $id => $model) {
-                $model->scenario = $scenario;
-                $model->load(['Variant' => $requestParams['Variant'][$id]]);
+            if (array_key_exists('Variant', $requestParams)) {
+                foreach ($models['variant'] as $id => $model) {
+                    $model->scenario = $scenario;
+                    $model->load(['Variant' => $requestParams['Variant'][$id]]);
+                }
             }
 
             // get uploaded file instance
             $oldFileNames['main'] = [];
             $this->getUploadedFileInstances($models, $oldFileNames, $requestParams);
 
+            // trigger an event
+            $this->trigger(self::EVENT_BEFORE_SAVE, new ExtraDataEvent([
+                'extraData' => [
+                    'models' => $models,
+                ]
+            ]));
+            
             // validate model
             $validate['main'] = $models['main']->validate();
             $validate['i18n'] = true;
@@ -815,18 +818,13 @@ class ProductController extends Controller
             if ($this->modelExist('i18n')) {
                 $validate['i18n'] = $models['i18n']->validate();
             }
-            if ($this->modelExist('variant')) {
+            if (array_key_exists('Variant', $requestParams)) {
                 foreach ($models['variant'] as $id => $model) {
                     $validate['variant'] &= $model->validate();
                 }
             }
 
             if (! $validate['main'] || ! $validate['i18n'] || ! $validate['variant']) {
-                var_dump($models['main']->errors);
-                var_dump($models['i18n']->errors);
-                foreach ($models['variant'] as $id => $model) {
-                    var_dump($model->errors);
-                }
                 throw new Exception(1);
             }
 
@@ -840,7 +838,7 @@ class ProductController extends Controller
                     }
                 }
 
-                if ($this->modelExist('variant')) {
+                if (array_key_exists('Variant', $requestParams)) {
                     foreach ($models['variant'] as $id => $model) {
                         $model->scenario = $scenario;
                         if (!$model->save()) {
@@ -868,7 +866,6 @@ class ProductController extends Controller
         } catch(Exception $e) {
             if ($transaction->isActive) {
                 $transaction->rollBack();
-                var_dump($e->getMessage());
             }
 
             // restore uploaded file instances
@@ -1020,7 +1017,7 @@ class ProductController extends Controller
      *
      * @return array       The combinations
      */
-    private function generate_combinations(array $data, array &$all = array(), array $group = array(), $value = null, $i = 0)
+    protected function generate_combinations(array $data, array &$all = array(), array $group = array(), $value = null, $i = 0)
     {
         $keys = array_keys($data);
         if (isset($value) === true) {
@@ -1038,5 +1035,51 @@ class ProductController extends Controller
         }
 
         return $all;
+    }
+
+    protected function getAllErrors($models)
+    {
+        $errors = [];
+        if (!is_array($models)) {
+            $errors += $models->getErrors();
+        } else {
+            foreach ($models as $model) {
+                $errors += $this->getAllErrors($model);
+            }
+        }
+        return $errors;
+    }
+
+    protected function getReturnArray($models, $component, $create, $saved = true)
+    {
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        if ($component === null) {
+            if ($saved) {
+                return [
+                    'status'  => 'success',
+                ];
+            } else {
+                return [
+                    'status'  => 'error',
+                    'errors'  => $this->getAllErrors($models),
+                ];
+            }
+        }
+        if ($saved) {
+            return [
+                'status'  => 'success',
+                'html'    => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => $create]),
+                'scripts' => $this->registerClientSideAjaxScript(),
+                'title'   => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
+            ];
+        } else {
+            return [
+                'status'  => 'error',
+                'errors'  => $this->getAllErrors($models),
+                'html'    => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => $create]),
+                'scripts' => $this->registerClientSideAjaxScript(),
+                'title'   => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
+            ];
+        }
     }
 }

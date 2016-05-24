@@ -147,7 +147,9 @@ class View extends \kalibao\common\components\crud\Edit
                 'class' => 'required form-control input-sm date-picker date-range',
                 'maxlength' => true,
                 'placeholder' => $models['main']->getAttributeLabel('available_date'),
-                'rel' => (isset($models['main']->available_date))?$models['main']->available_date:date('Y-m-d')
+                'rel' => (isset($models['main']->available_date))?
+                    Yii::$app->formatter->asDate($models['main']->available_date, I18N::getDateFormat(I18N::DATE_FORMAT, 'datepicker')):
+                    date('Y-m-d')
             ]
         ]);
 
@@ -386,6 +388,8 @@ class View extends \kalibao\common\components\crud\Edit
                 'value' => Yii::$app->formatter->asDatetime($models['main']->updated_at, I18N::getDateFormat())
             ]);
         }
+        
+        
 
         $this->setItems($items);
     }

@@ -189,9 +189,9 @@
 }
 
 .unsaved {
-  -webkit-animation: emphase 0.5s 1;
-  -o-animation: emphase 0.5s 1;
-  animation: emphase 0.5s 1;
+  -webkit-animation: emphase-warning 0.5s 1;
+  -o-animation: emphase-warning 0.5s 1;
+  animation: emphase-warning 0.5s 1;
   border: 1px solid #f39c12;
 
   -webkit-box-shadow: 0 0 1px 1px #f39c12;
@@ -199,7 +199,31 @@
   box-shadow: 0 0 1px 1px #f39c12;
 }
 
-@keyframes emphase {
+.error {
+  -webkit-animation: emphase-danger 0.5s 1;
+  -o-animation: emphase-danger 0.5s 1;
+  animation: emphase-danger 0.5s 1;
+  border: 1px solid #f39c12;
+
+  -webkit-box-shadow: 0 0 1px 1px #d73925;
+  -o-box-shadow: 0 0 1px 1px #d73925;
+  box-shadow: 0 0 1px 1px #d73925;
+}
+
+@keyframes emphase-danger {
+  0%, 100% {
+    -webkit-box-shadow: none;
+    -o-box-shadow: none;
+    box-shadow: none;
+  }
+  50% {
+    -webkit-box-shadow: 0 0 5px 5px #d73925;
+    -o-box-shadow: 0 0 5px 5px #d73925;
+    box-shadow: 0 0 5px 5px #d73925;
+  }
+}
+
+@keyframes emphase-warning {
   0%, 100% {
     -webkit-box-shadow: none;
     -o-box-shadow: none;

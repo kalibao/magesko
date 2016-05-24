@@ -36,12 +36,8 @@ class I18N extends \yii\i18n\I18N
                 } elseif ($date == self::DATE_FORMAT) {
                     return 'dd MM yyyy';
                 }
-            case 'jquery':
-                if ($date == self::DATETIME_FORMAT) {
-                    return 'dd/MM/yyyy, HH:mm:ss';
-                } elseif ($date == self::DATE_FORMAT) {
-                    return 'dd/MM/yyyy';
-                }
+            case 'datepicker':
+                return 'dd/MM/yyyy';
             default:
                 if ($date == self::DATETIME_FORMAT) {
                     return 'MM dd, yyyy hh:mm:ss a';

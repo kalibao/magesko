@@ -70,11 +70,11 @@
    * Init events
    */
   $.kalibao.backend.product.View.prototype.initEvents = function () {
+    this.initDiscountEvents();
     this.initActionsEvents();
     this.initFormReset();
     this.initFormChange();
     this.initCrossSellingEvents();
-    this.initDiscountEvents();
     this.calcPrices();
     this.initTabHash();
     this.initCopyEvents();
@@ -126,10 +126,13 @@
         link_brand_product: self.$catalogTab.find('[name="Product[link_brand_product]"]').val(),
         link_product_test: self.$catalogTab.find('[name="Product[link_product_test]"]').val()
       };
-      $.post('/product/product/update-catalog', {ad: ad, rm: rm, productId: productId, Product: Product}, function(){
-        $.toaster({priority: 'success', title: 'Enregistré', message: 'Modifications enregistrées'});
-        self.initialData=newData;
-        self.saveFormState($('.tab-pane.active'));
+      $.post('/product/product/update-catalog', {ad: ad, rm: rm, productId: productId, Product: Product}, function(json){
+        if (self.afterAjaxPost(json)) {
+          self.initialData = newData;
+          self.saveFormState($('.tab-pane.active'));
+        } else {
+          self.showErrors(json);
+        }
       });
     });
 
@@ -180,6 +183,9 @@
   $.kalibao.backend.product.View.prototype.initDiscountEvents = function () {
     var self = this;
 
+    var $startDates = this.$discountTab.find("input[name*=start_date]");
+    var $endDates   = this.$discountTab.find("input[name*=end_date]");
+
     $("#margin-data").change(function(){
       $(".margin-data").toggle(this.checked);
     });
@@ -203,6 +209,32 @@
     this.$discountTab.find(".discount-value").keyup(function(){
       self.updateDiscount("value", $("#discount"));
     });
+    this.$discountTab.find(".btn-submit").click(function(e){
+      var errors = false;
+      for (var i = 0; i < $startDates.length; i++) {
+        var start = $startDates.eq(i);
+        var end   = $endDates.eq(i);
+
+        var startDate = start.val().split('-');
+        var endDate   = end.val().split('-');
+        startDate = new Date(startDate[2], startDate[1], startDate[0]);
+        endDate   = new Date(endDate[2],   endDate[1],   endDate[0]);
+
+        if (startDate > endDate) {
+          end.addClass('error').tooltip({title: end.data('error-text'), template: '<div class="tooltip tooltip-danger"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'})
+          errors = true;
+        } else {
+          end.removeClass('error').tooltip('destroy')
+        }
+      }
+      if (errors) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.stopImmediatePropagation();
+        return false;
+      }
+      return true;
+    })
   };
   
   /**
@@ -295,7 +327,8 @@
       placeholder: "sortable-placeholder",
       axis: "y",
       scroll: true,
-      stop: self.reorderVariants
+      stop: self.reorderVariants,
+      handle: '.sort-handle'
     });
 
     this.$attributeTab.find('.attribute-delete').click(function() {
@@ -363,7 +396,7 @@
         })
       });
       var product = self.urlParam('id');
-      $.post('/product/product/add-attribute', {data: data, product: product}, function(){location.reload()});
+      $.post('/product/product/add-attribute', {data: data, product: product}, function(r){self.afterAjaxPost(r, true)});
     });
 
     this.$variantListTab.find('.description-update').click(function(){
@@ -394,7 +427,7 @@
       $.post(
         '/product/product/update-logistic-strategy?id=' + logisticId + '&strategy=' + $modal.find('.select-strategy').eq(0).val() + '&product=' + self.urlParam('id'),
         $modal.find('textarea, input, .select-alternative-strategy').serialize(),
-        function() {$modal.modal('hide')}
+        function(data) {$modal.modal('hide'); self.afterAjaxPost(data)}
       );
     });
 
@@ -407,7 +440,6 @@
 
     this.$main.find('#send-media-url').off('click').click(function(e){
       e.preventDefault();
-      console.log('coucou');
 
       if (window.FormData && ! self.validate(self.activeValidators, self.$main)) {
         var $form = $(this).closest('form');
@@ -439,8 +471,7 @@
         $.kalibao.core.app.ajaxQuery(
           action,
           function (json) {
-            console.log('finish');
-            window.location.reload();
+            self.afterAjaxPost(json)
           },
           'POST',
           params,
@@ -492,6 +523,7 @@
    */
   $.kalibao.backend.product.View.prototype.initTabHash = function () {
     var hash = window.location.hash;
+    if (hash == "#") return;
     hash && $('ul.nav a[href="' + hash + '"]').tab('show');
     this.saveFormState($('.tab-pane.active'));
   };
@@ -506,6 +538,11 @@
       var $form = $button.closest('form');
       var action = $form.attr('action');
       var params = new FormData();
+
+      if ($form.find('input, select, textarea').hasClass('error')) {
+        $.toaster({ priority : 'danger', title : 'Attention', message : 'Il y a des erreurs dans le formulaire'});
+        return false;
+      }
 
       $form.find('input, select, textarea').each(function () {
         var $input = $(this);
@@ -530,13 +567,17 @@
       $.kalibao.core.app.ajaxQuery(
         action,
         function (json) {
-          var $content = $(json.html);
-          self.$wrapper.html($content);
-          if (self.activeScrollAuto) {
-            $.kalibao.core.app.scrollTop();
+          if (self.afterAjaxPost(json)) {
+            var $content = $(json.html);
+            self.$wrapper.html($content);
+            if (self.activeScrollAuto) {
+              $.kalibao.core.app.scrollTop();
+            }
+            self.saveFormState($('.tab-pane.active'));
+          } else {
+            self.showErrors(json);
           }
           self.$container.unblock();
-          self.saveFormState($('.tab-pane.active'));
         },
         'POST',
         params,
@@ -692,7 +733,7 @@
     var $table = $elem['item'].parent();
     var order = 1;
     $table.find('tr').each(function(){
-      $(this).find('.variant-order').eq(0).val(order++);
+      $(this).find('.variant-order').eq(0).val(order++).change();
     })
   };
 
@@ -747,7 +788,7 @@
     for (var i in CKEDITOR.instances) {
       CKEDITOR.instances[i].on('change', function() {this.updateElement(); $(this.element.$).change()});
     }
-    $(':input').change(function(){
+    $(':input').on('input change', function(){
       console.log('input change');
       var $e = $(this);
       var $tab = $e.closest('.tab-pane');
@@ -795,13 +836,14 @@
       var $input = $(elem);
       if ($input.is(':checkbox')) $input.prop('checked', $input.data('initialState'));
       else $input.val($input.data('initialState'));
-      $input.removeClass('unsaved');
+      $input.removeClass('unsaved error').tooltip('destroy');
     });
     // reload select 2 data from hidden input
     $tab.find('input.input-ajax-select').each(function(){
       $(this).trigger('change');
     });
     $tab.find('.btn-submit').removeClass('btn-primary').addClass('btn-default disabled');
+    if($tab.context.id == 'variant-list') this.sortVariantTable($tab);
   };
 
   /**
@@ -838,6 +880,26 @@
     });
     if (window.location.hash == '#catalog') changed = this.checkTreeState(notify) || changed;
     return changed;
+  };
+
+  $.kalibao.backend.product.View.prototype.sortVariantTable = function(table) {
+    var rows = $(table).find('tbody').find('tr').get();
+    rows.sort(function(a, b) {
+      var A = $(a).find('.variant-order').val();
+      var B = $(b).find('.variant-order').val();
+
+      if(A < B) {
+        return -1;
+      }
+      if(A > B) {
+        return 1;
+      }
+      return 0;
+    });
+
+    $.each(rows, function(index, row) {
+      $(table).find('table').children('tbody').append(row);
+    });
   };
 
   /**
@@ -902,6 +964,29 @@
           break;
       }
     })
-  }
+  };
+
+  $.kalibao.backend.product.View.prototype.afterAjaxPost = function (data, reload) {
+    reload = typeof reload !== 'undefined' ? reload : false;
+
+    if (typeof data != 'object') data = JSON.parse(data);
+    if (data.status === undefined) return false;
+    if (data.status == "success") {
+      $.toaster({priority: 'success', title: 'Enregistré', message: 'Modifications enregistrées'});
+      if (reload) window.location.reload();
+      return true;
+    } else {
+      $.each(data.errors, function(){
+        $.toaster({priority: 'danger', title: 'Erreur(s)', message: this})
+      });
+      return false;
+    }
+  };
+
+  $.kalibao.backend.product.View.prototype.showErrors = function (data) {
+    for (var field in data.errors) {
+      $('[name*='+field+']').addClass('unsaved');
+    }
+  };
 
 })(jQuery);

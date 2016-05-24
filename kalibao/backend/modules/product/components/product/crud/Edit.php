@@ -7,6 +7,7 @@
 namespace kalibao\backend\modules\product\components\product\crud;
 
 use kalibao\common\components\crud\InputField;
+use kalibao\common\components\i18n\I18N;
 use kalibao\common\models\brand\Brand;
 use kalibao\common\models\product\ProductI18n;
 use kalibao\common\models\supplier\Supplier;
@@ -55,7 +56,7 @@ class Edit extends \kalibao\common\components\crud\Edit
                 'class' => 'required form-control input-sm date-picker date-range',
                 'maxlength' => true,
                 'placeholder' => $models['main']->getAttributeLabel('available_date'),
-                'rel' => $models['main']->available_date
+                'rel' => Yii::$app->formatter->asDate($models['main']->available_date, I18N::getDateFormat(I18N::DATE_FORMAT, 'datepicker'))
             ]
         ]);
 

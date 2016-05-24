@@ -53,8 +53,8 @@
             </a>
         </div>
         <div class="col-xs-6">
-            <a class="btn btn-primary" href="#variant-price" data-toggle="tab">
-                <span><?= Yii::t('kalibao.backend', 'product_tab_variant_price') ?></span>
+            <a class="btn btn-primary" href="#variant-generator" data-toggle="tab">
+                <span><?= Yii::t('kalibao.backend', 'product_tab_variant_generator') ?></span>
             </a>
         </div>
     </div>

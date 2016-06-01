@@ -85,7 +85,7 @@
     var $container = $('.content-wrapper > .content-dynamic');
     var $headerMenu =  $('.navbar');
 
-    var links = $headerMenu.find('a[href!=#].ajax-link');
+    var links = $headerMenu.find('a[href!="#"].ajax-link');
 
     links.on('click', function () {
       var $this = $(this);
@@ -132,7 +132,7 @@
     var $sideBarMenu =  $('.sidebar-menu');
     var locationPathName = window.location.pathname;
 
-    var links = $sideBarMenu.find('a[href!=#]');
+    var links = $sideBarMenu.find('a[href!="#"]');
     links.each(function () {
       var $this = $(this);
       if ($this.attr('href') == locationPathName) {

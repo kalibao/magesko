@@ -47,6 +47,7 @@
     this.$attributeTab = this.$container.find('#attribute');
     this.$discountTab = this.$container.find('#discount');
     this.$variantListTab = this.$container.find('#variant-list');
+    this.$generatorTab = this.$container.find('#variant-generator');
     this.$logisticTab = this.$container.find('#logistic');
     this.$catalogTab = this.$container.find('#catalog');
     this.$tree = this.$container.find('#tree');
@@ -67,6 +68,34 @@
   };
 
   /**
+   * Init components
+   */
+  $.kalibao.backend.product.View.prototype.initComponents = function () {
+    this.initValidators(this.validators, this.activeValidators);
+    this.initAdvancedDropDownList(this.$main);
+    this.initDatePicker(this.$main);
+    this.initWysiwig(this.$main);
+    this.initUploader(this.$main);
+    this.initSelect2(this.$generatorTab);
+  };
+  /**
+   * Init select2 elements
+   */
+  $.kalibao.backend.product.View.prototype.initSelect2 = function ($container) {
+    $container.find(".select2").each(function() {
+      $(this).select2({
+        formatSelection: function (e) {
+          return $(e.element[0]).closest('optgroup').attr('label') + ' : ' + e.text;
+        },
+        escapeMarkup: function (m) {
+          return m;
+        },
+        placeholder: $(this).attr('data-placeholder')
+      });
+    })
+  };
+
+  /**
    * Init events
    */
   $.kalibao.backend.product.View.prototype.initEvents = function () {
@@ -83,6 +112,7 @@
       $('input[type=radio]:checked').not(this).prop('checked', false);
     });
     this.initTreeEvents();
+    this.initGeneratorEvents();
   };
 
   /**
@@ -235,6 +265,29 @@
       }
       return true;
     })
+  };
+
+  $.kalibao.backend.product.View.prototype.initGeneratorEvents = function () {
+    var showStep2 = function(){
+      $('#generator_step1').collapse('hide').parent().children().first().attr('disabled', '');
+      $('#generator_step2').collapse('show').parent().children().first().removeAttr('disabled')
+    };
+    var showStep1 = function(){
+      $('#generator_step1').collapse('show').parent().children().first().removeAttr('disabled');
+      $('#generator_step2').collapse('hide').parent().children().first().attr('disabled', '');
+    };
+
+    $('#generate-combinations').click(function(){
+      var $select = $('#generator-attributes');
+      if ($select.val()) {
+        $.post('generate-combinations', {data: $select.val()}, function(result){
+          $.each(result, function(){
+            $()
+          });
+          showStep2();
+        })
+      }
+    });
   };
   
   /**
@@ -524,7 +577,7 @@
   $.kalibao.backend.product.View.prototype.initTabHash = function () {
     var hash = window.location.hash;
     if (hash == "#") return;
-    hash && $('ul.nav a[href="' + hash + '"]').tab('show');
+    hash && $('a[href="' + hash + '"]').tab('show');
     this.saveFormState($('.tab-pane.active'));
   };
 
@@ -762,7 +815,7 @@
       })
     });
 
-    $('.nav-tabs>li a').off('click').click(function(e){
+    $('.nav-tabs>li a[href], .btn-primary[href^="#"]').off('click').click(function(e){
       if ($.inArray(window.location.hash, ['#media', '#attribute', '#']) == -1) { // disable changes verification for some tabs
         if (self.checkFormState($('.tab-pane.active'), true)) {
           $.toaster({ priority : 'warning', title : 'Attention', message : 'Il y a des changements non enregistrés'});
@@ -882,6 +935,10 @@
     return changed;
   };
 
+  /**
+   * sort variant table line according to the number in the order column
+   * @param table
+   */
   $.kalibao.backend.product.View.prototype.sortVariantTable = function(table) {
     var rows = $(table).find('tbody').find('tr').get();
     rows.sort(function(a, b) {

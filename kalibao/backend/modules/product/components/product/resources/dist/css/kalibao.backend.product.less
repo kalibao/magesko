@@ -236,3 +236,13 @@ input {
     display: inline-block;
   }
 }
+
+#variant-generator {
+  .panel-heading {
+    pointer-events: none;
+  }
+  .panel-heading[disabled] {
+    cursor: not-allowed;
+    background-color: #cccccc;
+  }
+}

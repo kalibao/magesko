@@ -10,12 +10,13 @@
     <li class="active"><a href="#product" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_product') ?></a></li>
     <li class="dropdown">
         <a class="dropdown-toggle" data-toggle="dropdown">
-            <?= Yii::t('kalibao.backend', 'product_tab_attribute') ?> <span class="caret"></span>
+            <?= Yii::t('kalibao.backend', 'product_tab_attribute_variant') ?> <span class="caret"></span>
         </a>
         <ul class="dropdown-menu">
             <li><a href="#attribute" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_attribute') ?></a></li>
-            <li class="divider"></li>
             <li><a href="#variant-list" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_variant_list') ?></a></li>
+            <li class="divider"></li>
+            <li><a href="#variant-generator" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_variant_generator') ?></a></li>
         </ul>
     </li>
     <li><a href="#description" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_description') ?></a></li>

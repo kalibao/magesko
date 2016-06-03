@@ -197,3 +197,10 @@ input.variant-order {
   margin-left: 10px;
   display: inline-block;
 }
+#variant-generator .panel-heading {
+  pointer-events: none;
+}
+#variant-generator .panel-heading[disabled] {
+  cursor: not-allowed;
+  background-color: #cccccc;
+}

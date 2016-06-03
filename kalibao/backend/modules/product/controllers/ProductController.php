@@ -8,7 +8,11 @@ namespace kalibao\backend\modules\product\controllers;
 
 use kalibao\backend\modules\product\components\product\crud\View;
 use kalibao\common\components\base\ExtraDataEvent;
+use kalibao\common\components\helpers\Database;
 use kalibao\common\components\helpers\Date;
+use kalibao\common\models\attribute\Attribute;
+use kalibao\common\models\attribute\AttributeI18n;
+use kalibao\common\models\attributeType\AttributeTypeI18n;
 use kalibao\common\models\branch\Branch;
 use kalibao\common\models\crossSelling\CrossSelling;
 use kalibao\common\models\discount\Discount;
@@ -104,52 +108,22 @@ class ProductController extends Controller
                 'roles' => [$this->getActionControllerPermission('consult'), 'permission.consult:*'],
             ];
         $b['access']['rules'][] = [
-            'actions' => ['delete-attribute', 'advanced-drop-down-list', 'settings', 'export'],
-            'allow' => true,
-            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
-        ];
-        $b['access']['rules'][] = [
-            'actions' => ['add-attribute', 'advanced-drop-down-list', 'settings', 'export'],
-            'allow' => true,
-            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
-        ];
-        $b['access']['rules'][] = [
-            'actions' => ['save-variant', 'advanced-drop-down-list', 'settings', 'export'],
-            'allow' => true,
-            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
-        ];
-        $b['access']['rules'][] = [
-            'actions' => ['save-variant-price', 'advanced-drop-down-list', 'settings', 'export'],
-            'allow' => true,
-            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
-        ];
-        $b['access']['rules'][] = [
-            'actions' => ['save-variant-logistic', 'advanced-drop-down-list', 'settings', 'export'],
-            'allow' => true,
-            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
-        ];
-        $b['access']['rules'][] = [
-            'actions' => ['add-cross-sale', 'advanced-drop-down-list', 'settings', 'export'],
-            'allow' => true,
-            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
-        ];
-        $b['access']['rules'][] = [
-            'actions' => ['save-discount', 'advanced-drop-down-list', 'settings', 'export'],
-            'allow' => true,
-            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
-        ];
-        $b['access']['rules'][] = [
-            'actions' => ['update-logistic-strategy', 'advanced-drop-down-list', 'settings', 'export'],
-            'allow' => true,
-            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
-        ];
-        $b['access']['rules'][] = [
-            'actions' => ['remove-media', 'advanced-drop-down-list', 'settings', 'export'],
-            'allow' => true,
-            'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
-        ];
-        $b['access']['rules'][] = [
-            'actions' => ['update-catalog', 'advanced-drop-down-list', 'settings', 'export'],
+            'actions' => [
+                'delete-attribute',
+                'add-attribute',
+                'save-variant',
+                'save-variant-price',
+                'save-variant-logistic',
+                'add-cross-sale',
+                'save-discount',
+                'update-logistic-strategy',
+                'remove-media',
+                'update-catalog',
+                'generate-combinations',
+                'advanced-drop-down-list',
+                'settings',
+                'export',
+            ],
             'allow' => true,
             'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
         ];
@@ -220,7 +194,6 @@ class ProductController extends Controller
     public function actionView()
     {
         $request = Yii::$app->request;
-        $models = $this->loadEditModels(['id' => $request->get('id')]);
         if ($request->get('id') === null) {
             throw new HttpException(404, Yii::t('kalibao.backend', 'product_not_found'));
         }
@@ -769,6 +742,42 @@ class ProductController extends Controller
 
         TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->post('productId'), 'categories'));
         return $this->getReturnArray($models, null, false, !$errors);
+    }
+
+    public function actionGenerateCombinations()
+    {
+        $request = Yii::$app->request;
+        if (!$request->isPost) {
+            throw new HttpException(405, 'method not allowed');
+        }
+
+        $attributes = [];
+        $attributeNames = [];
+        $attributeTypeNames = [];
+        foreach ($request->post('data') as $data) {
+            list($type, $attribute) = explode('-', $data);
+            $attributes[$type][] = $attribute;
+            $attributeIds[] = $attribute;
+            $attributeTypeIds[] = $type;
+        }
+        $attributeNames = AttributeI18n::find()
+            ->where(['i18n_id'=>Yii::$app->language, 'attribute_id' => $attributeIds])
+            ->asArray()
+            ->all();
+        $attributeNames = Database::indexWithPrimaryKey($attributeNames, 'attribute_id');
+
+        $combinations = $this->generate_combinations(array_values($attributes));
+
+        $result = [];
+        foreach ($combinations as $combination) {
+            $ids = implode('-', $combination);
+            $names = [$attributeNames[$combination[0]]['value'], $attributeNames[$combination[1]]['value']];
+
+            $result[$ids] = $names;
+        }
+
+        Yii::$app->response->format = Response::FORMAT_JSON;
+        return $result;
     }
 
     /**

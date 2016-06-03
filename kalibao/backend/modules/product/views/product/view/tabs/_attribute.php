@@ -18,27 +18,17 @@
                 <?php foreach($component->models['main']->attributeInfo as $attributeType => $datas): ?>
                     <tr id="attr-type-<?= reset($datas)['typeId'] ?>" data-id="<?= reset($datas)['typeId'] ?>">
                         <td>
-                            <?= $attributeType ?> &nbsp;
-                            <i class="fa fa-trash attribute-type-delete" title="delete" data-product="<?= $component->models['main']->id ?>" data-attribute-list="<?php foreach($datas as $data) echo $data['id'] . '|' ?>"></i></td>
+                            <?= $attributeType ?>
+                        </td>
                         <td>
                         <?php foreach($datas as $data): ?>
                             <span class="badge" id="attr-<?= $data['id'] ?>" data-id="<?= $data['id'] ?>">
-                                <?= $data['value'] ?> &nbsp;
-                                <i class="fa fa-trash attribute-delete" title="delete" data-product="<?= $component->models['main']->id ?>" data-attribute="<?= $data['id'] ?>"></i>
+                                <?= $data['value'] ?>
                             </span>
                         <?php endforeach; ?>
                         </td>
                     </tr>
                 <?php endforeach ?>
-                <tr>
-                    <td>
-                        <input id="input-attribute-type" type="hidden" class="form-control input-sm input-ajax-select" name="attribute-type" data-action="<?= \yii\helpers\Url::to(['/attribute-type/attribute-type/advanced-drop-down-list'] + ['id' => 'attribute_type.value']) ?>" data-add-action="/attribute-type/attribute-type/create" data-allow-clear="1" data-placeholder="Sélectionner" data-attribute-url="<?= \yii\helpers\Url::to(['/attribute/attribute/advanced-drop-down-list'] + ['id' => 'attribute.value']) ?>">
-                    </td>
-                    <td>
-                        <input id="input-attribute" data-allow-multiple="true" type="hidden" class="form-control input-sm input-ajax-select" name="attribute" data-action="<?= \yii\helpers\Url::to(['/attribute/attribute/advanced-drop-down-list'] + ['id' => 'attribute.value']) ?>" data-add-action="/attribute/attribute/create" data-allow-clear="1" data-placeholder="Sélectionner"><br/>
-                        <button class="btn btn-primary btn-xs" id="add-attribute"><i class="glyphicon glyphicon-plus"></i> &nbsp; <?= Yii::t('kalibao', 'btn_add') ?></button>
-                    </td>
-                </tr>
             </tbody>
         </table>
     </div>

@@ -149,4 +149,24 @@ class Attribute extends \yii\db\ActiveRecord
         return false;
     }
 
+    public static function getSelect($multiple = false, $id = 'attributes_list')
+    {
+        $attributes = Attribute::find()->with('attributeI18ns', 'attributeTypeI18ns')->orderBy('attribute_type_id')->all();
+
+        $placeholder = Yii::t('kalibao.backend', 'variant_generator_select_attributes');
+        $html = $multiple ?
+            '<select multiple class="select2" data-placeholder="' .$placeholder. '" id="' . $id . '">' :
+            '<select class="select2" data-placeholder="'.$placeholder.'" id="' . $id . '">';
+        $curAttributeType = null;
+        foreach ($attributes as $attribute) {
+            if ($attribute->attribute_type_id != $curAttributeType) { // new attribute type
+                if ($curAttributeType != null) $html .= '</optgroup>'; // not the first group
+                $html .= '<optgroup label="'.$attribute->attributeTypeI18n->value.'">';
+                $curAttributeType = $attribute->attribute_type_id;
+            }
+            $html .= '<option value="'.$attribute->attribute_type_id.'-'.$attribute->id.'">' .$attribute->attributeI18n->value. '</option>';
+        }
+        $html .= '</optgroup></select>';
+        return $html;
+    }
 }

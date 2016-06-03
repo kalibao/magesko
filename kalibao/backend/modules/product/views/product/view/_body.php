@@ -18,6 +18,7 @@
             <?= $this->render('tabs/_product', compact('component', 'create')); ?>
             <?= $this->render('tabs/_attribute', compact('component')); ?>
             <?= $this->render('tabs/_variantList', compact('component')); ?>
+            <?= $this->render('tabs/_variantGenerator', compact('component')); ?>
             <?= $this->render('tabs/_description', compact('component')); ?>
             <?= $this->render('tabs/_prices', compact('component')); ?>
             <?= $this->render('tabs/_catalog', compact('component')); ?>

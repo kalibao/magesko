@@ -8,12 +8,12 @@
 <section class="content">
     <div class="nav-tabs-custom">
         <?php if ($create): ?>
-            <?= $this->render('_tabsCreate'); ?>
+            <?= $this->render('_tabsCreate', compact('bundle')); ?>
             <div class="tab-content">
-                <?= $this->render('tabs/_product', compact('component', 'create')); ?>
+                <?= $this->render('tabs/_product', compact('component', 'create', 'bundle')); ?>
             </div>
         <?php else : ?>
-        <?= $this->render('_tabs'); ?>
+        <?= $this->render('_tabs', compact('bundle')); ?>
         <div class="tab-content">
             <?= $this->render('tabs/_product', compact('component', 'create')); ?>
             <?= $this->render('tabs/_attribute', compact('component')); ?>
@@ -26,6 +26,9 @@
             <?= $this->render('tabs/_crossSelling', compact('component')); ?>
             <?= $this->render('tabs/_discount', compact('component')); ?>
             <?= $this->render('tabs/_media', compact('component')); ?>
+            <?php if($bundle): ?>
+                <?= $this->render('tabs/_bundle', compact('component')); ?>
+            <?php endif; ?>
         </div>
         <?php endif; ?>
     </div>

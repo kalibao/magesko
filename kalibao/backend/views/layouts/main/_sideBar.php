@@ -103,6 +103,9 @@ use yii\helpers\Url;
                         <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:kalibao\backend\modules\product\controllers\ProductController'])): ?>
                             <li><a href="<?= Url::to(['/product/product/create']); ?>"><i class="fa fa-circle-o"></i> <?= Yii::t('kalibao.backend', 'navbar_product_add'); ?></a></li>
                         <?php endif; ?>
+                        <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:kalibao\backend\modules\product\controllers\ProductController'])): ?>
+                            <li><a href="<?= Url::to(['/product/product/create-bundle']); ?>"><i class="fa fa-circle-o"></i> <?= Yii::t('kalibao.backend', 'navbar_product_add_bundle'); ?></a></li>
+                        <?php endif; ?>
                         <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:kalibao\backend\modules\brand\controllers\BrandController'])): ?>
                             <li><a href="<?= Url::to(['/brand/brand/list']); ?>"><i class="fa fa-circle-o"></i> <?= Yii::t('kalibao.backend', 'navbar_brand_list'); ?></a></li>
                         <?php endif; ?>
@@ -111,6 +114,9 @@ use yii\helpers\Url;
                         <?php endif; ?>
                         <?php if (Yii::$app->user->canMultiple(['permission.consult:*', 'permission.consult:kalibao\backend\modules\attribute-type\controllers\AttributeTypeController'])): ?>
                             <li><a href="<?= Url::to(['/attribute-type/attribute-type/list']); ?>"><i class="fa fa-circle-o"></i> <?= Yii::t('kalibao.backend', 'navbar_attribute_list'); ?></a></li>
+                        <?php endif; ?>
+                        <?php if (Yii::$app->user->canMultiple([ 'permission.consult:*', 'permission.consult:kalibao\backend\modules\tax\controllers\TaxController'])): ?>
+                            <li><a href="<?= Url::to(['/tax/tax/list']); ?>"><i class="fa fa-circle-o"></i> <?= Yii::t('kalibao.backend', 'navbar_tax_list'); ?></a></li>
                         <?php endif; ?>
                     </ul>
                 </li>

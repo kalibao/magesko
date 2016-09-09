@@ -3,7 +3,7 @@
  * @copyright Copyright (c) 2015 Kalibao
  * @license https://github.com/kalibao/magesko/blob/master/LICENSE
  */
-$col_1 = ['name', 'supplier_id', 'brand_id', 'accountant_category_id', 'stats_category_id'];
+$col_1 = ['name', 'supplier_id', 'brand_id', 'accountant_category_id', 'stats_category_id', 'tax_id'];
 $col_2 = ['exclude_discount_code', 'force_secure', 'archived', 'alternative_product', 'available_date', 'google_category_id'];
 ?>
 
@@ -57,6 +57,9 @@ $col_2 = ['exclude_discount_code', 'force_secure', 'archived', 'alternative_prod
         </div>
         <?php if ($create): ?>
             <input type="hidden" class="form-control input-sm required" name="Product[base_price]" value="0" />
+            <?php if($bundle): ?>
+                <input type="hidden" class="form-control input-sm required" name="Product[is_pack]" value="1">
+            <?php endif; ?>
         <?php endif; ?>
         <input name="_scenario" type="hidden" value="update_product"/>
         <?= $this->render('../_buttons', ['propagation' => false]) ?>

@@ -63,10 +63,10 @@
                             <tr>
                                 <td><span class="label label-primary"><?= Yii::t('kalibao.backend', 'label_price_all') ?></span></td>
                                 <td>
-                                    <input class="form-control input-sm" tabindex="2" type="number" name="priceHT" id="priceHT" data-vat="0.2" data-precision="<?= Yii::$app->variable->get('kalibao.backend', 'price_decimals_count') ?>"/>
+                                    <input class="form-control input-sm" tabindex="2" type="number" name="priceHT" id="priceHT" data-vat="<?= ($component->models['main']->tax->rate)/100 ?>" data-precision="<?= Yii::$app->variable->get('kalibao.backend', 'price_decimals_count') ?>"/>
                                 </td>
                                 <td>
-                                    <input class="form-control input-sm" tabindex="3" type="number" name="priceTTC" id="priceTTC" data-vat="0.2" data-precision="<?= Yii::$app->variable->get('kalibao.backend', 'price_decimals_count') ?>"/>
+                                    <input class="form-control input-sm" tabindex="3" type="number" name="priceTTC" id="priceTTC" data-vat="<?= ($component->models['main']->tax->rate)/100 ?>" data-precision="<?= Yii::$app->variable->get('kalibao.backend', 'price_decimals_count') ?>"/>
                                 </td>
                                 <td></td>
                                 <td></td>

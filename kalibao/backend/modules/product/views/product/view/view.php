@@ -7,5 +7,5 @@
 $this->title = !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name ;
 ?>
 <div class="content-dynamic">
-    <?= $this->render('_contentBlock', compact('component', 'create')); ?>
+    <?= $this->render('_contentBlock', compact('component', 'create', 'bundle')); ?>
 </div>

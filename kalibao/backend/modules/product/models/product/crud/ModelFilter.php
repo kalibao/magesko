@@ -39,6 +39,8 @@ use kalibao\common\models\product\Product;
  * @property string $accountant_category_i18n_title
  * @property integer $accountant_category_id
  * @property string $base_price
+ * @property integer $tax_id
+ * @property string $tax_name
  * @property integer $is_pack
  * @property string $product_i18n_short_description
  * @property string $product_i18n_long_description
@@ -72,6 +74,7 @@ class ModelFilter extends Product implements ModelFilterInterface
     public $product_i18n_infos_shipping;
     public $product_i18n_meta_description;
     public $product_i18n_meta_keywords;
+    public $tax_name;
     public $created_at_start;
     public $created_at_end;
     public $updated_at_start;
@@ -84,7 +87,45 @@ class ModelFilter extends Product implements ModelFilterInterface
     {
         return [
             self::SCENARIO_DEFAULT => [
-                'id', 'exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'link_brand_product', 'link_product_test', 'available', 'available_date', 'product_i18n_name', 'alternative_product', 'brand_name', 'brand_id', 'supplier_name', 'supplier_id', 'catalog_category_i18n_title', 'catalog_category_id', 'stats_category_i18n_title', 'google_category_id', 'google_category_i18n_title', 'stats_category_id', 'accountant_category_i18n_title', 'accountant_category_id', 'base_price', 'is_pack', 'product_i18n_short_description', 'product_i18n_long_description', 'product_i18n_comment', 'product_i18n_page_title', 'product_i18n_name', 'product_i18n_infos_shipping', 'product_i18n_meta_description', 'product_i18n_meta_keywords', 'created_at_start', 'created_at_end', 'updated_at_start', 'updated_at_end'
+                'id',
+                'exclude_discount_code',
+                'force_secure',
+                'archived',
+                'top_product',
+                'exclude_from_google',
+                'link_brand_product',
+                'link_product_test',
+                'available',
+                'available_date',
+                'product_i18n_name',
+                'alternative_product',
+                'brand_name',
+                'brand_id',
+                'supplier_name',
+                'supplier_id',
+                'catalog_category_i18n_title',
+                'catalog_category_id',
+                'stats_category_i18n_title',
+                'google_category_id',
+                'google_category_i18n_title',
+                'stats_category_id',
+                'accountant_category_i18n_title',
+                'accountant_category_id',
+                'base_price',
+                'tax_id',
+                'is_pack',
+                'product_i18n_short_description',
+                'product_i18n_long_description',
+                'product_i18n_comment',
+                'product_i18n_page_title',
+                'product_i18n_name',
+                'product_i18n_infos_shipping',
+                'product_i18n_meta_description',
+                'product_i18n_meta_keywords',
+                'created_at_start',
+                'created_at_end',
+                'updated_at_start',
+                'updated_at_end'
             ]
         ];
     }
@@ -95,15 +136,48 @@ class ModelFilter extends Product implements ModelFilterInterface
     public function rules()
     {
         return [
-            [['id', 'alternative_product', 'brand_id', 'supplier_id', 'catalog_category_id', 'google_category_id', 'stats_category_id', 'accountant_category_id'], 'integer'],
-            [['exclude_discount_code', 'force_secure', 'archived', 'top_product', 'exclude_from_google', 'available', 'is_pack'], 'in', 'range' => [0, 1]],
+            [
+                [
+                    'id',
+                    'alternative_product',
+                    'brand_id',
+                    'supplier_id',
+                    'catalog_category_id',
+                    'google_category_id',
+                    'stats_category_id',
+                    'accountant_category_id',
+                    'tax_id'
+                ],
+                'integer'
+            ],
+            [
+                [
+                    'exclude_discount_code',
+                    'force_secure',
+                    'archived',
+                    'top_product',
+                    'exclude_from_google',
+                    'available',
+                    'is_pack'
+                ],
+                'in',
+                'range' => [0, 1]
+            ],
             [['available_date'], 'safe'],
-            [['created_at_start', 'created_at_end', 'updated_at_start', 'updated_at_end'], 'date', 'format' => 'yyyy-MM-dd'],
+            [
+                ['created_at_start', 'created_at_end', 'updated_at_start', 'updated_at_end'],
+                'date',
+                'format' => 'yyyy-MM-dd'
+            ],
             [['base_price'], 'number'],
             [['brand_name', 'supplier_name'], 'string', 'max' => 255],
             [['link_brand_product', 'link_product_test'], 'url', 'defaultScheme' => 'http'],
             [['product_i18n_name', 'product_i18n_name', 'product_i18n_meta_keywords'], 'string', 'max' => 500],
-            [['category_i18n_title', 'category_i18n_title', 'category_i18n_title', 'category_i18n_title'], 'string', 'max' => 200],
+            [
+                ['category_i18n_title', 'category_i18n_title', 'category_i18n_title', 'category_i18n_title'],
+                'string',
+                'max' => 200
+            ],
             [['product_i18n_short_description', 'product_i18n_meta_description'], 'string', 'max' => 2000],
             [['product_i18n_long_description'], 'string', 'max' => 7000],
             [['product_i18n_comment'], 'string', 'max' => 4000],
@@ -118,21 +192,22 @@ class ModelFilter extends Product implements ModelFilterInterface
     public function attributeLabels()
     {
         return [
-            'alternative_product_i18n_name' =>   Yii::t('kalibao.backend','alternative_product_i18n_name'),
-            'brand_name' =>                      Yii::t('kalibao.backend','brand_name'),
-            'supplier_name' =>                   Yii::t('kalibao.backend','supplier_name'),
-            'catalog_category_i18n_title' =>     Yii::t('kalibao.backend','catalog_category_i18n_title'),
-            'stats_category_i18n_title' =>       Yii::t('kalibao.backend','stats_category_i18n_title'),
-            'google_category_i18n_title' =>      Yii::t('kalibao.backend','google_category_i18n_title'),
-            'accountant_category_i18n_title' =>  Yii::t('kalibao.backend','accountant_category_i18n_title'),
-            'product_i18n_short_description' =>  Yii::t('kalibao.backend','product_i18n_short_description'),
-            'product_i18n_long_description' =>   Yii::t('kalibao.backend','product_i18n_long_description'),
-            'product_i18n_comment' =>            Yii::t('kalibao.backend','product_i18n_comment'),
-            'product_i18n_page_title' =>         Yii::t('kalibao.backend','product_i18n_page_title'),
-            'product_i18n_name' =>               Yii::t('kalibao.backend','product_i18n_name'),
-            'product_i18n_infos_shipping' =>     Yii::t('kalibao.backend','product_i18n_infos_shipping'),
-            'product_i18n_meta_description' =>   Yii::t('kalibao.backend','product_i18n_meta_description'),
-            'product_i18n_meta_keywords' =>      Yii::t('kalibao.backend','product_i18n_meta_keywords'),
+            'alternative_product_i18n_name'  => Yii::t('kalibao.backend', 'alternative_product_i18n_name'),
+            'brand_name'                     => Yii::t('kalibao.backend', 'brand_name'),
+            'supplier_name'                  => Yii::t('kalibao.backend', 'supplier_name'),
+            'tax_name'                       => Yii::t('kalibao.backend', 'tax_name'),
+            'catalog_category_i18n_title'    => Yii::t('kalibao.backend', 'catalog_category_i18n_title'),
+            'stats_category_i18n_title'      => Yii::t('kalibao.backend', 'stats_category_i18n_title'),
+            'google_category_i18n_title'     => Yii::t('kalibao.backend', 'google_category_i18n_title'),
+            'accountant_category_i18n_title' => Yii::t('kalibao.backend', 'accountant_category_i18n_title'),
+            'product_i18n_short_description' => Yii::t('kalibao.backend', 'product_i18n_short_description'),
+            'product_i18n_long_description'  => Yii::t('kalibao.backend', 'product_i18n_long_description'),
+            'product_i18n_comment'           => Yii::t('kalibao.backend', 'product_i18n_comment'),
+            'product_i18n_page_title'        => Yii::t('kalibao.backend', 'product_i18n_page_title'),
+            'product_i18n_name'              => Yii::t('kalibao.backend', 'product_i18n_name'),
+            'product_i18n_infos_shipping'    => Yii::t('kalibao.backend', 'product_i18n_infos_shipping'),
+            'product_i18n_meta_description'  => Yii::t('kalibao.backend', 'product_i18n_meta_description'),
+            'product_i18n_meta_keywords'     => Yii::t('kalibao.backend', 'product_i18n_meta_keywords'),
         ];
     }
 
@@ -144,20 +219,31 @@ class ModelFilter extends Product implements ModelFilterInterface
         $query = self::find();
         $query->joinWith([
             'productI18ns' => function ($query) use ($language) {
-                $query->select(['product_id', 'name', 'short_description', 'long_description', 'comment', 'page_title', 'name', 'infos_shipping', 'meta_description', 'meta_keywords'])->onCondition(['product_i18n.i18n_id' => $language]);
+                $query->select([
+                    'product_id',
+                    'name',
+                    'short_description',
+                    'long_description',
+                    'comment',
+                    'page_title',
+                    'name',
+                    'infos_shipping',
+                    'meta_description',
+                    'meta_keywords'
+                ])->onCondition(['product_i18n.i18n_id' => $language]);
             },
-            'brand' => function ($query) use ($language) {
+            'brand'        => function ($query) use ($language) {
                 $query->select(['id', 'name']);
             },
-            'supplier' => function ($query) use ($language) {
+            'supplier'     => function ($query) use ($language) {
                 $query->select(['id', 'name']);
             }
         ]);
 
         $dataProvider = new ActiveDataProvider([
-            'query' => $query,
-            'sort' => [
-                'attributes' => [
+            'query'      => $query,
+            'sort'       => [
+                'attributes'   => [
                     'id',
                     'exclude_discount_code',
                     'force_secure',
@@ -168,104 +254,104 @@ class ModelFilter extends Product implements ModelFilterInterface
                     'link_product_test',
                     'available',
                     'available_date',
-                    'alternative_product_i18n_name' => [
-                        'asc' => ['product_i18n.name' => SORT_ASC],
-                        'desc' => ['product_i18n.name' => SORT_DESC],
+                    'alternative_product_i18n_name'  => [
+                        'asc'     => ['product_i18n.name' => SORT_ASC],
+                        'desc'    => ['product_i18n.name' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('product_i18n_name')
+                        'label'   => $this->getAttributeLabel('product_i18n_name')
                     ],
                     'alternative_product',
-                    'brand_name' => [
-                        'asc' => ['brand.name' => SORT_ASC],
+                    'brand_name'                     => [
+                        'asc'     => ['brand.name' => SORT_ASC],
                         'desc' => ['brand.name' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('brand_name')
+                        'label'   => $this->getAttributeLabel('brand_name')
                     ],
                     'brand_id',
-                    'supplier_name' => [
-                        'asc' => ['supplier.name' => SORT_ASC],
+                    'supplier_name'                  => [
+                        'asc'     => ['supplier.name' => SORT_ASC],
                         'desc' => ['supplier.name' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('supplier_name')
+                        'label'   => $this->getAttributeLabel('supplier_name')
                     ],
                     'supplier_id',
-                    'catalog_category_i18n_title' => [
-                        'asc' => ['category_i18n.title' => SORT_ASC],
+                    'catalog_category_i18n_title'    => [
+                        'asc'     => ['category_i18n.title' => SORT_ASC],
                         'desc' => ['category_i18n.title' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('category_i18n_title')
+                        'label'   => $this->getAttributeLabel('category_i18n_title')
                     ],
                     'catalog_category_id',
-                    'stats_category_i18n_title' => [
-                        'asc' => ['category_i18n.title' => SORT_ASC],
+                    'stats_category_i18n_title'      => [
+                        'asc'     => ['category_i18n.title' => SORT_ASC],
                         'desc' => ['category_i18n.title' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('category_i18n_title')
+                        'label'   => $this->getAttributeLabel('category_i18n_title')
                     ],
                     'google_category_id',
-                    'google_category_i18n_title' => [
-                        'asc' => ['category_i18n.title' => SORT_ASC],
+                    'google_category_i18n_title'     => [
+                        'asc'     => ['category_i18n.title' => SORT_ASC],
                         'desc' => ['category_i18n.title' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('category_i18n_title')
+                        'label'   => $this->getAttributeLabel('category_i18n_title')
                     ],
                     'stats_category_id',
                     'accountant_category_i18n_title' => [
-                        'asc' => ['category_i18n.title' => SORT_ASC],
+                        'asc'     => ['category_i18n.title' => SORT_ASC],
                         'desc' => ['category_i18n.title' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('category_i18n_title')
+                        'label'   => $this->getAttributeLabel('category_i18n_title')
                     ],
                     'accountant_category_id',
                     'base_price',
                     'is_pack',
                     'product_i18n_short_description' => [
-                        'asc' => ['product_i18n.short_description' => SORT_ASC],
+                        'asc'     => ['product_i18n.short_description' => SORT_ASC],
                         'desc' => ['product_i18n.short_description' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('product_i18n_short_description')
+                        'label'   => $this->getAttributeLabel('product_i18n_short_description')
                     ],
-                    'product_i18n_long_description' => [
-                        'asc' => ['product_i18n.long_description' => SORT_ASC],
+                    'product_i18n_long_description'  => [
+                        'asc'     => ['product_i18n.long_description' => SORT_ASC],
                         'desc' => ['product_i18n.long_description' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('product_i18n_long_description')
+                        'label'   => $this->getAttributeLabel('product_i18n_long_description')
                     ],
-                    'product_i18n_comment' => [
-                        'asc' => ['product_i18n.comment' => SORT_ASC],
+                    'product_i18n_comment'           => [
+                        'asc'     => ['product_i18n.comment' => SORT_ASC],
                         'desc' => ['product_i18n.comment' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('product_i18n_comment')
+                        'label'   => $this->getAttributeLabel('product_i18n_comment')
                     ],
-                    'product_i18n_page_title' => [
-                        'asc' => ['product_i18n.page_title' => SORT_ASC],
+                    'product_i18n_page_title'        => [
+                        'asc'     => ['product_i18n.page_title' => SORT_ASC],
                         'desc' => ['product_i18n.page_title' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('product_i18n_page_title')
+                        'label'   => $this->getAttributeLabel('product_i18n_page_title')
                     ],
-                    'product_i18n_name' => [
-                        'asc' => ['product_i18n.name' => SORT_ASC],
+                    'product_i18n_name'              => [
+                        'asc'     => ['product_i18n.name' => SORT_ASC],
                         'desc' => ['product_i18n.name' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('product_i18n_name')
+                        'label'   => $this->getAttributeLabel('product_i18n_name')
                     ],
-                    'product_i18n_infos_shipping' => [
-                        'asc' => ['product_i18n.infos_shipping' => SORT_ASC],
+                    'product_i18n_infos_shipping'    => [
+                        'asc'     => ['product_i18n.infos_shipping' => SORT_ASC],
                         'desc' => ['product_i18n.infos_shipping' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('product_i18n_infos_shipping')
+                        'label'   => $this->getAttributeLabel('product_i18n_infos_shipping')
                     ],
-                    'product_i18n_meta_description' => [
-                        'asc' => ['product_i18n.meta_description' => SORT_ASC],
+                    'product_i18n_meta_description'  => [
+                        'asc'     => ['product_i18n.meta_description' => SORT_ASC],
                         'desc' => ['product_i18n.meta_description' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('product_i18n_meta_description')
+                        'label'   => $this->getAttributeLabel('product_i18n_meta_description')
                     ],
-                    'product_i18n_meta_keywords' => [
-                        'asc' => ['product_i18n.meta_keywords' => SORT_ASC],
+                    'product_i18n_meta_keywords'     => [
+                        'asc'     => ['product_i18n.meta_keywords' => SORT_ASC],
                         'desc' => ['product_i18n.meta_keywords' => SORT_DESC],
                         'default' => SORT_DESC,
-                        'label' => $this->getAttributeLabel('product_i18n_meta_keywords')
+                        'label'   => $this->getAttributeLabel('product_i18n_meta_keywords')
                     ],
                     'created_at',
                     'updated_at',
@@ -276,13 +362,13 @@ class ModelFilter extends Product implements ModelFilterInterface
             ],
             'pagination' => [
                 'defaultPageSize' => $pageSize,
-                'pageSize' => $pageSize,
+                'pageSize'        => $pageSize,
             ]
         ]);
 
         $this->load($requestParams);
 
-        if (! $this->validate()) {
+        if (!$this->validate()) {
             return $dataProvider;
         }
 

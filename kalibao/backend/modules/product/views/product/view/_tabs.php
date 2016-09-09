@@ -26,4 +26,7 @@
     <li><a href="#cross_selling" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_cross_selling') ?></a></li>
     <li><a href="#discount" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_discount') ?></a></li>
     <li><a href="#media" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_media') ?></a></li>
+    <?php if($bundle): ?>
+        <li><a href="#bundle" data-toggle="tab"><?= Yii::t('kalibao.backend', 'product_tab_bundle') ?></a></li>
+    <?php endif; ?>
 </ul>

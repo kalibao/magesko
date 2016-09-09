@@ -11,14 +11,19 @@
             <div class="row">
                 <?php if ($create): ?>
                     <div class="col-xs-12">
-                        <h4 class="box-title"><?= Yii::t('kalibao.backend', 'label_create_product') ?></h4>
+                        <?php if($bundle): ?>
+                            <h4 class="box-title"><?= Yii::t('kalibao.backend', 'label_create_product_bundle') ?></h4>
+                        <?php else: ?>
+                            <h4 class="box-title"><?= Yii::t('kalibao.backend', 'label_create_product') ?></h4>
+                        <?php endif; ?>
+
                     </div>
                 <?php else : ?>
                     <div class="col-lg-1 col-xs-3">
                         <?= $this->render('_thumbnail', ['product' => $component->models['main']]); ?>
                     </div>
                     <div class="col-lg-11 col-xs-9">
-                        <h4 class="box-title"><i class="fa fa-angle-double-right"></i>&nbsp;&nbsp;<?= $component->models['i18n']->name ?></h4>
+                        <h4 class="box-title <?= ($bundle)? 'bundle' : '' ?>"><i class="fa fa-angle-double-right"></i>&nbsp;&nbsp;<?= $component->models['i18n']->name ?></h4>
                         <?= Yii::t('kalibao.backend', 'product_variant_count', ['n' => count($component->models['main']->variantList)]) ?>
                     </div>
                 <?php endif; ?>

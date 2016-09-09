@@ -14,7 +14,7 @@ use yii\helpers\Url;
     <?php foreach ($row->items as $item): ?>
         <?php if ($item == $first): ?>
             <td>
-                <a href="<?= Url::to(['view'] + $row->getPk()); ?>" class="btn-view" title="<?= Yii::t('kalibao', 'btn_view'); ?>">
+                <a href="<?= Url::to(['view'] + $row->getPk()); ?>" class="btn-view <?= $row->model->is_pack?'pack':'' ?>" title="<?= Yii::t('kalibao', 'btn_view'); ?>">
                     <?= $item; ?>
                 </a>
             </td>

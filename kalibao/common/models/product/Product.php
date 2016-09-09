@@ -13,6 +13,7 @@ use kalibao\common\models\product\ProductI18n;
 use kalibao\common\models\productMedia\ProductMedia;
 use kalibao\common\models\supplier\Supplier;
 use kalibao\common\models\sheet\Sheet;
+use kalibao\common\models\tax\Tax;
 use kalibao\common\models\variant\Variant;
 use kalibao\common\models\variantAttribute\VariantAttribute;
 use Yii;
@@ -39,6 +40,7 @@ use yii\caching\TagDependency;
  * @property integer $stats_category_id
  * @property integer $accountant_category_id
  * @property string $base_price
+ * @property integer $tax_id
  * @property integer $is_pack
  * @property string $created_at
  * @property string $updated_at
@@ -54,12 +56,55 @@ use yii\caching\TagDependency;
  * @property ProductI18n[] $productI18ns
  * @property ProductMedia[] $productMedia
  * @property Variant[] $variants
+ * @property Tax $tax
  *
  * @package kalibao\common\models\product
  * @version 1.0
  */
 class Product extends \yii\db\ActiveRecord
 {
+    /**
+     * @inheritdoc
+     */
+    public static function tableName()
+    {
+        return 'product';
+    }
+
+    public static function countByAttribute($where = [])
+    {
+        $sheets = Sheet::find()
+            ->innerJoinWith('sheetType')
+            ->where([
+                'table' => 'product'
+            ])
+            ->andwhere($where)
+            ->select('sheet.id, sheet_type_id, primary_key')
+            ->asArray()
+            ->all();
+
+        $productIds = [];
+        foreach ($sheets as $sheet) {
+            $productIds[] = $sheet['primary_key'];
+        }
+
+        if (empty($productIds)) {
+            return false;
+        }
+
+        $command = Yii::$app->db->createCommand(
+            "SELECT `attribute_id`, `attribute_type_id`, count( DISTINCT product_id) AS 'number'
+             FROM `variant`
+             INNER JOIN `variant_attribute`
+             ON `variant`.`id` = `variant_attribute`.`variant_id`
+             INNER JOIN `attribute`
+             ON `variant_attribute`.`attribute_id` = `attribute`.`id`
+             WHERE `product_id` IN (" . implode(',', $productIds) . ")
+             GROUP BY `attribute_id`"
+        );
+        return $command->queryAll();
+    }
+
     /**
      * @inheritdoc
      */
@@ -73,14 +118,6 @@ class Product extends \yii\db\ActiveRecord
                 },
             ]
         ];
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function tableName()
-    {
-        return 'product';
     }
 
     /**
@@ -106,6 +143,7 @@ class Product extends \yii\db\ActiveRecord
                 'stats_category_id',
                 'accountant_category_id',
                 'base_price',
+                'tax_id',
                 'is_pack'
             ],
             'update'             => [
@@ -125,6 +163,7 @@ class Product extends \yii\db\ActiveRecord
                 'stats_category_id',
                 'accountant_category_id',
                 'base_price',
+                'tax_id',
                 'is_pack'
             ],
             'update_product'     => [
@@ -136,7 +175,8 @@ class Product extends \yii\db\ActiveRecord
                 'supplier_id',
                 'stats_category_id',
                 'accountant_category_id',
-                'available_date'
+                'available_date',
+                'tax_id'
             ],
             'update_description' => [],
             'update_price'       => ['base_price'],
@@ -181,7 +221,8 @@ class Product extends \yii\db\ActiveRecord
                     'supplier_id',
                     'google_category_id',
                     'stats_category_id',
-                    'accountant_category_id'
+                    'accountant_category_id',
+                    'tax_id'
                 ],
                 'integer'
             ],
@@ -213,6 +254,7 @@ class Product extends \yii\db\ActiveRecord
             'stats_category_id'      => Yii::t('kalibao.backend', 'product_label_stats_category_id'),
             'accountant_category_id' => Yii::t('kalibao.backend', 'product_label_accountant_category_id'),
             'base_price'             => Yii::t('kalibao.backend', 'product_label_base_price'),
+            'tax_id'                 => Yii::t('kalibao.backend', 'product_label_tax_id'),
             'is_pack'                => Yii::t('kalibao.backend', 'product_label_is_pack'),
             'created_at'             => Yii::t('kalibao', 'model:created_at'),
             'updated_at'             => Yii::t('kalibao', 'model:updated_at'),
@@ -259,6 +301,13 @@ class Product extends \yii\db\ActiveRecord
         return $this->hasOne(Supplier::className(), ['id' => 'supplier_id']);
     }
 
+    /**
+     * @return \yii\db\ActiveQuery
+     */
+    public function getTax()
+    {
+        return $this->hasOne(Tax::className(), ['id' => 'tax_id']);
+    }
     /**
      * @return \yii\db\ActiveQuery
      */
@@ -330,6 +379,28 @@ class Product extends \yii\db\ActiveRecord
                 ]
             ])
         );
+    }
+
+    /**
+     * function to generate a tag for caching data (alias to static method)
+     * @param string $id id of the product
+     * @param string $context identifier describing the cached data
+     * @return string the tag
+     */
+    public function generateTag($id = '', $context = '')
+    {
+        return self::generateTagStatic($id, $context);
+    }
+
+    /**
+     * static function to generate a tag for caching data
+     * @param string $id id of the product
+     * @param string $context identifier describing the cached data
+     * @return string the tag
+     */
+    public static function generateTagStatic($id = '', $context = '')
+    {
+        return (md5('ProductTag' . $id . $context));
     }
 
     /**
@@ -516,61 +587,5 @@ class Product extends \yii\db\ActiveRecord
             )->queryAll();
         }, 0, $dependency);
         return ($asJson) ? json_encode($data) : $data;
-    }
-
-    /**
-     * function to generate a tag for caching data (alias to static method)
-     * @param string $id id of the product
-     * @param string $context identifier describing the cached data
-     * @return string the tag
-     */
-    public function generateTag($id = '', $context = '')
-    {
-        return self::generateTagStatic($id, $context);
-    }
-
-    /**
-     * static function to generate a tag for caching data
-     * @param string $id id of the product
-     * @param string $context identifier describing the cached data
-     * @return string the tag
-     */
-    public static function generateTagStatic($id = '', $context = '')
-    {
-        return (md5('ProductTag' . $id . $context));
-    }
-
-    public static function countByAttribute($where = [])
-    {
-        $sheets = Sheet::find()
-            ->innerJoinWith('sheetType')
-            ->where([
-                'table' => 'product'
-            ])
-            ->andwhere($where)
-            ->select('sheet.id, sheet_type_id, primary_key')
-            ->asArray()
-            ->all();
-
-        $productIds = [];
-        foreach ($sheets as $sheet) {
-            $productIds[] = $sheet['primary_key'];
-        }
-
-        if (empty($productIds)) {
-            return false;
-        }
-
-        $command = Yii::$app->db->createCommand(
-            "SELECT `attribute_id`, `attribute_type_id`, count( DISTINCT product_id) AS 'number'
-             FROM `variant`
-             INNER JOIN `variant_attribute`
-             ON `variant`.`id` = `variant_attribute`.`variant_id`
-             INNER JOIN `attribute`
-             ON `variant_attribute`.`attribute_id` = `attribute`.`id`
-             WHERE `product_id` IN (" . implode(',', $productIds) . ")
-             GROUP BY `attribute_id`"
-        );
-        return $command->queryAll();
     }
 }

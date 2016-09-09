@@ -95,4 +95,16 @@ class CountryI18n extends \yii\db\ActiveRecord
     {
         return $this->hasOne(Country::className(), ['id' => 'country_id']);
     }
+
+    public function getAllI18nById()
+    {
+        $return = [];
+
+        $translations = CountryI18n::findAll(['i18n_id' => Yii::$app->language]);
+        foreach ($translations as $translation) {
+            $return[$translation->country_id] = $translation->name;
+        }
+
+        return $return;
+    }
 }

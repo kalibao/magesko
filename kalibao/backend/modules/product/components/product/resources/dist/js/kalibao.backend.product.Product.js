@@ -57,7 +57,7 @@
     this.$sendMedia = this.$main.find('#send-media');
     this.changed = false;
 
-    $.kalibao.core.app.hasUnsavedChanges = function() {
+    $.kalibao.core.app.hasUnsavedChanges = function () {
       if (window.location.pathname.search('/product/product') === -1) return false;
       return self.checkFormState($('.tab-pane.active'));
     };
@@ -82,7 +82,7 @@
    * Init select2 elements
    */
   $.kalibao.backend.product.View.prototype.initSelect2 = function ($container) {
-    $container.find(".select2").each(function() {
+    $container.find(".select2").each(function () {
       $(this).select2({
         formatSelection: function (e) {
           return $(e.element[0]).closest('optgroup').attr('label') + ' : ' + e.text;
@@ -108,7 +108,7 @@
     this.initTabHash();
     this.initCopyEvents();
     $('[data-toggle="tooltip"]').tooltip();
-    this.$variantListTab.find('input[type=radio]').change(function() {
+    this.$variantListTab.find('input[type=radio]').change(function () {
       $('input[type=radio]:checked').not(this).prop('checked', false);
     });
     this.initTreeEvents();
@@ -132,7 +132,7 @@
         'keep_selected_style': false
       }
     });
-    this.$tree.on('ready.jstree', function(){
+    this.$tree.on('ready.jstree', function () {
       for (var i = 0; i < self.categories.length; i++) {
         self.$tree.jstree().check_node('branch-' + self.categories[i].branch_id);
       }
@@ -146,7 +146,7 @@
   $.kalibao.backend.product.View.prototype.initTreeEvents = function () {
     var self = this;
     var $jstree = this.$tree.jstree();
-    this.$catalogTab.find('.btn-submit').off('click').on('click', function(e) {
+    this.$catalogTab.find('.btn-submit').off('click').on('click', function (e) {
       e.preventDefault();
       var newData = $jstree.get_checked();
       var ad = $(newData).not(self.initialData).get(); // present in new data and not in initial
@@ -156,7 +156,12 @@
         link_brand_product: self.$catalogTab.find('[name="Product[link_brand_product]"]').val(),
         link_product_test: self.$catalogTab.find('[name="Product[link_product_test]"]').val()
       };
-      $.post('/product/product/update-catalog', {ad: ad, rm: rm, productId: productId, Product: Product}, function(json){
+      $.post('/product/product/update-catalog', {
+        ad: ad,
+        rm: rm,
+        productId: productId,
+        Product: Product
+      }, function (json) {
         if (self.afterAjaxPost(json)) {
           self.initialData = newData;
           self.saveFormState($('.tab-pane.active'));
@@ -166,17 +171,17 @@
       });
     });
 
-    this.$catalogTab.find('.reset-form').on('click', function() {
+    this.$catalogTab.find('.reset-form').on('click', function () {
       $jstree.uncheck_all();
       $jstree.check_node(self.initialData);
       self.$tree.removeClass('unsaved');
     });
 
-    this.$openAll.on('click', function() {
+    this.$openAll.on('click', function () {
       $jstree.open_all();
     });
 
-    this.$closeAll.on('click', function() {
+    this.$closeAll.on('click', function () {
       $jstree.close_all();
     })
   };
@@ -187,21 +192,21 @@
   $.kalibao.backend.product.View.prototype.initCrossSellingEvents = function () {
     var self = this;
     var $variationList = $("#cross_selling_variation");
-    $variationList.change(function(){
+    $variationList.change(function () {
       $(".cross-selling-table").hide();
       $("#cross_selling_" + $(this).val()).show();
     }).change();
 
-    this.$crossSellingTab.find(".discount-rate" ).keyup(function(){
+    this.$crossSellingTab.find(".discount-rate").keyup(function () {
       self.updateDiscount("rate", $("#cross_selling"));
     }).keyup();
-    this.$crossSellingTab.find(".discount-price").keyup(function(){
+    this.$crossSellingTab.find(".discount-price").keyup(function () {
       self.updateDiscount("price", $("#cross_selling"));
     });
-    this.$crossSellingTab.find(".discount-value").keyup(function(){
+    this.$crossSellingTab.find(".discount-value").keyup(function () {
       self.updateDiscount("value", $("#cross_selling"));
     });
-    this.$crossSellingTab.find("#add-new-cross_sale").click(function(e){
+    this.$crossSellingTab.find("#add-new-cross_sale").click(function (e) {
       e.preventDefault();
       self.addCrossSellingLine($variationList.val());
     });
@@ -214,44 +219,47 @@
     var self = this;
 
     var $startDates = this.$discountTab.find("input[name*=start_date]");
-    var $endDates   = this.$discountTab.find("input[name*=end_date]");
+    var $endDates = this.$discountTab.find("input[name*=end_date]");
 
-    $("#margin-data").change(function(){
+    $("#margin-data").change(function () {
       $(".margin-data").toggle(this.checked);
     });
-    $("#base_price").keyup(function(){
+    $("#base_price").keyup(function () {
       var $e = $("#priceTTC");
       var vat = parseFloat($e.attr("data-vat"));
-      $e.val(Math.round($(this).val() * (1 + vat)*10000)/10000);
+      $e.val(Math.round($(this).val() * (1 + vat) * 10000) / 10000);
     }).keyup();
-    $("#priceTTC").keyup(function(){
+    $("#priceTTC").keyup(function () {
       var $e = $("#base_price");
       var vat = parseFloat($(this).attr("data-vat"));
-      $e.val(Math.round($(this).val() / (1 + vat)*10000)/10000);
+      $e.val(Math.round($(this).val() / (1 + vat) * 10000) / 10000);
     });
 
-    this.$discountTab.find(".discount-rate" ).keyup(function(){
+    this.$discountTab.find(".discount-rate").keyup(function () {
       self.updateDiscount("rate", $("#discount"));
     }).keyup();
-    this.$discountTab.find(".discount-price").keyup(function(){
+    this.$discountTab.find(".discount-price").keyup(function () {
       self.updateDiscount("price", $("#discount"));
     });
-    this.$discountTab.find(".discount-value").keyup(function(){
+    this.$discountTab.find(".discount-value").keyup(function () {
       self.updateDiscount("value", $("#discount"));
     });
-    this.$discountTab.find(".btn-submit").click(function(e){
+    this.$discountTab.find(".btn-submit").click(function (e) {
       var errors = false;
       for (var i = 0; i < $startDates.length; i++) {
         var start = $startDates.eq(i);
-        var end   = $endDates.eq(i);
+        var end = $endDates.eq(i);
 
         var startDate = start.val().split('-');
-        var endDate   = end.val().split('-');
+        var endDate = end.val().split('-');
         startDate = new Date(startDate[2], startDate[1], startDate[0]);
-        endDate   = new Date(endDate[2],   endDate[1],   endDate[0]);
+        endDate = new Date(endDate[2], endDate[1], endDate[0]);
 
         if (startDate > endDate) {
-          end.addClass('error').tooltip({title: end.data('error-text'), template: '<div class="tooltip tooltip-danger"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'})
+          end.addClass('error').tooltip({
+            title: end.data('error-text'),
+            template: '<div class="tooltip tooltip-danger"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+          })
           errors = true;
         } else {
           end.removeClass('error').tooltip('destroy')
@@ -268,46 +276,94 @@
   };
 
   $.kalibao.backend.product.View.prototype.initGeneratorEvents = function () {
-    var showStep2 = function(){
+    var self = this;
+    var showStep2 = function () {
       $('#generator_step1').collapse('hide').parent().children().first().attr('disabled', '');
       $('#generator_step2').collapse('show').parent().children().first().removeAttr('disabled')
     };
-    var showStep1 = function(){
+    var showStep1 = function () {
       $('#generator_step1').collapse('show').parent().children().first().removeAttr('disabled');
       $('#generator_step2').collapse('hide').parent().children().first().attr('disabled', '');
     };
 
-    $('#generate-combinations').click(function(){
+    $('#generate-combinations').click(function () {
       var $select = $('#generator-attributes');
       if ($select.val()) {
-        $.post('generate-combinations', {data: $select.val()}, function(result){
-          $.each(result, function(){
-            $()
-          });
+        $.post('generate-combinations', {data: $select.val()}, function (result, resp, jqxhr) {
+          console.log(jqxhr);
+          for (var key in result) { // loop on combinations
+            var newElement = '<label class="variant"><input type="checkbox" name="variant[]" id="variant-' + key + '" value="' + key + '">';
+
+            $.each(result[key], function () {
+              newElement += '<span class="badge">' + this + '</span>'
+            });
+            newElement += '</label><br>';
+            $(newElement).prependTo($('#generator_step2').children().first());
+          }
           showStep2();
         })
       }
     });
+
+    $('#generate-variants').click(function () {
+      var data = [];
+      $(this).parent().find(':checked').each(function () {
+        data.push($(this).val());
+      });
+      $.post('add-variant', {
+        data: data,
+        product: self.urlParam('id')
+      }, function () {
+        window.location.hash = '#variant-list';
+        window.location.reload();
+      });
+    });
+
+    $('.delete-variant').click(function () {
+      var id = $(this).data('id');
+      var line = $(this).closest('tr');
+
+      var modal = new $.kalibao.core.Modal({id: 'modal-delete-variant'});
+      modal.setHeader($.kalibao.core.app.messages.variantConfirmDelete);
+      modal.setBtnPrimary($.kalibao.core.app.messages.btnDelete);
+      modal.setBtnSecondary($.kalibao.core.app.messages.btnClose);
+
+      // buttons actions
+      modal.$component.find('.btn-secondary, .close').on('click', function () {
+        modal.close();
+        return false;
+      });
+      modal.$component.find('.btn-primary').on('click', function () {
+        $.post('delete-variant?id=' + id, function (data) {
+          modal.close();
+          if (self.afterAjaxPost(data)) line.slideUp();
+        });
+      });
+      modal.open();
+      modal.$component.find('.btn-primary').focus();
+    });
   };
-  
+
   /**
    * Init actions events
    */
   $.kalibao.backend.product.View.prototype.initActionsEvents = function () {
-    var self   = this;
+    var self = this;
     var $tbody = this.$attributeTab.find('tbody');
 
     var $btnRefresh = $('#refresh-variants');
     var $btnSave = $('#save-attributes');
-    $btnRefresh.click(function(){location.reload()}).hide();
+    $btnRefresh.click(function () {
+      location.reload()
+    }).hide();
     $btnSave.hide();
 
-    this.$main.find('.btn-submit').on('click', function() {
+    this.$main.find('.btn-submit').on('click', function () {
       self.submit($(this));
       return false;
     });
 
-    this.$main.find('.btn-add-again').on('click', function() {
+    this.$main.find('.btn-add-again').on('click', function () {
       var action = $(this).attr('href');
       var params = '';
 
@@ -334,7 +390,7 @@
       return false;
     });
 
-    this.$main.find('.btn-close').on('click', function() {
+    this.$main.find('.btn-close').on('click', function () {
       var backLink = self.getDynamicBackLink();
       var action = '';
       var params = '';
@@ -384,95 +440,27 @@
       handle: '.sort-handle'
     });
 
-    this.$attributeTab.find('.attribute-delete').click(function() {
-      if (confirm('supprimer un attribut effacera toutes les variations qui l\'utilisent.\nSupprimer ?')) {
-        var $btn = $(this);
-        $.post("delete-attribute", {
-          id: $(this).data('attribute'),
-          product: $(this).data('product')
-        }).done(function() {
-          $btn.parent().fadeOut();
-        })
-      }
-      $btnRefresh.show();
-    });
-
-    this.$attributeTab.find('.attribute-type-delete').click(function() {
-      if (confirm('supprimer un attribut effacera toutes les variations qui l\'utilisent.\nSupprimer ?')) {
-        var $btn = $(this);
-        $.post("delete-attribute", {
-          ids: $(this).data('attribute-list'),
-          product: $(this).data('product')
-        }).done(function() {
-          $btn.closest('tr').fadeOut();
-        })
-      }
-      $btnRefresh.show();
-    });
-
-    this.$attributeTab.find('#add-attribute').click(function() {
-      var $input = $('#input-attribute');
-      var value = $input.val();
-      $input.select2('destroy');
-      $.kalibao.crud.tools.initAdvancedDropDownList($input);
-      if (!value) return;
-
-      var attributeType = $('#input-attribute-type').val().split('|');
-      value = value.split('|');
-
-      if (!$tbody.find("#attr-type-" + attributeType[0]).length) {
-        $tbody.prepend($("<tr data-id='"+ attributeType[0] +"' id='attr-type-"+ attributeType[0] +"'><td>"+ attributeType[1] +"</td><td></td></tr>" + attributeType[0]));
-      }
-
-      var $td = $("#attr-type-" + attributeType[0]).find('td').eq(1);
-      if (!$td.find("#attr-" + value[0]).length)
-        $td.append($('<span class="badge" data-id="'+ value[0] +'" id="attr-'+ value[0] +'">'+ value[1] +'</span>'))
-
-      $btnSave.show();
-    });
-
-    this.$attributeTab.find('#input-attribute-type').change(function(){
-      var $attributes = $("#input-attribute");
-      $attributes.select2('destroy');
-      $attributes.attr("data-action", $(this).data("attribute-url") + '|' + $(this).val());
-      $.kalibao.crud.tools.initAdvancedDropDownList($attributes);
-    });
-
-    this.$attributeTab.find('#save-attributes').click(function(){
-      var data = {};
-      $tbody.find('tr').each(function(){
-        if ($(this).find('input').length) return;
-        var typeId = $(this).first('td').data('id');
-        data[typeId] = [];
-        $(this).last('td').find('span').each(function(){
-          data[typeId].push($(this).data('id'))
-        })
-      });
-      var product = self.urlParam('id');
-      $.post('/product/product/add-attribute', {data: data, product: product}, function(r){self.afterAjaxPost(r, true)});
-    });
-
-    this.$variantListTab.find('.description-update').click(function(){
+    this.$variantListTab.find('.description-update').click(function () {
       var $textarea = $(this).siblings('textarea').eq(0);
       var data = $textarea.ckeditorGet().getData();
       self.$variantListTab.find($textarea.data('origin')).html(data);
     });
 
-    this.$logisticTab.find('.select-strategy').change(function(){
-      $(this).find('option').each(function(){
+    this.$logisticTab.find('.select-strategy').change(function () {
+      $(this).find('option').each(function () {
         $($(this).data('id')).hide();
       });
       $($(this).find(':selected').data('id')).show();
     }).change();
 
-    this.$logisticTab.find('.select-alternative-strategy').change(function(){
-      $(this).find('option').each(function(){
+    this.$logisticTab.find('.select-alternative-strategy').change(function () {
+      $(this).find('option').each(function () {
         $($(this).data('id')).hide();
       });
       $($(this).find(':selected').data('id')).show();
     }).change();
 
-    this.$logisticTab.find('.save-logistic').click(function(e){
+    this.$logisticTab.find('.save-logistic').click(function (e) {
       e.preventDefault();
       var $modal = $(this).closest('.modal');
       var logisticId = $modal.data('id');
@@ -480,21 +468,24 @@
       $.post(
         '/product/product/update-logistic-strategy?id=' + logisticId + '&strategy=' + $modal.find('.select-strategy').eq(0).val() + '&product=' + self.urlParam('id'),
         $modal.find('textarea, input, .select-alternative-strategy').serialize(),
-        function(data) {$modal.modal('hide'); self.afterAjaxPost(data)}
+        function (data) {
+          $modal.modal('hide');
+          self.afterAjaxPost(data)
+        }
       );
     });
 
-    this.$main.find('.select-media').change(function(){
-      $(this).find('option').each(function(){
+    this.$main.find('.select-media').change(function () {
+      $(this).find('option').each(function () {
         $($(this).data('id')).hide();
       });
       $($(this).find(':selected').data('id')).show();
     }).change();
 
-    this.$main.find('#send-media-url').off('click').click(function(e){
+    this.$main.find('#send-media-url').off('click').click(function (e) {
       e.preventDefault();
 
-      if (window.FormData && ! self.validate(self.activeValidators, self.$main)) {
+      if (window.FormData && !self.validate(self.activeValidators, self.$main)) {
         var $form = $(this).closest('form');
         var action = $form.attr('action');
         var params = new FormData();
@@ -505,11 +496,11 @@
             var inputType = $input.attr('type');
             if (inputType === 'file') {
               if ($input.get(0).files.length > 0) {
-                $.each($input.get(0).files, function(i, e){
+                $.each($input.get(0).files, function (i, e) {
                   params.append($input.attr('name'), e);
                 });
               }
-            } else if(inputType === 'checkbox') {
+            } else if (inputType === 'checkbox') {
               if ($input.is(':checked')) {
                 params.append($input.attr('name'), $input.val());
               }
@@ -535,10 +526,14 @@
       return false
     });
 
-    this.$main.find('.delete-product-media').click(function(){
+    this.$main.find('.delete-product-media').click(function () {
       var that = this;
-      $.post('/product/product/remove-media?id=' + $(this).data('id') + '&product=' + self.urlParam('id'), function(){
-        $.toaster({priority: 'success', title: 'Enregistré', message: 'Le media a été supprimé'});
+      $.post('/product/product/remove-media?id=' + $(this).data('id') + '&product=' + self.urlParam('id'), function () {
+        $.toaster({
+          priority: 'success',
+          title: $.kalibao.core.app.messages.toastSavedTitle,
+          message: $.kalibao.core.app.messages.toastFileDeleted
+        });
         that.closest('.media').remove();
       });
     });
@@ -546,27 +541,35 @@
     this.$dropzone.uploadFile({
       url: '/media/media/create?product=' + self.urlParam('id'),
       fileName: 'Media[file]',
-      extraHTML: function(){
+      extraHTML: function () {
         return '<label>Titre :</label><input type="text" class="form-control input-sm" name="MediaI18n[title]"/>';
       },
       autoSubmit: false,
       formData: {'Media[media_type_id]': 1},
-      onSuccess: function(file, data, xhr, pd){
-        $.toaster({priority: 'success', title: 'Enregistré', message: 'fichier ' + file[0] + ' envoyé'})
+      onSuccess: function (file, data, xhr, pd) {
+        $.toaster({
+          priority: 'success',
+          title: $.kalibao.core.app.messages.toastSavedTitle,
+          message: $.kalibao.core.app.messages.toastFileUploaded.replace('%file%', file[0])
+        })
       },
-      afterUploadAll: function(obj){
-        $.toaster({priority: 'success', title: 'Enregistré', message: obj.getFileCount() + ' fichiers envoyés'});
+      afterUploadAll: function (obj) {
+        $.toaster({
+          priority: 'success',
+          title: $.kalibao.core.app.messages.toastSavedTitle,
+          message: $.kalibao.core.app.messages.toastUploadComplete.replace('%count%', obj.getFileCount())
+        });
         window.location.reload();
       },
-      uploadStr: 'Parcourir',
-      dragDropStr: '<span> &nbsp; ou déposez vos Fichiers</span>',
+      uploadStr: $.kalibao.core.app.messages.uploadSelectFile,
+      dragDropStr: '<span> &nbsp; ' + $.kalibao.core.app.messages.uploadDropFile + '</span>',
       acceptFiles: "image/*",
       showPreview: true,
       previewHeight: "auto",
       previewWidth: "auto"
     });
 
-    this.$sendMedia.off('click').click(function(){
+    this.$sendMedia.off('click').click(function () {
       self.$dropzone.startUpload();
     })
   };
@@ -576,7 +579,7 @@
    */
   $.kalibao.backend.product.View.prototype.initTabHash = function () {
     var hash = window.location.hash;
-    if (hash == "#") return;
+    // if (hash == "#" || hash == "") return;
     hash && $('a[href="' + hash + '"]').tab('show');
     this.saveFormState($('.tab-pane.active'));
   };
@@ -587,13 +590,17 @@
   $.kalibao.backend.product.View.prototype.submit = function ($button) {
     var self = this;
 
-    if (window.FormData && ! this.validate(this.activeValidators, this.$main)) {
+    if (window.FormData && !this.validate(this.activeValidators, this.$main)) {
       var $form = $button.closest('form');
       var action = $form.attr('action');
       var params = new FormData();
 
       if ($form.find('input, select, textarea').hasClass('error')) {
-        $.toaster({ priority : 'danger', title : 'Attention', message : 'Il y a des erreurs dans le formulaire'});
+        $.toaster({
+          priority: 'danger',
+          title: $.kalibao.core.app.messages.toastValidationTitle,
+          message: $.kalibao.core.app.messages.toastValidationText
+        });
         return false;
       }
 
@@ -605,7 +612,7 @@
             if ($input.get(0).files.length > 0) {
               params.append($input.attr('name'), $input.get(0).files[0]);
             }
-          } else if(inputType === 'checkbox') {
+          } else if (inputType === 'checkbox') {
             if ($input.is(':checked')) {
               params.append($input.attr('name'), $input.val());
             }
@@ -649,34 +656,34 @@
     var $lines = $container.find("tr");
     for (var i = $lines.length - 1; i >= 1; i--) {
       var $curline = $lines.eq(i);
-      var bprice   = parseFloat($curline.find("[disabled]").first().val());
-      var $price   = $curline.find(".discount-price").first();
-      var $value   = $curline.find(".discount-value").first();
-      var $rate    = $curline.find(".discount-rate").first();
-      var $fprice  = $curline.find(".discount-final-price").first();
-      switch(change) {
+      var bprice = parseFloat($curline.find("[disabled]").first().val());
+      var $price = $curline.find(".discount-price").first();
+      var $value = $curline.find(".discount-value").first();
+      var $rate = $curline.find(".discount-rate").first();
+      var $fprice = $curline.find(".discount-final-price").first();
+      switch (change) {
         case "price":
           var value = bprice - parseFloat($price.val());
-          var rate = (value / bprice)*100;
+          var rate = (value / bprice) * 100;
           $fprice.val($price.val());
-          $value.val(Math.round(value*10000)/10000);
-          $rate.val(Math.round(rate*100000)/100000);
+          $value.val(Math.round(value * 10000) / 10000);
+          $rate.val(Math.round(rate * 100000) / 100000);
           break;
         case "value":
           var value = parseFloat($value.val());
           var fprice = bprice - value;
-          var rate = (value / bprice)*100;
-          $fprice.val(Math.round(fprice*10000)/10000);
-          $price.val(Math.round(fprice*10000)/10000);
-          $rate.val(Math.round(rate*100000)/100000);
+          var rate = (value / bprice) * 100;
+          $fprice.val(Math.round(fprice * 10000) / 10000);
+          $price.val(Math.round(fprice * 10000) / 10000);
+          $rate.val(Math.round(rate * 100000) / 100000);
           break;
         case "rate":
           var rate = parseFloat($rate.val());
-          var value = bprice * rate/100;
+          var value = bprice * rate / 100;
           var fprice = bprice - value;
-          $fprice.val(Math.round(fprice*10000)/10000);
-          $price.val(Math.round(fprice*10000)/10000);
-          $value.val(Math.round(value*10000)/10000);
+          $fprice.val(Math.round(fprice * 10000) / 10000);
+          $price.val(Math.round(fprice * 10000) / 10000);
+          $value.val(Math.round(value * 10000) / 10000);
           break;
       }
     }
@@ -687,8 +694,8 @@
    */
   $.kalibao.backend.product.View.prototype.calcPrices = function () {
     var self = this;
-    var $buyPriceInput     = $('#buyPrice');
-    var $sellPriceHTInput  = $('#priceHT');
+    var $buyPriceInput = $('#buyPrice');
+    var $sellPriceHTInput = $('#priceHT');
     var $sellPriceTTCInput = $('#priceTTC');
     var $sellPriceTable = $('#sell-prices-table');
     var $buyPriceListInputs = $('#buy-prices-table').find('input[name*="price"]');
@@ -698,45 +705,45 @@
     var $marginRateInputs = $sellPriceTable.find('td:nth-child(5) input');
     var multiplier = 1 + $sellPriceHTInput.data('vat');
 
-    var updateMargin = function(line) {
+    var updateMargin = function (line) {
       if (line == null) {
-        $buyPriceListInputs.each(function(){
+        $buyPriceListInputs.each(function () {
           updateMargin($buyPriceListInputs.index($(this))); // updateMargin for each line
         })
       }
       var buy = $buyPriceListInputs.eq(line).val();
       var sell = $sellPriceTTCListInputs.eq(line).val();
 
-      $marginCoeffInputs.eq(line).val((sell/buy).toFixed(2));
-      $marginRateInputs.eq(line).val((100 - (buy/sell)*100).toFixed(2) + ' %');
+      $marginCoeffInputs.eq(line).val((sell / buy).toFixed(2));
+      $marginRateInputs.eq(line).val((100 - (buy / sell) * 100).toFixed(2) + ' %');
     };
 
     // events for all lines
-    $buyPriceInput.on('input', function(){
+    $buyPriceInput.on('input', function () {
       var price = $(this).val();
-      $buyPriceListInputs.each(function(){
+      $buyPriceListInputs.each(function () {
         $(this).val(price);
         updateMargin();
       })
     });
 
-    $sellPriceHTInput.on('input', function(){
+    $sellPriceHTInput.on('input', function () {
       var price = $(this).val();
-      $sellPriceHTListInputs.each(function(){  // copy to all HT inputs
+      $sellPriceHTListInputs.each(function () {  // copy to all HT inputs
         $(this).val(parseFloat(price).toFixed(6));
       });
-      $sellPriceTTCListInputs.each(function(){ // calc all TTC inputs
+      $sellPriceTTCListInputs.each(function () { // calc all TTC inputs
         $(this).val((price * multiplier).toFixed(6));
       });
       updateMargin();
     });
 
-    $sellPriceTTCInput.on('input', function(){
+    $sellPriceTTCInput.on('input', function () {
       var price = $(this).val();
-      $sellPriceTTCListInputs.each(function(){ // copy to all TTC input
+      $sellPriceTTCListInputs.each(function () { // copy to all TTC input
         $(this).val(parseFloat(price).toFixed(6));
       });
-      $sellPriceHTListInputs.each(function(){  // calc all HT inputs
+      $sellPriceHTListInputs.each(function () {  // calc all HT inputs
         $(this).val((price / multiplier).toFixed(6));
       });
       updateMargin();
@@ -744,19 +751,21 @@
 
 
     // individual line edit
-    $sellPriceHTListInputs.on('input', function(){
+    $sellPriceHTListInputs.on('input', function () {
       var index = $sellPriceHTListInputs.index($(this));
       $sellPriceTTCListInputs.eq(index).val(($(this).val() * multiplier).toFixed(6));
       updateMargin(index);
     });
 
-    $sellPriceTTCListInputs.on('input', function(){
+    $sellPriceTTCListInputs.on('input', function () {
       var index = $sellPriceTTCListInputs.index($(this));
       $sellPriceHTListInputs.eq(index).val(($(this).val() / multiplier).toFixed(6));
       updateMargin(index);
     });
 
-    $buyPriceListInputs.on('input', function(){updateMargin();});
+    $buyPriceListInputs.on('input', function () {
+      updateMargin();
+    });
 
     // trigger input event to calc all datas
     $sellPriceHTListInputs.trigger('input');
@@ -767,12 +776,12 @@
    * @param name string The param name
    * @returns {*} The value of the url param
    */
-  $.kalibao.backend.product.View.prototype.urlParam = function(name){
+  $.kalibao.backend.product.View.prototype.urlParam = function (name) {
     var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
-    if (results==null){
+    if (results == null) {
       return null;
     }
-    else{
+    else {
       return results[1] || 0;
     }
   };
@@ -782,10 +791,10 @@
    * @param $event Object The event triggered
    * @param $elem Object The ordered object
    */
-  $.kalibao.backend.product.View.prototype.reorderVariants = function($event, $elem) {
+  $.kalibao.backend.product.View.prototype.reorderVariants = function ($event, $elem) {
     var $table = $elem['item'].parent();
     var order = 1;
-    $table.find('tr').each(function(){
+    $table.find('tr').each(function () {
       $(this).find('.variant-order').eq(0).val(order++).change();
     })
   };
@@ -794,31 +803,37 @@
    * Function to add a cross sale to a variant
    * @param id int id of the current variant where cross sale is added
    */
-  $.kalibao.backend.product.View.prototype.addCrossSellingLine = function(id) {
+  $.kalibao.backend.product.View.prototype.addCrossSellingLine = function (id) {
     $.post('/product/product/add-cross-sale', {
       variant1: id,
       variant2: $("#variant-selector").val()
-    }, function(){location.reload()});
+    }, function () {
+      location.reload()
+    });
   };
 
   /**
    * Init the buttons to reset the form into their original state
    */
-  $.kalibao.backend.product.View.prototype.initFormReset = function() {
+  $.kalibao.backend.product.View.prototype.initFormReset = function () {
     var self = this;
-    $('.tab-pane').each(function(i, e){
+    $('.tab-pane').each(function (i, e) {
       var $e = $(e);
-      $e.find('.reset-form').off('click').click(function(e){
+      $e.find('.reset-form').off('click').click(function (e) {
         e.preventDefault();
         self.resetFormState($e.find('form'));
         return false;
       })
     });
 
-    $('.nav-tabs>li a[href], .btn-primary[href^="#"]').off('click').click(function(e){
+    $('.nav-tabs>li a[href], .btn-primary[href^="#"][href!="#"]').off('click').click(function (e) {
       if ($.inArray(window.location.hash, ['#media', '#attribute', '#']) == -1) { // disable changes verification for some tabs
         if (self.checkFormState($('.tab-pane.active'), true)) {
-          $.toaster({ priority : 'warning', title : 'Attention', message : 'Il y a des changements non enregistrés'});
+          $.toaster({
+            priority: 'warning',
+            title: $.kalibao.core.app.messages.toastUnsavedTitle,
+            message: $.kalibao.core.app.messages.toastUnsavedText
+          });
           return false;
         }
       }
@@ -835,13 +850,16 @@
   /**
    * Init the events for unsaved data warning before changing page or product tab
    */
-  $.kalibao.backend.product.View.prototype.initFormChange = function() {
+  $.kalibao.backend.product.View.prototype.initFormChange = function () {
     var self = this;
     //sync ckeditors with textareas to catch the change event
     for (var i in CKEDITOR.instances) {
-      CKEDITOR.instances[i].on('change', function() {this.updateElement(); $(this.element.$).change()});
+      CKEDITOR.instances[i].on('change', function () {
+        this.updateElement();
+        $(this.element.$).change()
+      });
     }
-    $(':input').on('input change', function(){
+    $(':input').on('input change', function () {
       console.log('input change');
       var $e = $(this);
       var $tab = $e.closest('.tab-pane');
@@ -853,7 +871,7 @@
       }
     });
 
-    this.$tree.on('changed.jstree', function(){
+    this.$tree.on('changed.jstree', function () {
       var $tab = self.$catalogTab;
       if (self.checkTreeState()) {
         $tab.find('.btn-submit').removeClass('btn-default disabled').addClass('btn-primary');
@@ -868,9 +886,9 @@
    * save the current state of the form in memory for later checks /!\ this function does not save data in database
    * @param tab the container of the form
    */
-  $.kalibao.backend.product.View.prototype.saveFormState  = function(tab) {
+  $.kalibao.backend.product.View.prototype.saveFormState = function (tab) {
     var $tab = $(tab);
-    $tab.find(':input:not(:button)').each(function(i, elem) {
+    $tab.find(':input:not(:button)').each(function (i, elem) {
       var $input = $(elem);
       if ($input.is(':checkbox')) $input.data('initialState', $input.is(':checked'));
       else $input.data('initialState', $input.val());
@@ -883,20 +901,20 @@
    * reverts all changes made on the form since last save
    * @param tab the container of the form
    */
-  $.kalibao.backend.product.View.prototype.resetFormState = function(tab) {
+  $.kalibao.backend.product.View.prototype.resetFormState = function (tab) {
     var $tab = $(tab);
-    $tab.find(':input:not(:button)').each(function(i, elem) {
+    $tab.find(':input:not(:button)').each(function (i, elem) {
       var $input = $(elem);
       if ($input.is(':checkbox')) $input.prop('checked', $input.data('initialState'));
       else $input.val($input.data('initialState'));
       $input.removeClass('unsaved error').tooltip('destroy');
     });
     // reload select 2 data from hidden input
-    $tab.find('input.input-ajax-select').each(function(){
+    $tab.find('input.input-ajax-select').each(function () {
       $(this).trigger('change');
     });
     $tab.find('.btn-submit').removeClass('btn-primary').addClass('btn-default disabled');
-    if($tab.context.id == 'variant-list') this.sortVariantTable($tab);
+    if ($tab.context.id == 'variant-list') this.sortVariantTable($tab);
   };
 
   /**
@@ -905,19 +923,21 @@
    * @param notify if set to true, add a class to the unsaved elements
    * @returns {boolean} true : unsaved data, false : no unsaved data
    */
-  $.kalibao.backend.product.View.prototype.checkFormState = function(tab, notify) {
+  $.kalibao.backend.product.View.prototype.checkFormState = function (tab, notify) {
     // set default value
     notify = typeof notify !== 'undefined' ? notify : false;
 
     var changed = false;
     var $tab = $(tab);
-    $tab.find(':input:not(:button):not(.nocheck)').each(function(i, elem) {
+    $tab.find(':input:not(:button):not(.nocheck)').each(function (i, elem) {
       var $input = $(elem);
       if ($input.is(':checkbox')) {
         if ($input.is(':checked') != $input.data('initialState')) {
           if (notify) {
             $input.removeClass('unsaved');
-            setTimeout(function(){$input.addClass('unsaved');}, 1); // setTimeout to restart animation
+            setTimeout(function () {
+              $input.addClass('unsaved');
+            }, 1); // setTimeout to restart animation
           }
           changed = true;
         }
@@ -925,7 +945,9 @@
         if ($input.val() != $input.data('initialState')) {
           if (notify) {
             $input.removeClass('unsaved');
-            setTimeout(function(){$input.addClass('unsaved');}, 1); // setTimeout to restart animation
+            setTimeout(function () {
+              $input.addClass('unsaved');
+            }, 1); // setTimeout to restart animation
           }
           changed = true;
         }
@@ -939,22 +961,22 @@
    * sort variant table line according to the number in the order column
    * @param table
    */
-  $.kalibao.backend.product.View.prototype.sortVariantTable = function(table) {
+  $.kalibao.backend.product.View.prototype.sortVariantTable = function (table) {
     var rows = $(table).find('tbody').find('tr').get();
-    rows.sort(function(a, b) {
+    rows.sort(function (a, b) {
       var A = $(a).find('.variant-order').val();
       var B = $(b).find('.variant-order').val();
 
-      if(A < B) {
+      if (A < B) {
         return -1;
       }
-      if(A > B) {
+      if (A > B) {
         return 1;
       }
       return 0;
     });
 
-    $.each(rows, function(index, row) {
+    $.each(rows, function (index, row) {
       $(table).find('table').children('tbody').append(row);
     });
   };
@@ -964,7 +986,7 @@
    * @param notify if set to true, add a class to the unsaved tree
    * @returns {boolean} true : unsaved data, false : no unsaved data
    */
-  $.kalibao.backend.product.View.prototype.checkTreeState = function(notify) {
+  $.kalibao.backend.product.View.prototype.checkTreeState = function (notify) {
     // set default value
     notify = typeof notify !== 'undefined' ? notify : false;
     if (typeof this.initialData === 'undefined') return false;
@@ -972,9 +994,11 @@
     var $jstree = this.$tree.jstree();
     var $tree = this.$tree;
 
-    if (! $jstree.get_checked().equals(this.initialData)) {
+    if (!$jstree.get_checked().equals(this.initialData)) {
       if (notify) {
-        setTimeout(function(){$tree.addClass('unsaved');}, 1); // setTimeout to restart animation
+        setTimeout(function () {
+          $tree.addClass('unsaved');
+        }, 1); // setTimeout to restart animation
         $tree.removeClass('unsaved');
       }
       return true;
@@ -989,25 +1013,25 @@
   $.kalibao.backend.product.View.prototype.initCopyEvents = function () {
     var self = this;
 
-    this.$main.find('.copy-first-double').click(function(){
+    this.$main.find('.copy-first-double').click(function () {
       var col = $(this).parent().index();
       var $tbody = $(this).closest('table').find('tbody');
       var $firstLine = $tbody.find('tr').eq(0);
       var $secondLine = $tbody.find('tr').eq(1);
-      $tbody.find('tr').each(function(){
-        if ($(this).index() != 0 && $(this).index() != 1){
-          if ($(this).index()%2 == 0) {
+      $tbody.find('tr').each(function () {
+        if ($(this).index() != 0 && $(this).index() != 1) {
+          if ($(this).index() % 2 == 0) {
             $(this).find('td').eq(col).find('input').val(
               $firstLine.find('td').eq(col).find('input').val()
             )
           } else {
-            $(this).find('td').eq(col-1).find('input').val(
-              $secondLine.find('td').eq(col-1).find('input').val()
+            $(this).find('td').eq(col - 1).find('input').val(
+              $secondLine.find('td').eq(col - 1).find('input').val()
             )
           }
         }
       });
-      switch (col){
+      switch (col) {
         case 2:
           self.updateDiscount('price', $(this).closest('.tab-pane'));
           break;
@@ -1029,12 +1053,16 @@
     if (typeof data != 'object') data = JSON.parse(data);
     if (data.status === undefined) return false;
     if (data.status == "success") {
-      $.toaster({priority: 'success', title: 'Enregistré', message: 'Modifications enregistrées'});
+      $.toaster({ priority: 'success',
+        title: $.kalibao.core.app.messages.toastSavedTitle,
+        message: $.kalibao.core.app.messages.toastSavedText });
       if (reload) window.location.reload();
       return true;
     } else {
-      $.each(data.errors, function(){
-        $.toaster({priority: 'danger', title: 'Erreur(s)', message: this})
+      $.each(data.errors, function () {
+        $.toaster({ priority: 'danger',
+          title: $.kalibao.core.app.messages.toastValidationTitle,
+          message: this })
       });
       return false;
     }
@@ -1042,7 +1070,7 @@
 
   $.kalibao.backend.product.View.prototype.showErrors = function (data) {
     for (var field in data.errors) {
-      $('[name*='+field+']').addClass('unsaved');
+      $('[name*=' + field + ']').addClass('unsaved');
     }
   };
 

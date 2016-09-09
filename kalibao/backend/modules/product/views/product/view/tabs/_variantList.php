@@ -21,6 +21,7 @@ $modals = '';
                         <th><?= Yii::t('kalibao.backend', 'label_variant_main') ?></th>
                         <th><?= Yii::t('kalibao.backend', 'label_variant_top_selling') ?></th>
                         <th><?= Yii::t('kalibao.backend', 'label_variant_description') ?></th>
+                        <th><?= Yii::t('kalibao', 'btn_delete') ?></th>
                     </tr>
                 </thead>
                 <tbody class="sortable">
@@ -44,6 +45,9 @@ $modals = '';
                                 <?php ob_start(); ?>
                                     <?= $this->render('_variantListModal', compact('variant')) ?>
                                 <?php $modals .= ob_get_clean(); ?>
+                            </td>
+                            <td>
+                                <i class="btn fa fa-2x fa-trash text-red delete-variant" data-id="<?= $variant->id ?>"></i>
                             </td>
                         </tr>
                     <?php endforeach; ?>

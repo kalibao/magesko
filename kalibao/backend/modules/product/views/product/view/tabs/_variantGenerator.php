@@ -23,9 +23,7 @@
             <div id="generator_step1" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
                 <div class="panel-body">
                     <?= \kalibao\common\models\attribute\Attribute::getSelect(true, 'generator-attributes'); ?>
-                    <div class="text-center">
-                        <a class="btn btn-primary" id="generate-combinations"><?= Yii::t('kalibao.backend', 'variant_generator_combination') ?></a>
-                    </div>
+                    <a class="btn btn-primary" id="generate-combinations"><?= Yii::t('kalibao.backend', 'variant_generator_combination') ?></a>
                 </div>
             </div>
         </div>

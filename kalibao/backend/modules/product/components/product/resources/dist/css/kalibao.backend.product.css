@@ -204,3 +204,34 @@ input.variant-order {
   cursor: not-allowed;
   background-color: #cccccc;
 }
+#variant-generator .variant {
+  width: 100%;
+  height: 30px;
+  line-height: 28px;
+  border-bottom: 1px solid #ddd;
+  margin: 0;
+}
+#variant-generator .variant:hover {
+  background: #ededed;
+  cursor: pointer;
+}
+#variant-generator .variant input {
+  position: relative;
+  top: 3px;
+  margin-right: 10px;
+}
+#variant-generator #generate-variants,
+#variant-generator #generate-combinations {
+  display: table;
+  margin: 15px auto auto;
+}
+.btn-view.pack,
+h4.bundle {
+  font-weight: bold;
+}
+.btn-view.pack:after,
+h4.bundle:after {
+  margin-left: 5px;
+  content: ' (pack)';
+  font-style: italic;
+}

@@ -109,20 +109,22 @@ class ProductController extends Controller
             ];
         $b['access']['rules'][] = [
             'actions' => [
-                'delete-attribute',
-                'add-attribute',
+                'export',
+                'settings',
+                'add-variant',
                 'save-variant',
+                'remove-media',
+                'create-bundle',
+                'save-discount',
+                'delete-variant',
+                'add-cross-sale',
+                'update-catalog',
+                'delete-attribute',
                 'save-variant-price',
                 'save-variant-logistic',
-                'add-cross-sale',
-                'save-discount',
-                'update-logistic-strategy',
-                'remove-media',
-                'update-catalog',
                 'generate-combinations',
                 'advanced-drop-down-list',
-                'settings',
-                'export',
+                'update-logistic-strategy',
             ],
             'allow' => true,
             'roles' => [$this->getActionControllerPermission('update'), 'permission.update:*'],
@@ -198,9 +200,12 @@ class ProductController extends Controller
             throw new HttpException(404, Yii::t('kalibao.backend', 'product_not_found'));
         }
         $catalogTreeId = Yii::$app->variable->get('kalibao.backend', 'catalog_tree_id');
+
+        $models = $this->loadEditModels(['id' => $request->get('id')]);
+
         $tree = Tree::findOne($catalogTreeId);
         $component = new View([
-            'models' => $this->loadEditModels(['id' => $request->get('id')]),
+            'models' => $models,
             'language' => Yii::$app->language,
             'addAgain' => $request->get('add-again', true),
             'saved' => false,
@@ -216,16 +221,11 @@ class ProductController extends Controller
         ]);
 
         $create = false;
+        $bundle = ($models['main']->is_pack) == 1;
         if ($request->isAjax) {
-            Yii::$app->response->format = Response::FORMAT_JSON;
-
-            return [
-                'html' => $this->renderAjax('view/_contentBlock.php', compact('component', 'create')),
-                'scripts' => $this->registerClientSideAjaxScript(),
-                'title' => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
-            ];
+            return $this->getReturnArray($models, $component, $create, null, $bundle);
         } else {
-            return $this->render('view/view', compact('component', 'create'));
+            return $this->render('view/view', compact('component', 'create', 'bundle'));
         }
     }
 
@@ -308,7 +308,47 @@ class ProductController extends Controller
         if ($request->isAjax) {
             return $this->getReturnArray($models, $crudEdit, !$saved, $saved);
         } else {
-            return $this->render('view/view', ['component' => $crudEdit, 'create' => !$saved]);
+            return $this->render('view/view', ['component' => $crudEdit, 'create' => !$saved, 'bundle' => false]);
+        }
+    }
+
+    /**
+     * Create action
+     * @return array|string
+     * @throws ErrorException
+     */
+    public function actionCreateBundle()
+    {
+        // request component
+        $request = Yii::$app->request;
+        // load models
+        $models = $this->loadEditModels();
+
+        // save models
+        $saved = false;
+        if ($request->isPost) {
+            $saved = $this->saveEditModels($models, $request->post());
+            if ($saved) {
+                return $this->redirect(Url::to(['view'] + ['id' => $models['main']->id]));
+            }
+        }
+
+        // create a component to display data
+        $crudEdit = new View([
+            'models'       => $models,
+            'language'     => Yii::$app->language,
+            'addAgain'     => $request->get('add-again', true),
+            'saved'        => $saved,
+            'uploadConfig' => $this->uploadConfig,
+            'dropDownList' => function ($id) {
+                return $this->getDropDownList($id);
+            }
+        ]);
+
+        if ($request->isAjax) {
+            return $this->getReturnArray($models, $crudEdit, !$saved, $saved, true);
+        } else {
+            return $this->render('view/view', ['component' => $crudEdit, 'create' => !$saved, 'bundle' => true]);
         }
     }
 
@@ -349,55 +389,14 @@ class ProductController extends Controller
      * @throws ErrorException
      * @throws \yii\db\Exception
      */
-    public function actionAddAttribute()
+    public function actionDeleteVariant()
     {
-        $transaction = Product::getDb()->beginTransaction();
         $request = Yii::$app->request;
-        $product = Product::findOne($request->post('product'));
-        if (count(($variants = $product->variantList))) {
-            foreach ($variants as $variant)
-                $variant->delete();
-        }
-        $combinations = $this->generate_combinations($request->post('data'));
-        try {
-            foreach ($combinations as $combination) {
-                $discount = new Discount(['scenario' => 'insert']);
-                $logistic = new LogisticStrategy(['scenario' => 'insert']);
-                $d = $discount->save();
-                $l = $logistic->save();
-                if ($d && $l) {
-                    $variant = new Variant();
-                    $variant->scenario = 'insert';
-                    $variant->product_id = $request->post('product');
-                    $variant->discount_id = $discount->id;
-                    $variant->logistic_strategy_id = $logistic->id;
-                    if ($variant->save()) {
-                        foreach ($combination as $attribute) {
-                            $variantAttribute = new VariantAttribute();
-                            $variantAttribute->scenario = 'insert';
-                            $variantAttribute->attribute_id = $attribute;
-                            $variantAttribute->variant_id = $variant->id;
-                            if (!$variantAttribute->save()) { // error in variant attribute
-                                throw new ErrorException('variantAttribute');
-                            }
-                        }
-                    } else { // error in variant
-                        throw new ErrorException('variant');
-                    }
-                } else { // error in logistic or discount
-                    if (!$d) throw new ErrorException('discount');
-                    if (!$l) throw new ErrorException('logistic');
-                }
-            }
-            TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
-            $transaction->commit();
-            return $this->getReturnArray($product, null, false, true);
-        } catch (ErrorException $e) {
-            if ($transaction->isActive) {
-                $transaction->rollBack();
-            }
-            return $this->getReturnArray($product, null, false, false);
-        }
+        $variant = Variant::findOne($request->get('id'));
+        $delete = $variant->delete();
+
+        TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($variant->product_id));
+        return $this->getReturnArray($variant, null, false, $delete);
     }
 
     /**
@@ -444,7 +443,7 @@ class ProductController extends Controller
             $models['variant']->scenario = 'update-variant';
             $models['variant']->attributes = $data;
             if (! $models['variantI18n'] = VariantI18n::findOne(['i18n_id' => Yii::$app->language, 'variant_id' => $models['variant']->id])) {
-                $variantI18n = new VariantI18n();
+                $models['variantI18n'] = new VariantI18n();
             }
             $models['variantI18n']->scenario = 'insert';
             $models['variantI18n']->i18n_id = Yii::$app->language;
@@ -761,23 +760,78 @@ class ProductController extends Controller
             $attributeTypeIds[] = $type;
         }
         $attributeNames = AttributeI18n::find()
-            ->where(['i18n_id'=>Yii::$app->language, 'attribute_id' => $attributeIds])
-            ->asArray()
-            ->all();
-        $attributeNames = Database::indexWithPrimaryKey($attributeNames, 'attribute_id');
+          ->where(['i18n_id'      => Yii::$app->language,
+                   'attribute_id' => $attributeIds
+          ])
+          ->asArray()
+          ->all();
+        $attributeNames = Database::indexWithPrimaryKey($attributeNames,
+          'attribute_id');
 
         $combinations = $this->generate_combinations(array_values($attributes));
 
         $result = [];
         foreach ($combinations as $combination) {
             $ids = implode('-', $combination);
-            $names = [$attributeNames[$combination[0]]['value'], $attributeNames[$combination[1]]['value']];
+            $names = [];
+            foreach ($combination as $id) {
+                $names[] = $attributeNames[$id]['value'];
+            }
 
             $result[$ids] = $names;
         }
 
         Yii::$app->response->format = Response::FORMAT_JSON;
         return $result;
+    }
+    
+    public function actionAddVariant()
+    {
+        $transaction = Product::getDb()->beginTransaction();
+        $request = Yii::$app->request;
+        $product = Product::findOne($request->post('product'));
+
+        $combinations = $request->post('data');
+        try {
+            foreach ($combinations as $combination) {
+                $discount = new Discount(['scenario' => 'insert']);
+                $logistic = new LogisticStrategy(['scenario' => 'insert']);
+                $d = $discount->save();
+                $l = $logistic->save();
+                if ($d && $l) {
+                    $variant = new Variant();
+                    $variant->scenario = 'insert';
+                    $variant->product_id = $request->post('product');
+                    $variant->discount_id = $discount->id;
+                    $variant->logistic_strategy_id = $logistic->id;
+                    if ($variant->save()) {
+                        $attributes = explode('-', $combination);
+                        foreach ($attributes as $attribute) {
+                            $variantAttribute = new VariantAttribute();
+                            $variantAttribute->scenario = 'insert';
+                            $variantAttribute->attribute_id = $attribute;
+                            $variantAttribute->variant_id = $variant->id;
+                            if (!$variantAttribute->save()) { // error in variant attribute
+                                throw new ErrorException('variantAttribute');
+                            }
+                        }
+                    } else { // error in variant
+                        throw new ErrorException('variant');
+                    }
+                } else { // error in logistic or discount
+                    if (!$d) throw new ErrorException('discount');
+                    if (!$l) throw new ErrorException('logistic');
+                }
+            }
+            TagDependency::invalidate(Yii::$app->commonCache, Product::generateTagStatic($request->get('id')));
+            $transaction->commit();
+            return $this->getReturnArray($product, null, false, true);
+        } catch (ErrorException $e) {
+            if ($transaction->isActive) {
+                $transaction->rollBack();
+            }
+            return $this->getReturnArray($product, null, false, false);
+        }
     }
 
     /**
@@ -981,6 +1035,14 @@ class ProductController extends Controller
                     10
                 );
                 break;
+            case 'tax.name':
+                return Html::findAdvancedDropDownListData(
+                    'kalibao\common\models\tax\TaxI18n',
+                    ['tax_id', 'name'],
+                    [['LIKE', 'name', $search]],
+                    10
+                );
+                break;
             case 'variantList':
                 $data = (new ActiveQuery(Variant::className()))
                     ->joinWith('productI18ns')
@@ -1059,7 +1121,7 @@ class ProductController extends Controller
         return $errors;
     }
 
-    protected function getReturnArray($models, $component, $create, $saved = true)
+    protected function getReturnArray($models, $component, $create, $saved = true, $isBundle = false)
     {
         Yii::$app->response->format = Response::FORMAT_JSON;
         if ($component === null) {
@@ -1077,7 +1139,7 @@ class ProductController extends Controller
         if ($saved) {
             return [
                 'status'  => 'success',
-                'html'    => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => $create]),
+                'html'    => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => $create, 'bundle' => $isBundle]),
                 'scripts' => $this->registerClientSideAjaxScript(),
                 'title'   => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
             ];
@@ -1085,7 +1147,7 @@ class ProductController extends Controller
             return [
                 'status'  => 'error',
                 'errors'  => $this->getAllErrors($models),
-                'html'    => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => $create]),
+                'html'    => $this->renderAjax('view/_contentBlock.php', ['component' => $component, 'create' => $create, 'bundle' => $isBundle]),
                 'scripts' => $this->registerClientSideAjaxScript(),
                 'title'   => !empty($component->models['i18n']->page_title) ? $component->models['i18n']->page_title : $component->models['i18n']->name,
             ];

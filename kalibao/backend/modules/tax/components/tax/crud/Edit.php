@@ -6,6 +6,8 @@
 
 namespace kalibao\backend\modules\tax\components\tax\crud;
 
+use kalibao\common\models\country\Country;
+use kalibao\common\models\country\CountryI18n;
 use Yii;
 use yii\helpers\Url;
 use kalibao\common\components\crud\SimpleValueField;
@@ -20,6 +22,9 @@ use kalibao\common\components\i18n\I18N;
  */
 class Edit extends \kalibao\common\components\crud\Edit
 {
+
+    public $countryTranslations;
+
     /**
      * @inheritdoc
      */
@@ -42,6 +47,10 @@ class Edit extends \kalibao\common\components\crud\Edit
 
         // upload config
         $uploadConfig['main'] = $this->uploadConfig[(new \ReflectionClass($models['main']))->getName()];
+        
+        // get translations for countries
+        
+        $this->countryTranslations = CountryI18n::getAllI18nById();
 
         // set items
         $items = [];
